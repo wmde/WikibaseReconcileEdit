@@ -26,7 +26,7 @@
 		{
 			"path": "/onorprot/v0/in",
 			"method": "POST",
-			"class": "MediaWiki\\Extension\\OnOrProt\\OnOrIn"
+			"class": "MediaWiki\\Extension\\OnOrProt\\MediaWiki\\Api\\InputEndpoint"
 		}
 	],
 	"manifest_version": 2
