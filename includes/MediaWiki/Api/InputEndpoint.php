@@ -4,6 +4,7 @@ namespace MediaWiki\Extension\OnOrProt\MediaWiki\Api;
 
 use MediaWiki\Extension\OnOrProt\Model\Input;
 use MediaWiki\Extension\OnOrProt\Model\Schema;
+use MediaWiki\Extension\OnOrProt\Wikibase\ItemGenerator;
 use MediaWiki\Rest\SimpleHandler;
 use Wikimedia\ParamValidator\ParamValidator;
 use Wikibase\DataModel\Entity\Item;
@@ -28,13 +29,8 @@ class InputEndpoint extends SimpleHandler {
 		 * 2) MAP the input data to Wikibase Item / concpets
 		 * Might want properties too in the future?
 		 */
-		$items = [];
-		foreach ( $input->rows as $row ) {
-			// TODO this would or could be the point that this is split up into jobs?
-			$item = new Item();
-			// TODO go from the CSV to the $item using the $schema
-			$items[] = $item;
-		}
+		$itemGenerator = new ItemGenerator();
+		$items = $itemGenerator->generate( $schema, $input );
 
 		/**
 		 * 3) Perform reconciliation & set the ID if it is know?
@@ -50,12 +46,21 @@ class InputEndpoint extends SimpleHandler {
 		 * b) Overriding what exists on the existing item with what was sent in the input?
 		 * TODO maybe strategy for this needs to be defined in the schema?
 		 */
-		// TODO
-		return true;
+
+		/**
+		 * 5) Output stuff to the user?
+		 */
+		$rawOutput = [];
+		foreach ( $items as $item ) {
+			$rawOutput[] = var_export( $item, true );
+		}
+		return $rawOutput;
 	}
+
 	public function needsWriteAccess() {
 		return true;
 	}
+
 	public function getParamSettings() {
 		return [
 			'input' => [

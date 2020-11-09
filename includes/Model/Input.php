@@ -5,23 +5,20 @@ namespace MediaWiki\Extension\OnOrProt\Model;
 class Input {
 
 	/**
-	 * @var null|string[]
-	 */
-	public $headers = null;
-
-	/**
 	 * @var array[]
 	 */
 	public $rows;
 
 	public function __construct( string $rawCsvInput, bool $csvHasHeaders ) {
-		$data = array_map( 'str_getcsv', explode( PHP_EOL, $rawCsvInput ) );
+		// Raw CSV string to array of rows
+		$data = array_map( 'str_getcsv', explode( PHP_EOL, trim( $rawCsvInput ) ) );
 		array_walk( $data, function ( &$a ) use ( $data ) {
 		  $a = array_combine( $data[0], $a );
 		});
 
+		// If we have headers (according to schema) then remove them
 		if ( $csvHasHeaders ) {
-			$this->headers = array_shift( $data );
+			array_shift( $data );
 		}
 
 		$this->rows = $data;
