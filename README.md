@@ -25,3 +25,16 @@ A few different general directions were considered:
 - The data and schema file is then split up into native Wikibase Items along with some DATA needed to make the edit?
 - The data is added to the queue of things to process (can be the actual job queue)?
 - The Job queue slowly processes the combined data into edits, making them for the user..
+
+## CSV to mapping
+
+Everything within an item is individually addressable (and also the current state is referencable?)
+
+- label/en - The en label regardless of current value
+- label/en@"Foo"- The en label with a value of "Foo"?
+- alias/en@"Foo" - The en alias that has a value of "Foo"?
+- statement/P123
+- TODO further down statements
+- sitelink/enwiki
+
+
