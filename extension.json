@@ -27,6 +27,11 @@
 			"path": "/onorprot/v0/in",
 			"method": "POST",
 			"class": "MediaWiki\\Extension\\OnOrProt\\MediaWiki\\Api\\InputEndpoint"
+		},
+		{
+			"path": "/onorprot/v0/reconcile",
+			"method": "POST",
+			"class": "MediaWiki\\Extension\\OnOrProt\\MediaWiki\\Api\\ReconcileEndpoint"
 		}
 	],
 	"manifest_version": 2
