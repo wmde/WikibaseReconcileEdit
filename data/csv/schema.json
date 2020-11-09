@@ -1,0 +1,30 @@
+{
+	"meta": {
+		"headers": true
+	},
+	"columns": {
+		"name": {
+			"to": [
+				"label@en",
+				"P2"
+			]
+		},
+		"unique-id": {
+			"to": [
+				"P1"
+			],
+			"reconcile": true
+		},
+		"first-created": {
+			"to": [
+				"P3"
+			]
+		},
+		"hasPart": {
+			"to": [
+				"P4"
+			],
+			"isa": "P1"
+		}
+	}
+}

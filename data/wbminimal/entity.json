@@ -1,0 +1,22 @@
+{
+	"labels": {
+		"en": "Foo"
+	},
+	"descriptions": {
+		"en": "Foo"
+	},
+	"aliases": {
+		"en": [
+			"Foo"
+		]
+	},
+	"sitelinks": [
+		"https://en.wikipedia.org/wiki/Main_Page"
+	],
+	"statements": [
+		{
+			"property": "P31",
+			"value": "cat"
+		}
+	]
+}

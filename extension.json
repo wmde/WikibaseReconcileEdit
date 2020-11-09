@@ -1,0 +1,33 @@
+{
+	"name": "OnOrProt",
+	"descriptionmsg": "onorprot-desc",
+	"license-name": "GPL-2.0-or-later",
+	"type": "other",
+	"requires": {
+		"MediaWiki": ">= 1.32.0"
+	},
+	"AutoloadNamespaces": {
+		"MediaWiki\\Extension\\OnOrProt\\": "includes/"
+	},
+	"config": {
+		"OnOrProtEnableFoo": {
+			"description": "Enable the Foo feature.",
+			"value": true
+		}
+	},
+	"HookHandlers": {
+	},
+	"MessagesDirs": {
+		"OnOrProt": [
+			"i18n"
+		]
+	},
+	"RestRoutes": [
+		{
+			"path": "/onorprot/v0/in",
+			"method": "POST",
+			"class": "MediaWiki\\Extension\\OnOrProt\\OnOrIn"
+		}
+	],
+	"manifest_version": 2
+}
