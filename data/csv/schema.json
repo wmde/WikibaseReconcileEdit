@@ -7,24 +7,43 @@
 			"to": [
 				"label@en",
 				"P2"
-			]
+			],
+			"reconcile": {
+				"value": true
+			}
 		},
 		"unique-id": {
 			"to": [
-				"P1"
+				"P1@1"
 			],
-			"reconcile": true
+			"reconcile": {
+				"match": true
+			}
 		},
-		"first-created": {
+		"unique-id/isbn/13": {
+			"to": [
+				"P1@1/qualifier"
+			],
+			"reconcile": {
+				"match": true
+			}
+		},
+		"author": {
 			"to": [
 				"P3"
-			]
+			],
+			"reconcile": {
+				"value": true
+			}
 		},
 		"hasPart": {
 			"to": [
 				"P4"
 			],
-			"isa": "P1"
+			"isa": "P1",
+			"reconcile": {
+				"value": true
+			}
 		}
 	}
 }

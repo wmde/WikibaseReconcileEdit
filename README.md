@@ -2,6 +2,14 @@
 
 OnOrProt is a set ofOpen!Next prototype APIs, that is also relevant to OpenRefine.
 
+## Questions & Notes
+
+One instance of each mainsnak?
+Do they ever want to add qualifiers or references ro existing statements?
+Do they ever want to add multiple statements?
+
+Ends up being multiple reconcile levels, items and statements...
+
 ## 1) Easy Reconciliation
 
 Given "P123" -> "ABC123" give me the Item ID if it exists?
