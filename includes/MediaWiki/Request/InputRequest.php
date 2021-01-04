@@ -7,7 +7,7 @@ use MediaWiki\Rest\RequestInterface;
 /**
  * Allows the jump from a RequestInterface object to the strings needed for input
  */
-interface Request {
+interface InputRequest {
 
 	/**
 	 * @param RequestInterface $request from the API

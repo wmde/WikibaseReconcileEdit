@@ -1,0 +1,31 @@
+{
+	"type": "item",
+	"labels": {
+		"en-gb": {
+			"language": "en-gb",
+			"value": "Item To Reconcile With"
+		}
+	},
+	"descriptions": {},
+	"aliases": {},
+	"claims": {
+		"P19": [
+			{
+				"mainsnak": {
+					"snaktype": "value",
+					"property": "P19",
+					"hash": "7de3f7630f0c31ab73f135612ae810426cefc7da",
+					"datavalue": {
+						"value": "https://github.com/addshore/test1",
+						"type": "string"
+					},
+					"datatype": "url"
+				},
+				"type": "statement",
+				"id": "Q29$bf83777b-4572-1680-0177-0505789ec6ee",
+				"rank": "normal"
+			}
+		]
+	},
+	"sitelinks": {}
+}

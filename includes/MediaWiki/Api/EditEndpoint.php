@@ -9,13 +9,16 @@ use MediaWiki\Rest\SimpleHandler;
 use Wikimedia\ParamValidator\ParamValidator;
 use Wikibase\DataModel\Entity\Item;
 
-class InputEndpoint extends SimpleHandler {
+class EditEndpoint extends SimpleHandler {
 
 	public function run() {
 		// TODO use different Request interfaces
-		$request = new \MediaWiki\Extension\OnOrProt\MediaWiki\Request\MockInputDiskRequest();
-		$rawInput = $request->input( $this->getRequest() );
-		$rawSchema = $request->schema( $this->getRequest() );
+		$request = new \MediaWiki\Extension\OnOrProt\MediaWiki\Request\MockEditDiskRequest();
+		$rawEntity = $request->entity( $this->getRequest() );
+		$rawReconcile = $request->reconcile( $this->getRequest() );
+
+		var_dump($rawReconcile);
+		die();
 
 		/**
 		 * 1) INPUT to the API from user
