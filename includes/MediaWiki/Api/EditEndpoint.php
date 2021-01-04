@@ -6,11 +6,13 @@ use MediaWiki\Rest\SimpleHandler;
 use Wikimedia\ParamValidator\ParamValidator;
 use Wikibase\DataModel\Entity\PropertyId;
 use Wikibase\DataModel\Entity\Item;
+use Wikibase\DataModel\Statement\StatementList;
 use Wikibase\Repo\WikibaseRepo;
 use Wikibase\DataModel\Snak\PropertyValueSnak;
 use DataValues\StringValue;
 use MediaWiki\MediaWikiServices;
 use Wikibase\DataModel\Entity\ItemId;
+use Wikibase\DataModel\Services\Statement\GuidGenerator;
 
 class EditEndpoint extends SimpleHandler {
 
@@ -144,6 +146,8 @@ class EditEndpoint extends SimpleHandler {
 		} else {
 			$base = new Item();
 			$baseRevId = false;
+			// XXX: this is a bit evil, but needed to work around the fact we want to mint statement guids
+			$base->setId( ItemId::newFromNumber( $repo->newIdGenerator()->getNewId( 'wikibase-item' ) ) );
 		}
 
 		// Modify the base..
@@ -164,8 +168,33 @@ class EditEndpoint extends SimpleHandler {
 			);
 		}
 		// set, statements
-		// TODO use correct statement GUIDs
-		$base->setStatements( $inputEntity->getStatements() );
+		// collect existing statement data values
+		$existingStatementsByPropertyId = [];
+		foreach ( $base->getStatements()->getIterator() as $statement ) {
+			$existingStatementsByPropertyId[$mainSnak->getPropertyId()->getSerialization()][$statement->getGuid()] = $statement;
+		}
+		$statementsToAdd = [];
+		$statementsToKeep = [];
+		foreach ( $inputEntity->getStatements()->getIterator() as $inputStatement ) {
+			/** @var PropertyValueSnak $inputMainSnak */
+			$inputMainSnak = $inputStatement->getMainSnak();
+			// If an input statement value already exists then do nothing...
+			foreach ( $existingStatementsByPropertyId[$inputMainSnak->getPropertyId()->getSerialization()] as $existingStatement ) {
+				if ( $existingStatement->getMainSnak()->getDataValue()->equals( $inputMainSnak->getDataValue() ) ) {
+					// continue out of the 2 foreach loops, as we don't need to add this statement
+					$statementsToKeep[] = $existingStatement;
+					continue 2;
+				}
+			}
+			$statementsToAdd[] = $inputStatement;
+		}
+		// add fresh guids to new statements
+		$guidGenerator = new GuidGenerator();
+		foreach ( $statementsToAdd as $statement ) {
+			$statement->setGuid( $guidGenerator->newGuid( $base->getId() ) );
+		}
+		// set the new statement list
+		$base->setStatements( new StatementList( array_merge( $statementsToKeep, $statementsToAdd ) ) );
 
 		// And make the edit
 		$editEntity = $repo->newEditEntityFactory()->newEditEntity(
@@ -176,7 +205,7 @@ class EditEndpoint extends SimpleHandler {
 		$saveStatus = $editEntity->attemptSave(
 			$base,
 			'Reconciliation Edit',
-			$base->getId() ? null : EDIT_NEW,
+			$baseRevId ? null : EDIT_NEW,
 			false // TODO actually do a token check?
 		);
 

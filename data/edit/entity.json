@@ -4,7 +4,7 @@
 	"labels": {
 		"en": {
 			"language": "en",
-			"value": "Item To Reconcile With"
+			"value": "Item #3 to reconcile with"
 		}
 	},
 	"descriptions": {},
@@ -15,15 +15,13 @@
 				"mainsnak": {
 					"snaktype": "value",
 					"property": "P23",
-					"hash": "7de3f7630f0c31ab73f135612ae810426cefc7da",
 					"datavalue": {
-						"value": "https://github.com/addshore/test2",
+						"value": "https://github.com/addshore/test3",
 						"type": "string"
 					},
 					"datatype": "url"
 				},
 				"type": "statement",
-				"id": "Q23$bf83777b-4572-1680-0177-0505789ec6ee",
 				"rank": "normal"
 			}
 		]
