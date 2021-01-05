@@ -4,18 +4,10 @@
 	"license-name": "GPL-2.0-or-later",
 	"type": "other",
 	"requires": {
-		"MediaWiki": ">= 1.32.0"
+		"MediaWiki": ">= 1.35.0"
 	},
 	"AutoloadNamespaces": {
 		"MediaWiki\\Extension\\OnOrProt\\": "includes/"
-	},
-	"config": {
-		"OnOrProtEnableFoo": {
-			"description": "Enable the Foo feature.",
-			"value": true
-		}
-	},
-	"HookHandlers": {
 	},
 	"MessagesDirs": {
 		"OnOrProt": [
@@ -27,11 +19,6 @@
 			"path": "/onorprot/v0/edit",
 			"method": "POST",
 			"class": "MediaWiki\\Extension\\OnOrProt\\MediaWiki\\Api\\EditEndpoint"
-		},
-		{
-			"path": "/onorprot/v0/reconcile",
-			"method": "POST",
-			"class": "MediaWiki\\Extension\\OnOrProt\\MediaWiki\\Api\\ReconcileEndpoint"
 		}
 	],
 	"manifest_version": 2

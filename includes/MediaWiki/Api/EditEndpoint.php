@@ -257,7 +257,8 @@ class EditEndpoint extends SimpleHandler {
 	}
 
 	/**
-	 * @inheritDoc
+	 * {@inheritDoc}
+	 * @return array
 	 */
 	public function getParamSettings() {
 		return [
