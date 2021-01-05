@@ -3,23 +3,30 @@
 namespace MediaWiki\Extension\OnOrProt\MediaWiki\Api;
 
 use DataValues\StringValue;
+use MediaWiki\Extension\OnOrProt\MediaWiki\ExternalLinks;
 use MediaWiki\Extension\OnOrProt\MediaWiki\Request\EditRequest;
 use MediaWiki\Extension\OnOrProt\MediaWiki\Request\MockEditDiskRequest;
 use MediaWiki\Extension\OnOrProt\MediaWiki\Request\UrlInputEditRequest;
-use MediaWiki\MediaWikiServices;
 use MediaWiki\Rest\SimpleHandler;
+use Title;
 use Wikibase\DataModel\Entity\Item;
 use Wikibase\DataModel\Entity\ItemId;
 use Wikibase\DataModel\Entity\PropertyId;
 use Wikibase\DataModel\Services\Statement\GuidGenerator;
 use Wikibase\DataModel\Snak\PropertyValueSnak;
 use Wikibase\DataModel\Statement\StatementList;
+use Wikibase\Lib\Store\EntityIdLookup;
 use Wikibase\Repo\WikibaseRepo;
 use Wikimedia\ParamValidator\ParamValidator;
 
 class EditEndpoint extends SimpleHandler {
 
 	private const VERSION_KEY = "onorprot-version";
+
+	/**
+	 * @var EntityIdLookup
+	 */
+	private $entityIdLookup;
 
 	/**
 	 * Get an EditRequest object from the current request
@@ -37,6 +44,7 @@ class EditEndpoint extends SimpleHandler {
 		$repo = WikibaseRepo::getDefaultInstance();
 		$propertyDataTypeLookup = $repo->getPropertyDataTypeLookup();
 		$deserializer = $repo->getBaseDataModelDeserializerFactory()->newEntityDeserializer();
+		$this->entityIdLookup = $repo->getEntityIdLookup();
 
 		// Get the request
 		$request = $this->getEditRequest();
@@ -105,33 +113,11 @@ class EditEndpoint extends SimpleHandler {
 		$reconciliationDataValue = $reconciliationMainSnak->getDataValue();
 		$reconciliationUrl = $reconciliationDataValue->getValue();
 
-		// Is this URL in the externallinks table?
-		$externalLinkIndexes = \LinkFilter::makeIndexes( $reconciliationUrl );
-		if ( count( $externalLinkIndexes ) !== 1 ) {
-			die( 'Unexpected issue with LinkFilter return' );
-		}
-		$externalLinkIndex = $externalLinkIndexes[0];
-		// TODO inject LoadBalancer?
-		$db = MediaWikiServices::getInstance()->getDBLoadBalancer()->getConnection( DB_REPLICA );
-		// TODO join and query correct ns only etc?
-		$externalLinksResult = $db->select(
-			'externallinks',
-			'el_from',
-			[
-				'el_index' => $externalLinkIndex
-			],
-			__METHOD__
+		// Find Items that use the URL
+		$itemIdsThatReferenceTheUrl = $this->getItemIdsFromPageIds(
+			( new ExternalLinks() )->pageIdsContainingUrl( $reconciliationUrl )
 		);
-		// Find ItemIds from the external link matches
-		$itemIdsThatReferenceTheUrl = [];
-		foreach ( $externalLinksResult as $row ) {
-			$pageId = $row->el_from;
-			$title = \Title::newFromID( $pageId );
-			$inputEntityId = $repo->getEntityIdLookup()->getEntityIdForTitle( $title );
-			if ( $inputEntityId && $inputEntityId instanceof ItemId ) {
-				$itemIdsThatReferenceTheUrl[] = $inputEntityId;
-			}
-		}
+
 		// Find Items that match the URL and Property ID
 		$itemsThatReferenceTheUrlInCorrectStatement = [];
 		foreach ( $itemIdsThatReferenceTheUrl as $itemId ) {
@@ -250,6 +236,21 @@ class EditEndpoint extends SimpleHandler {
 			'success' => $saveStatus->isGood()
 		];
 		return json_encode( $response );
+	}
+
+	/**
+	 * @param int[] $pageIds
+	 * @return ItemId[]
+	 */
+	private function getItemIdsFromPageIds( array $pageIds ) : array {
+		$itemIds = [];
+		foreach ( $pageIds as $pageId ) {
+			$entityId = $this->entityIdLookup->getEntityIdForTitle( Title::newFromID( $pageId ) );
+			if ( $entityId && $entityId instanceof ItemId ) {
+				$itemIds[] = $entityId;
+			}
+		}
+		return $itemIds;
 	}
 
 	public function needsWriteAccess() {
