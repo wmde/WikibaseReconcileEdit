@@ -3,6 +3,7 @@
 namespace MediaWiki\Extension\OnOrProt\MediaWiki\Api;
 
 use DataValues\StringValue;
+use MediaWiki\Extension\OnOrProt\EditStrategy\SimplePutStrategy;
 use MediaWiki\Extension\OnOrProt\MediaWiki\ExternalLinks;
 use MediaWiki\Extension\OnOrProt\MediaWiki\Request\EditRequest;
 use MediaWiki\Extension\OnOrProt\MediaWiki\Request\MockEditDiskRequest;
@@ -12,9 +13,7 @@ use Title;
 use Wikibase\DataModel\Entity\Item;
 use Wikibase\DataModel\Entity\ItemId;
 use Wikibase\DataModel\Entity\PropertyId;
-use Wikibase\DataModel\Services\Statement\GuidGenerator;
 use Wikibase\DataModel\Snak\PropertyValueSnak;
-use Wikibase\DataModel\Statement\StatementList;
 use Wikibase\Lib\Store\EntityIdLookup;
 use Wikibase\Repo\WikibaseRepo;
 use Wikimedia\ParamValidator\ParamValidator;
@@ -164,67 +163,16 @@ class EditEndpoint extends SimpleHandler {
 			$base->setId( ItemId::newFromNumber( $repo->newIdGenerator()->getNewId( 'wikibase-item' ) ) );
 		}
 
-		// Modify the base..
-		// merge labels
-		$base->getFingerprint()->getLabels()->addAll(
-			$inputEntity->getFingerprint()->getLabels()->getIterator()
-		);
-		// merge, descriptions
-		$base->getFingerprint()->getDescriptions()->addAll(
-			$inputEntity->getFingerprint()->getDescriptions()->getIterator()
-		);
-		// merge, aliases
-		// TODO such merging logic would be good to have in DataModel?
-		foreach ( $inputEntity->getFingerprint()->getAliasGroups()->getIterator() as $inputAliasGroup ) {
-			$language = $inputAliasGroup->getLanguageCode();
-			$base->getFingerprint()->getAliasGroups()->setAliasesForLanguage(
-				$language,
-				array_unique( array_merge(
-					$base->getFingerprint()->getAliasGroups()->getByLanguage( $language )->getAliases(),
-					$inputEntity->getFingerprint()->getAliasGroups()->getByLanguage( $language )->getAliases()
-				) )
-			);
-		}
-		// set, statements
-		// collect existing statement data values
-		$existingStatementsByPropertyId = [];
-		foreach ( $base->getStatements()->getIterator() as $statement ) {
-			$propertyIdString = $statement->getMainSnak()->getPropertyId()->getSerialization();
-			$existingStatementsByPropertyId[$propertyIdString][$statement->getGuid()] = $statement;
-		}
-		$statementsToAdd = [];
-		$statementsToKeep = [];
-		foreach ( $inputEntity->getStatements()->getIterator() as $inputStatement ) {
-			/** @var PropertyValueSnak $inputMainSnak */
-			$inputMainSnak = $inputStatement->getMainSnak();
-			$inputPropertyIdString = $inputMainSnak->getPropertyId()->getSerialization();
-			// If an input statement value already exists then do nothing...
-			foreach ( $existingStatementsByPropertyId[$inputPropertyIdString] as $existingStatement ) {
-				if ( $existingStatement->getMainSnak()->getDataValue()->equals( $inputMainSnak->getDataValue() ) ) {
-					// continue out of the 2 foreach loops, as we don't need to add this statement
-					$statementsToKeep[] = $existingStatement;
-					continue 2;
-				}
-			}
-			$statementsToAdd[] = $inputStatement;
-		}
-		// add fresh guids to new statements
-		$guidGenerator = new GuidGenerator();
-		foreach ( $statementsToAdd as $statement ) {
-			$statement->setGuid( $guidGenerator->newGuid( $base->getId() ) );
-		}
-		// set the new statement list
-		$base->setStatements( new StatementList( array_merge( $statementsToKeep, $statementsToAdd ) ) );
-
 		// And make the edit
+		$toSave = ( new SimplePutStrategy() )->apply( $base, $inputEntity );
 		$editEntity = $repo->newEditEntityFactory()->newEditEntity(
 			// TODO use a real user
 			\User::newSystemUser( 'OnOrProtReconciliator' ),
-			$base->getId(),
+			$toSave->getId(),
 			$baseRevId
 		);
 		$saveStatus = $editEntity->attemptSave(
-			$base,
+			$toSave,
 			'Reconciliation Edit',
 			$baseRevId ? null : EDIT_NEW,
 			// TODO actually do a token check?
