@@ -2,25 +2,29 @@
 
 namespace MediaWiki\Extension\OnOrProt\MediaWiki\Api;
 
-use MediaWiki\Rest\SimpleHandler;
-use Wikimedia\ParamValidator\ParamValidator;
-use Wikibase\DataModel\Entity\PropertyId;
-use Wikibase\DataModel\Entity\Item;
-use Wikibase\DataModel\Statement\StatementList;
-use Wikibase\Repo\WikibaseRepo;
-use Wikibase\DataModel\Snak\PropertyValueSnak;
 use DataValues\StringValue;
-use MediaWiki\MediaWikiServices;
-use Wikibase\DataModel\Entity\ItemId;
-use Wikibase\DataModel\Services\Statement\GuidGenerator;
 use MediaWiki\Extension\OnOrProt\MediaWiki\Request\EditRequest;
 use MediaWiki\Extension\OnOrProt\MediaWiki\Request\MockEditDiskRequest;
 use MediaWiki\Extension\OnOrProt\MediaWiki\Request\UrlInputEditRequest;
+use MediaWiki\MediaWikiServices;
+use MediaWiki\Rest\SimpleHandler;
+use Wikibase\DataModel\Entity\Item;
+use Wikibase\DataModel\Entity\ItemId;
+use Wikibase\DataModel\Entity\PropertyId;
+use Wikibase\DataModel\Services\Statement\GuidGenerator;
+use Wikibase\DataModel\Snak\PropertyValueSnak;
+use Wikibase\DataModel\Statement\StatementList;
+use Wikibase\Repo\WikibaseRepo;
+use Wikimedia\ParamValidator\ParamValidator;
 
 class EditEndpoint extends SimpleHandler {
 
 	private const VERSION_KEY = "onorprot-version";
 
+	/**
+	 * Get an EditRequest object from the current request
+	 * @return EditRequest
+	 */
 	private function getEditRequest() : EditRequest {
 		if ( isset( $_SERVER[ 'HTTP_X_ONORPROT_USE_DISK_REQUEST' ] ) ) {
 			return new MockEditDiskRequest();
@@ -44,10 +48,16 @@ class EditEndpoint extends SimpleHandler {
 		if ( $inputReconcile === null ) {
 			die( 'Invalid reconcile JSON supplied' );
 		}
-		if ( !array_key_exists( self::VERSION_KEY, $inputReconcile ) || $inputReconcile[self::VERSION_KEY] !== '0.0.1' ) {
+		if (
+			!array_key_exists( self::VERSION_KEY, $inputReconcile ) ||
+			$inputReconcile[self::VERSION_KEY] !== '0.0.1'
+		) {
 			die( 'Only supported reconciliation version is 0.0.1' );
 		}
-		if ( !array_key_exists( 'urlReconcile', $inputReconcile ) || !preg_match( PropertyId::PATTERN, $inputReconcile['urlReconcile'] ) ) {
+		if (
+			!array_key_exists( 'urlReconcile', $inputReconcile ) ||
+			!preg_match( PropertyId::PATTERN, $inputReconcile['urlReconcile'] )
+		) {
 			die( '0.0.1 requires a single urlReconcile key mapped to a property id, such as P123' );
 		}
 		$reconcileUrlProperty = new PropertyId( $inputReconcile['urlReconcile'] );
@@ -170,9 +180,13 @@ class EditEndpoint extends SimpleHandler {
 
 		// Modify the base..
 		// merge labels
-		$base->getFingerprint()->getLabels()->addAll( $inputEntity->getFingerprint()->getLabels()->getIterator() );
+		$base->getFingerprint()->getLabels()->addAll(
+			$inputEntity->getFingerprint()->getLabels()->getIterator()
+		);
 		// merge, descriptions
-		$base->getFingerprint()->getDescriptions()->addAll( $inputEntity->getFingerprint()->getDescriptions()->getIterator() );
+		$base->getFingerprint()->getDescriptions()->addAll(
+			$inputEntity->getFingerprint()->getDescriptions()->getIterator()
+		);
 		// merge, aliases
 		// TODO such merging logic would be good to have in DataModel?
 		foreach ( $inputEntity->getFingerprint()->getAliasGroups()->getIterator() as $inputAliasGroup ) {
@@ -189,15 +203,17 @@ class EditEndpoint extends SimpleHandler {
 		// collect existing statement data values
 		$existingStatementsByPropertyId = [];
 		foreach ( $base->getStatements()->getIterator() as $statement ) {
-			$existingStatementsByPropertyId[$mainSnak->getPropertyId()->getSerialization()][$statement->getGuid()] = $statement;
+			$propertyIdString = $statement->getMainSnak()->getPropertyId()->getSerialization();
+			$existingStatementsByPropertyId[$propertyIdString][$statement->getGuid()] = $statement;
 		}
 		$statementsToAdd = [];
 		$statementsToKeep = [];
 		foreach ( $inputEntity->getStatements()->getIterator() as $inputStatement ) {
 			/** @var PropertyValueSnak $inputMainSnak */
 			$inputMainSnak = $inputStatement->getMainSnak();
+			$inputPropertyIdString = $inputMainSnak->getPropertyId()->getSerialization();
 			// If an input statement value already exists then do nothing...
-			foreach ( $existingStatementsByPropertyId[$inputMainSnak->getPropertyId()->getSerialization()] as $existingStatement ) {
+			foreach ( $existingStatementsByPropertyId[$inputPropertyIdString] as $existingStatement ) {
 				if ( $existingStatement->getMainSnak()->getDataValue()->equals( $inputMainSnak->getDataValue() ) ) {
 					// continue out of the 2 foreach loops, as we don't need to add this statement
 					$statementsToKeep[] = $existingStatement;
@@ -216,7 +232,8 @@ class EditEndpoint extends SimpleHandler {
 
 		// And make the edit
 		$editEntity = $repo->newEditEntityFactory()->newEditEntity(
-			\User::newSystemUser( 'OnOrProtReconciliator' ), // TODO use a real user
+			// TODO use a real user
+			\User::newSystemUser( 'OnOrProtReconciliator' ),
 			$base->getId(),
 			$baseRevId
 		);
@@ -224,7 +241,8 @@ class EditEndpoint extends SimpleHandler {
 			$base,
 			'Reconciliation Edit',
 			$baseRevId ? null : EDIT_NEW,
-			false // TODO actually do a token check?
+			// TODO actually do a token check?
+			false
 		);
 
 		// Make some sort of response
@@ -238,6 +256,9 @@ class EditEndpoint extends SimpleHandler {
 		return true;
 	}
 
+	/**
+	 * @inheritDoc
+	 */
 	public function getParamSettings() {
 		return [
 			'entity' => [

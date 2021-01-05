@@ -4,10 +4,19 @@ namespace MediaWiki\Extension\OnOrProt\MediaWiki\Request;
 
 use MediaWiki\Rest\RequestInterface;
 
+/**
+ * EditRequest sourced from POSTed request data
+ */
 class UrlInputEditRequest implements EditRequest {
 
+	/**
+	 * @var RequestInterface
+	 */
 	private $request;
 
+	/**
+	 * @param RequestInterface $request
+	 */
 	public function __construct( RequestInterface $request ) {
 		$this->request = $request;
 	}

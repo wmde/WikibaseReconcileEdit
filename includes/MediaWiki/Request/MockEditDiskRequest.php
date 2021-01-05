@@ -2,6 +2,9 @@
 
 namespace MediaWiki\Extension\OnOrProt\MediaWiki\Request;
 
+/**
+ * EditRequest sourced from test data stored in the data directory
+ */
 class MockEditDiskRequest implements EditRequest {
 
 	public function entity() : ?array {
