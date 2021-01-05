@@ -2,16 +2,20 @@
 
 namespace MediaWiki\Extension\OnOrProt\MediaWiki\Request;
 
-use MediaWiki\Rest\RequestInterface;
+class MockEditDiskRequest implements EditRequest {
 
-class MockEditDiskRequest {
-
-	public function entity( RequestInterface $request ) : string {
-		return file_get_contents( __DIR__ . '/../../../data/edit/entity.json' );
+	public function entity() : ?array {
+		return json_decode(
+			file_get_contents( __DIR__ . '/../../../data/edit/entity.json' ),
+			true
+		) ?: null;
 	}
 
-	public function reconcile( RequestInterface $request ) : string {
-		return file_get_contents( __DIR__ . '/../../../data/edit/reconcile.json' );
+	public function reconcile() : ?array {
+		return json_decode(
+			file_get_contents( __DIR__ . '/../../../data/edit/reconcile.json' ),
+			true
+		) ?: null;
 	}
 
 }

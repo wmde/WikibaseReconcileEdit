@@ -13,21 +13,37 @@ use DataValues\StringValue;
 use MediaWiki\MediaWikiServices;
 use Wikibase\DataModel\Entity\ItemId;
 use Wikibase\DataModel\Services\Statement\GuidGenerator;
+use MediaWiki\Extension\OnOrProt\MediaWiki\Request\EditRequest;
+use MediaWiki\Extension\OnOrProt\MediaWiki\Request\MockEditDiskRequest;
+use MediaWiki\Extension\OnOrProt\MediaWiki\Request\UrlInputEditRequest;
 
 class EditEndpoint extends SimpleHandler {
 
 	private const VERSION_KEY = "onorprot-version";
 
+	private function getEditRequest() : EditRequest {
+		if ( isset( $_SERVER[ 'HTTP_X_ONORPROT_USE_DISK_REQUEST' ] ) ) {
+			return new MockEditDiskRequest();
+		}
+		return new UrlInputEditRequest( $this->getRequest() );
+	}
+
 	public function run() {
-		// TODO use different Request interfaces / real input data
+		// TODO inject these services
 		$repo = WikibaseRepo::getDefaultInstance();
-		$request = new \MediaWiki\Extension\OnOrProt\MediaWiki\Request\MockEditDiskRequest();
+		$propertyDataTypeLookup = $repo->getPropertyDataTypeLookup();
+		$deserializer = $repo->getBaseDataModelDeserializerFactory()->newEntityDeserializer();
+
+		// Get the request
+		$request = $this->getEditRequest();
 
 		// Validate and process reconciliation input
 		// TODO use different services per version
 		// TODO output an object that controls the reconciliations spec?
-		$rawReconcile = $request->reconcile( $this->getRequest() );
-		$inputReconcile = json_decode( $rawReconcile, true );
+		$inputReconcile = $request->reconcile();
+		if ( $inputReconcile === null ) {
+			die( 'Invalid reconcile JSON supplied' );
+		}
 		if ( !array_key_exists( self::VERSION_KEY, $inputReconcile ) || $inputReconcile[self::VERSION_KEY] !== '0.0.1' ) {
 			die( 'Only supported reconciliation version is 0.0.1' );
 		}
@@ -36,20 +52,21 @@ class EditEndpoint extends SimpleHandler {
 		}
 		$reconcileUrlProperty = new PropertyId( $inputReconcile['urlReconcile'] );
 		// For now this property must be of URL type
-		if ( $repo->getPropertyDataTypeLookup()->getDataTypeIdForProperty( $reconcileUrlProperty ) !== 'url' ) {
+		if ( $propertyDataTypeLookup->getDataTypeIdForProperty( $reconcileUrlProperty ) !== 'url' ) {
 			die( 'urlReconcile property must be of type url' );
 		}
 
 		// Validate entity input
-		$rawEntity = $request->entity( $this->getRequest() );
-		$inputEntity = json_decode( $rawEntity, true );
+		$inputEntity = $request->entity();
+		if ( $inputEntity === null ) {
+			die( 'Invalid entity JSON supplied' );
+		}
 		if ( !array_key_exists( self::VERSION_KEY, $inputEntity ) || $inputEntity[self::VERSION_KEY] !== '0.0.1' ) {
 			die( 'Only supported entity version is 0.0.1' );
 		}
 		if ( !array_key_exists( 'type', $inputEntity ) || $inputEntity['type'] !== 'item' ) {
 			die( 'Only supported entity type is \'item\'' );
 		}
-		$deserializer = $repo->getBaseDataModelDeserializerFactory()->newEntityDeserializer();
 		/** @var Item $inputEntity */
 		$inputEntity = $deserializer->deserialize( $inputEntity );
 
@@ -84,6 +101,7 @@ class EditEndpoint extends SimpleHandler {
 			die( 'Unexpected issue with LinkFilter return' );
 		}
 		$externalLinkIndex = $externalLinkIndexes[0];
+		// TODO inject LoadBalancer?
 		$db = MediaWikiServices::getInstance()->getDBLoadBalancer()->getConnection( DB_REPLICA );
 		// TODO join and query correct ns only etc?
 		$externalLinksResult = $db->select(
@@ -224,12 +242,10 @@ class EditEndpoint extends SimpleHandler {
 		return [
 			'entity' => [
 				self::PARAM_SOURCE => 'post',
-				//ParamValidator::PARAM_TYPE => 'upload',
 				ParamValidator::PARAM_REQUIRED => true,
 			],
 			'reconcile' => [
 				self::PARAM_SOURCE => 'post',
-				//ParamValidator::PARAM_TYPE => 'upload',
 				ParamValidator::PARAM_REQUIRED => true,
 			],
 		];
