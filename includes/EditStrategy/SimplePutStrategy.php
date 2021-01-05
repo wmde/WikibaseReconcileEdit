@@ -10,11 +10,24 @@ use Wikibase\DataModel\Statement\StatementList;
 class SimplePutStrategy {
 
 	/**
+	 * @var GuidGenerator
+	 */
+	private $guidGenerator;
+
+	/**
+	 * @param GuidGenerator|null $guidGenerator
+	 */
+	public function __construct( ?GuidGenerator $guidGenerator = null ) {
+		$this->guidGenerator = $guidGenerator;
+	}
+
+	/**
 	 * @param Item $base The base Item to be used
 	 * @param Item $submitted The submitted data to be applied to the base
 	 * @return Item the $base with $submitted applied per the strategy
 	 */
 	public function apply( Item $base, Item $submitted ) : Item {
+		// TODO validate? and die if sitelinks, references, qualifiers are involved?
 		$base = $this->applyLabels( $base, $submitted );
 		$base = $this->applyDescriptions( $base, $submitted );
 		$base = $this->applyAliases( $base, $submitted );
@@ -87,20 +100,21 @@ class SimplePutStrategy {
 			$inputMainSnak = $inputStatement->getMainSnak();
 			$inputPropertyIdString = $inputMainSnak->getPropertyId()->getSerialization();
 			// If an input statement value already exists then do nothing...
-			foreach ( $existingStatementsByPropertyId[$inputPropertyIdString] as $existingStatement ) {
-				if ( $existingStatement->getMainSnak()->getDataValue()->equals( $inputMainSnak->getDataValue() ) ) {
-					// continue out of the 2 foreach loops, as we don't need to add this statement
-					$statementsToKeep[] = $existingStatement;
-					continue 2;
+			if ( array_key_exists( $inputPropertyIdString, $existingStatementsByPropertyId ) ) {
+				foreach ( $existingStatementsByPropertyId[$inputPropertyIdString] as $existingStatement ) {
+					if ( $existingStatement->getMainSnak()->getDataValue()->equals( $inputMainSnak->getDataValue() ) ) {
+						// continue out of the 2 foreach loops, as we don't need to add this statement
+						$statementsToKeep[] = $existingStatement;
+						continue 2;
+					}
 				}
 			}
 			$statementsToAdd[] = $inputStatement;
 		}
 
 		// Add fresh guids to new statements
-		$guidGenerator = new GuidGenerator();
 		foreach ( $statementsToAdd as $statement ) {
-			$statement->setGuid( $guidGenerator->newGuid( $base->getId() ) );
+			$statement->setGuid( $this->guidGenerator->newGuid( $base->getId() ) );
 		}
 
 		// Set the new statement list
