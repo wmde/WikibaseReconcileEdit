@@ -1,0 +1,12 @@
+{
+	"wikibasereconcileedit-version": "0.0.1/minimal",
+	"labels": {
+		"en": "Item #3 to reconcile with"
+	},
+	"statements": [
+		{
+			"property": "P23",
+			"value": "https://github.com/addshore/test3"
+		}
+	]
+}

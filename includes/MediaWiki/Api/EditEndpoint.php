@@ -5,6 +5,7 @@ namespace MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\Api;
 use DataValues\StringValue;
 use MediaWiki\Extension\WikibaseReconcileEdit\EditStrategy\SimplePutStrategy;
 use MediaWiki\Extension\WikibaseReconcileEdit\InputToEntity\FullWikibaseItemInput;
+use MediaWiki\Extension\WikibaseReconcileEdit\InputToEntity\MinimalItemInput;
 use MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\ExternalLinks;
 use MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\Request\EditRequest;
 use MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\Request\MockEditDiskRequest;
@@ -75,7 +76,17 @@ class EditEndpoint extends SimpleHandler {
 		}
 
 		// Get Item from input
-		$inputEntity = ( new FullWikibaseItemInput )->getItem( $request );
+		if ( !array_key_exists( self::VERSION_KEY, $request->entity() ) ) {
+			die( 'entity input version must be specified in key ' . self::VERSION_KEY );
+		}
+		$inputEntityVersion = $request->entity()[self::VERSION_KEY];
+		if ( $inputEntityVersion === '0.0.1/full' ) {
+			$inputEntity = ( new FullWikibaseItemInput )->getItem( $request );
+		} elseif ( $inputEntityVersion === '0.0.1/minimal' ) {
+			$inputEntity = ( new MinimalItemInput )->getItem( $request );
+		} else {
+			die( 'unknown entity input version' );
+		}
 
 		// Validate Entity
 		// Don't support references, qualifiers or sitelinks

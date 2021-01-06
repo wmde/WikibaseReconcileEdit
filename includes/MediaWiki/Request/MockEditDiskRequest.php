@@ -9,7 +9,7 @@ class MockEditDiskRequest implements EditRequest {
 
 	public function entity() : ?array {
 		return json_decode(
-			file_get_contents( __DIR__ . '/../../../data/edit/entity.json' ),
+			file_get_contents( __DIR__ . '/../../../data/edit/entity-normal.json' ),
 			true
 		) ?: null;
 	}
