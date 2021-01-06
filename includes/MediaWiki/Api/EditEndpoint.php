@@ -4,6 +4,7 @@ namespace MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\Api;
 
 use DataValues\StringValue;
 use MediaWiki\Extension\WikibaseReconcileEdit\EditStrategy\SimplePutStrategy;
+use MediaWiki\Extension\WikibaseReconcileEdit\InputToEntity\FullWikibaseItemInput;
 use MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\ExternalLinks;
 use MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\Request\EditRequest;
 use MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\Request\MockEditDiskRequest;
@@ -20,7 +21,7 @@ use Wikimedia\ParamValidator\ParamValidator;
 
 class EditEndpoint extends SimpleHandler {
 
-	private const VERSION_KEY = "wikibasereconcileedit-version";
+	public const VERSION_KEY = "wikibasereconcileedit-version";
 
 	/**
 	 * @var EntityIdLookup
@@ -73,19 +74,8 @@ class EditEndpoint extends SimpleHandler {
 			die( 'urlReconcile property must be of type url' );
 		}
 
-		// Validate entity input
-		$inputEntity = $request->entity();
-		if ( $inputEntity === null ) {
-			die( 'Invalid entity JSON supplied' );
-		}
-		if ( !array_key_exists( self::VERSION_KEY, $inputEntity ) || $inputEntity[self::VERSION_KEY] !== '0.0.1' ) {
-			die( 'Only supported entity version is 0.0.1' );
-		}
-		if ( !array_key_exists( 'type', $inputEntity ) || $inputEntity['type'] !== 'item' ) {
-			die( 'Only supported entity type is \'item\'' );
-		}
-		/** @var Item $inputEntity */
-		$inputEntity = $deserializer->deserialize( $inputEntity );
+		// Get Item from input
+		$inputEntity = ( new FullWikibaseItemInput )->getItem( $request );
 
 		// Validate Entity
 		// Don't support references, qualifiers or sitelinks

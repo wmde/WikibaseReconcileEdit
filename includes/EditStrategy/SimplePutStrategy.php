@@ -19,6 +19,9 @@ class SimplePutStrategy {
 	 */
 	public function __construct( ?GuidGenerator $guidGenerator = null ) {
 		$this->guidGenerator = $guidGenerator;
+		if ( !$this->guidGenerator ) {
+			$this->guidGenerator = new GuidGenerator();
+		}
 	}
 
 	/**
@@ -29,7 +32,7 @@ class SimplePutStrategy {
 	public function apply( Item $base, Item $submitted ) : Item {
 		// TODO validate? and die if sitelinks, references, qualifiers are involved?
 		$base = $this->applyLabels( $base, $submitted );
-		$base = $this->applyDescriptions( $base, $submitted ) ;
+		$base = $this->applyDescriptions( $base, $submitted );
 		$base = $this->applyAliases( $base, $submitted );
 		return $this->applyStatements( $base, $submitted );
 	}
