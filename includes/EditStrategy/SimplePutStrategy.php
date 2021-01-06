@@ -4,6 +4,7 @@ namespace MediaWiki\Extension\WikibaseReconcileEdit\EditStrategy;
 
 use Wikibase\DataModel\Entity\Item;
 use Wikibase\DataModel\Services\Statement\GuidGenerator;
+use Wikibase\DataModel\SiteLinkList;
 use Wikibase\DataModel\Snak\PropertyValueSnak;
 use Wikibase\DataModel\Statement\StatementList;
 
@@ -30,10 +31,11 @@ class SimplePutStrategy {
 	 * @return Item the $base with $submitted applied per the strategy
 	 */
 	public function apply( Item $base, Item $submitted ) : Item {
-		// TODO validate? and die if sitelinks, references, qualifiers are involved?
+		// TODO validate? and die if references, qualifiers are involved?
 		$base = $this->applyLabels( $base, $submitted );
 		$base = $this->applyDescriptions( $base, $submitted );
 		$base = $this->applyAliases( $base, $submitted );
+		$base = $this->applySitelinks( $base, $submitted );
 		return $this->applyStatements( $base, $submitted );
 	}
 
@@ -43,6 +45,7 @@ class SimplePutStrategy {
 	 * @return Item
 	 */
 	private function applyLabels( Item $base, Item $submitted ) : Item {
+		// TODO perhaps things that are overridden should be added as aliases? (probably a strategy configuration)
 		$base->getFingerprint()->getLabels()->addAll(
 			$submitted->getFingerprint()->getLabels()->getIterator()
 		);
@@ -79,6 +82,20 @@ class SimplePutStrategy {
 			);
 		}
 
+		return $base;
+	}
+
+	/**
+	 * @param Item $base
+	 * @param Item $submitted
+	 * @return Item
+	 */
+	private function applySitelinks( Item $base, Item $submitted ) : Item {
+		$siteLinkList = new SiteLinkList();
+		foreach ( $submitted->getSiteLinkList()->getIterator() as $siteLink ) {
+			$siteLinkList->setSiteLink( $siteLink );
+		}
+		$base->setSiteLinkList( $siteLinkList );
 		return $base;
 	}
 

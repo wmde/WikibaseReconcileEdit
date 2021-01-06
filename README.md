@@ -8,8 +8,8 @@ This code is currently **work in progress** and some things are thus **known to 
 
 * 0.0.1/minimal aliases
 * 0.0.1/minimal statement value parsing options (such as language), could lead to "interesting" things
-* Anything to do with sitelinks, references, qualifiers
-* Ranks may have an undetermined behavior
+* Anything to do with references, qualifiers
+* Statement ranks and sitelink badges may have an undetermined behavior
 * Editing always has a fixed user and summary currently, and token validation etc does not happen
 * All API errors are pretty hard / not in a JSON format currently
 * Not fully tested, so there could be other bugs...
@@ -25,8 +25,8 @@ Initial reconciliation is `urlReconcile` which allows for simple reconciliation 
 The default initial behavior is:
 
 * Merge: Labels, Descriptions, Aliases
-* Set: Statements
-* Not Supported: Sitelinks, Qualifiers, References, NoValues, SomeValues
+* Set: Statements, SiteLinks
+* Not Supported: Qualifiers, References, NoValues, SomeValues
 
 This means that:
 
@@ -48,7 +48,7 @@ A couple of different input formats are allowed.
 
 #### Minimal 0.0.1/minimal
 
-Inspired by but not necessarily the same as a minimal format used in https://github.com/maxlath/wikibase-sdk
+Inspired by but not necessarily the same as a minimal format used in maxlath/wikibase-sdk [see here](https://github.com/maxlath/wikibase-cli/blob/master/docs/write_operations.md#batch-mode).
 
 ```js
 {
@@ -65,7 +65,7 @@ Inspired by but not necessarily the same as a minimal format used in https://git
 }
 ```
 
-**WARNING: Aliases and sitelinks are not yet implemented!**
+**WARNING: Aliases are not yet implemented!**
 
 #### Full 0.0.1/full
 

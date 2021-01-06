@@ -1,0 +1,24 @@
+{
+	"wikibasereconcileedit-version": "0.0.1/minimal",
+	"labels": {
+		"en": "en-label"
+	},
+	"descriptions": {
+		"fr": "fr-desc"
+	},
+	"TODO-aliases": {
+		"en": [
+			"en-alias1",
+			"en-alias2"
+		]
+	},
+	"sitelinks": {
+		"site1": "SomePage"
+	},
+	"statements": [
+		{
+			"property": "P23",
+			"value": "im-a-string"
+		}
+	]
+}

@@ -8,6 +8,7 @@ use ValueParsers\ParserOptions;
 use Wikibase\DataModel\Entity\Item;
 use Wikibase\DataModel\Entity\PropertyId;
 use Wikibase\DataModel\Services\Lookup\PropertyDataTypeLookup;
+use Wikibase\DataModel\SiteLink;
 use Wikibase\DataModel\Snak\PropertyValueSnak;
 use Wikibase\Repo\ValueParserFactory;
 use Wikibase\Repo\WikibaseRepo;
@@ -66,6 +67,12 @@ class MinimalItemInput {
 			die( 'aliases not yet supported for minimal format' );
 		}
 
+		if ( array_key_exists( 'sitelinks', $inputEntity ) ) {
+			foreach ( $inputEntity['sitelinks'] as $siteId => $pageName ) {
+				$item->getSiteLinkList()->setSiteLink( new SiteLink( $siteId, $pageName ) );
+			}
+		}
+
 		if ( array_key_exists( 'statements', $inputEntity ) ) {
 			foreach ( $inputEntity['statements'] as $statementDetails ) {
 				if (
@@ -83,10 +90,6 @@ class MinimalItemInput {
 					new PropertyValueSnak( $propertyId, $dataValue )
 				);
 			}
-		}
-
-		if ( array_key_exists( 'sitelinks', $inputEntity ) ) {
-			die( 'sitelinks not yet supported for minimal format' );
 		}
 
 		return $item;

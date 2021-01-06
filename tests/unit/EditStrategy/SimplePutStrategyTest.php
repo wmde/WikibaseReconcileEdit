@@ -60,6 +60,21 @@ class SimplePutStrategyTest extends \MediaWikiUnitTestCase {
 			FluidItem::init()->withAlias( 'en', 'Replace' )->item(),
 			FluidItem::init()->withAlias( 'en', 'Replace' )->withAlias( 'en', 'Foo' )->item()
 		];
+		yield 'Add sitelink' => [
+			FluidItem::init()->item(),
+			FluidItem::init()->withSitelink( 'en', 'New' )->item(),
+			FluidItem::init()->withSitelink( 'en', 'New' )->item()
+		];
+		yield 'Overwrite sitelink' => [
+			FluidItem::init()->withSitelink( 'en', 'Old' )->item(),
+			FluidItem::init()->withSitelink( 'en', 'New' )->item(),
+			FluidItem::init()->withSitelink( 'en', 'New' )->item()
+		];
+		yield 'Sitelink is removed when not provided' => [
+			FluidItem::init()->withSitelink( 'en', 'New' )->item(),
+			FluidItem::init()->item(),
+			FluidItem::init()->item(),
+		];
 		yield 'Statements get removed' => [
 			FluidItem::init()->withStringValue( 'P1', 'Foo' )->item(),
 			new Item(),

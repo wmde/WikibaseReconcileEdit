@@ -6,6 +6,7 @@ use DataValues\StringValue;
 use Wikibase\DataModel\Entity\Item;
 use Wikibase\DataModel\Entity\ItemId;
 use Wikibase\DataModel\Entity\PropertyId;
+use Wikibase\DataModel\SiteLink;
 use Wikibase\DataModel\Snak\PropertyValueSnak;
 
 class FluidItem {
@@ -83,6 +84,16 @@ class FluidItem {
 				$baseAliases
 				) )
 			);
+		return $this;
+	}
+
+	/**
+	 * @param string $siteId
+	 * @param string $pageName
+	 * @return self
+	 */
+	public function withSiteLink( string $siteId, string $pageName ) : self {
+		$this->item->getSiteLinkList()->setSiteLink( new SiteLink( $siteId, $pageName ) );
 		return $this;
 	}
 

@@ -89,14 +89,11 @@ class EditEndpoint extends SimpleHandler {
 		}
 
 		// Validate Entity
-		// Don't support references, qualifiers or sitelinks
+		// Don't support references, qualifiers
 		foreach ( $inputEntity->getStatements()->toArray() as $statement ) {
 			if ( $statement->getQualifiers()->count() !== 0 || $statement->getReferences()->count() !== 0 ) {
 				die( 'Qualifiers and References are not currently supported' );
 			}
-		}
-		if ( $inputEntity->getSiteLinkList()->count() !== 0 ) {
-			die( 'Sitelinks are not currently supported' );
 		}
 		// Check for our reconciliation value
 		$reconciliationStatements = $inputEntity->getStatements()->getByPropertyId( $reconcileUrlProperty );
