@@ -6,7 +6,7 @@
 	"descriptions": {
 		"fr": "fr-desc"
 	},
-	"TODO-aliases": {
+	"aliases": {
 		"en": [
 			"en-alias1",
 			"en-alias2"

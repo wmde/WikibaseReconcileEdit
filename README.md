@@ -6,7 +6,6 @@ Such an API could also be relevant to OpenRefine and other projects in the futur
 
 This code is currently **work in progress** and some things are thus **known to not to work**:
 
-* 0.0.1/minimal aliases
 * 0.0.1/minimal statement value parsing options (such as language), could lead to "interesting" things
 * Anything to do with references, qualifiers
 * Statement ranks and sitelink badges may have an undetermined behavior
@@ -64,8 +63,6 @@ Inspired by but not necessarily the same as a minimal format used in maxlath/wik
     ]
 }
 ```
-
-**WARNING: Aliases are not yet implemented!**
 
 #### Full 0.0.1/full
 

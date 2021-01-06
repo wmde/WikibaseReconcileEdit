@@ -64,7 +64,12 @@ class MinimalItemInput {
 			}
 		}
 		if ( array_key_exists( 'aliases', $inputEntity ) ) {
-			die( 'aliases not yet supported for minimal format' );
+			foreach ( $inputEntity['aliases'] as $lang => $aliases ) {
+				if ( $item->getAliasGroups()->hasGroupForLanguage( $lang ) ) {
+					$aliases = array_unique( array_merge( $aliases, $item->getAliasGroups()->getByLanguage( $lang ) ) );
+				}
+				$item->getAliasGroups()->setAliasesForLanguage( $lang, $aliases );
+			}
 		}
 
 		if ( array_key_exists( 'sitelinks', $inputEntity ) ) {

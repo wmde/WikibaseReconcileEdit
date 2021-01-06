@@ -55,9 +55,8 @@ class MinimalItemInputTest extends \MediaWikiUnitTestCase {
 			FluidItem::init()
 				->withLabel( 'en', 'en-label' )
 				->withDescription( 'fr', 'fr-desc' )
-				// TODO implement aliases for minimal format
-				//->withAlias( 'en', 'en-alias1' )
-				//->withAlias( 'en', 'en-alias2' )
+				->withAlias( 'en', 'en-alias2' )
+				->withAlias( 'en', 'en-alias1' )
 				->withSiteLink( 'site1', 'SomePage' )
 				->withStringValue( 'P23', 'im-a-string' )
 				->item()
