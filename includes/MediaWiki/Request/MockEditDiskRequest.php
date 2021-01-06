@@ -1,6 +1,6 @@
 <?php
 
-namespace MediaWiki\Extension\OnOrProt\MediaWiki\Request;
+namespace MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\Request;
 
 /**
  * EditRequest sourced from test data stored in the data directory

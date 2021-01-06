@@ -1,6 +1,6 @@
 <?PHP
 
-namespace MediaWiki\Extension\OnOrProt\Maintenance;
+namespace MediaWiki\Extension\WikibaseReconcileEdit\Maintenance;
 
 use DataValues\StringValue;
 use User;
@@ -24,7 +24,7 @@ if ( getenv( 'MW_INSTALL_PATH' ) ) {
 class Seed extends \Maintenance {
 	public function execute() {
 		$store = WikibaseRepo::getDefaultInstance()->getEntityStore();
-		$user = User::newSystemUser( 'OnOrProtSeeder' );
+		$user = User::newSystemUser( 'WikibaseReconcileEditSeeder' );
 		$time = time();
 
 		// Create the property

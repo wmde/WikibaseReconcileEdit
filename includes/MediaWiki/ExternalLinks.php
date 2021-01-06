@@ -1,6 +1,6 @@
 <?php
 
-namespace MediaWiki\Extension\OnOrProt\MediaWiki;
+namespace MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki;
 
 use LinkFilter;
 use MediaWiki\MediaWikiServices;

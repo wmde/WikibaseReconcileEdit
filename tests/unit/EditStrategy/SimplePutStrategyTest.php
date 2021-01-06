@@ -1,15 +1,15 @@
 <?php
 
-namespace MediaWiki\Extension\OnOrProt\Tests\Unit\EditStrategy;
+namespace MediaWiki\Extension\WikibaseReconcileEdit\Tests\Unit\EditStrategy;
 
-use MediaWiki\Extension\OnOrProt\EditStrategy\SimplePutStrategy;
-use MediaWiki\Extension\OnOrProt\Wikibase\FluidItem;
+use MediaWiki\Extension\WikibaseReconcileEdit\EditStrategy\SimplePutStrategy;
+use MediaWiki\Extension\WikibaseReconcileEdit\Wikibase\FluidItem;
 use Wikibase\DataModel\Entity\EntityId;
 use Wikibase\DataModel\Entity\Item;
 use Wikibase\DataModel\Services\Statement\GuidGenerator;
 
 /**
- * @covers \MediaWiki\Extension\OnOrProt\EditStrategy\SimplePutStrategy
+ * @covers \MediaWiki\Extension\WikibaseReconcileEdit\EditStrategy\SimplePutStrategy
  */
 class SimplePutStrategyTest extends \MediaWikiUnitTestCase {
 

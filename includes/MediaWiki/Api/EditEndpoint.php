@@ -1,13 +1,13 @@
 <?php
 
-namespace MediaWiki\Extension\OnOrProt\MediaWiki\Api;
+namespace MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\Api;
 
 use DataValues\StringValue;
-use MediaWiki\Extension\OnOrProt\EditStrategy\SimplePutStrategy;
-use MediaWiki\Extension\OnOrProt\MediaWiki\ExternalLinks;
-use MediaWiki\Extension\OnOrProt\MediaWiki\Request\EditRequest;
-use MediaWiki\Extension\OnOrProt\MediaWiki\Request\MockEditDiskRequest;
-use MediaWiki\Extension\OnOrProt\MediaWiki\Request\UrlInputEditRequest;
+use MediaWiki\Extension\WikibaseReconcileEdit\EditStrategy\SimplePutStrategy;
+use MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\ExternalLinks;
+use MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\Request\EditRequest;
+use MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\Request\MockEditDiskRequest;
+use MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\Request\UrlInputEditRequest;
 use MediaWiki\Rest\SimpleHandler;
 use Title;
 use Wikibase\DataModel\Entity\Item;
@@ -20,7 +20,7 @@ use Wikimedia\ParamValidator\ParamValidator;
 
 class EditEndpoint extends SimpleHandler {
 
-	private const VERSION_KEY = "onorprot-version";
+	private const VERSION_KEY = "wikibasereconcileedit-version";
 
 	/**
 	 * @var EntityIdLookup
@@ -32,7 +32,7 @@ class EditEndpoint extends SimpleHandler {
 	 * @return EditRequest
 	 */
 	private function getEditRequest() : EditRequest {
-		if ( isset( $_SERVER[ 'HTTP_X_ONORPROT_USE_DISK_REQUEST' ] ) ) {
+		if ( isset( $_SERVER[ 'HTTP_X_WIKIBASERECONCILEEDIT_USE_DISK_REQUEST' ] ) ) {
 			return new MockEditDiskRequest();
 		}
 		return new UrlInputEditRequest( $this->getRequest() );
@@ -167,7 +167,7 @@ class EditEndpoint extends SimpleHandler {
 		$toSave = ( new SimplePutStrategy() )->apply( $base, $inputEntity );
 		$editEntity = $repo->newEditEntityFactory()->newEditEntity(
 			// TODO use a real user
-			\User::newSystemUser( 'OnOrProtReconciliator' ),
+			\User::newSystemUser( 'WikibaseReconcileEditReconciliator' ),
 			$toSave->getId(),
 			$baseRevId
 		);

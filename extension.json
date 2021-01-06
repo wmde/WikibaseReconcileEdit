@@ -1,24 +1,24 @@
 {
-	"name": "OnOrProt",
-	"descriptionmsg": "onorprot-desc",
+	"name": "WikibaseReconcileEdit",
+	"descriptionmsg": "wikibasereconcileedit-desc",
 	"license-name": "GPL-2.0-or-later",
 	"type": "other",
 	"requires": {
 		"MediaWiki": ">= 1.35.0"
 	},
 	"AutoloadNamespaces": {
-		"MediaWiki\\Extension\\OnOrProt\\": "includes/"
+		"MediaWiki\\Extension\\WikibaseReconcileEdit\\": "includes/"
 	},
 	"MessagesDirs": {
-		"OnOrProt": [
+		"WikibaseReconcileEdit": [
 			"i18n"
 		]
 	},
 	"RestRoutes": [
 		{
-			"path": "/onorprot/v0/edit",
+			"path": "/wikibase-reconcile-edit/v0/edit",
 			"method": "POST",
-			"class": "MediaWiki\\Extension\\OnOrProt\\MediaWiki\\Api\\EditEndpoint"
+			"class": "MediaWiki\\Extension\\WikibaseReconcileEdit\\MediaWiki\\Api\\EditEndpoint"
 		}
 	],
 	"manifest_version": 2

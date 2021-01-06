@@ -1,9 +1,10 @@
-# OnOrProt
+# WikibaseReconcileEdit
 
-OnOrProt contains Open!Next prototype APIs.
-These could also be relevant to OpenRefine and other project in the future.
+WikibaseReconcileEdit was created as a prototype API for the Open!Next project.
 
-## /onorprot/v0/edit (Editing API)
+Such an API could also be relevant to OpenRefine and other projects in the future.
+
+## /wikibase-reconcile-edit/v0/edit (Editing API)
 
 Provides simple reconciliation of Item edits.
 
@@ -24,7 +25,7 @@ Reconciliation payload 0.0.1 should look like this:
 
 ```js
 {
-    "version":"0.0.1",
+    "wikibasereconcileedit-version":"0.0.1",
     "urlReconcile": "P23"
 }
 ```
@@ -39,7 +40,7 @@ Edit payload 0.0.1 should look like this:
 
 ```js
 {
-    "onorprot-version": "0.0.1",
+    "wikibasereconcileedit-version": "0.0.1",
     "type": "item",
     "labels": {
         "en": {

@@ -1,6 +1,6 @@
 <?php
 
-namespace MediaWiki\Extension\OnOrProt\Wikibase;
+namespace MediaWiki\Extension\WikibaseReconcileEdit\Wikibase;
 
 use DataValues\StringValue;
 use Wikibase\DataModel\Entity\Item;

@@ -1,6 +1,6 @@
 <?php
 
-namespace MediaWiki\Extension\OnOrProt\EditStrategy;
+namespace MediaWiki\Extension\WikibaseReconcileEdit\EditStrategy;
 
 use Wikibase\DataModel\Entity\Item;
 use Wikibase\DataModel\Services\Statement\GuidGenerator;
@@ -29,7 +29,7 @@ class SimplePutStrategy {
 	public function apply( Item $base, Item $submitted ) : Item {
 		// TODO validate? and die if sitelinks, references, qualifiers are involved?
 		$base = $this->applyLabels( $base, $submitted );
-		$base = $this->applyDescriptions( $base, $submitted );
+		$base = $this->applyDescriptions( $base, $submitted ) ;
 		$base = $this->applyAliases( $base, $submitted );
 		return $this->applyStatements( $base, $submitted );
 	}
