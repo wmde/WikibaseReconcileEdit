@@ -4,11 +4,23 @@ WikibaseReconcileEdit was created as a prototype API for the Open!Next project.
 
 Such an API could also be relevant to OpenRefine and other projects in the future.
 
+This code is currently **work in progress** and some things are thus **known to not to work**:
+
+* 0.0.1/minimal aliases
+* 0.0.1/minimal statement value parsing options (such as language), could lead to "interesting" things
+* Anything to do with sitelinks, references, qualifiers
+* Ranks may have an undetermined behavior
+* Editing always has a fixed user and summary currently, and token validation etc does not happen
+* All API errors are pretty hard / not in a JSON format currently
+* Not fully tested, so there could be other bugs...
+
 ## /wikibase-reconcile-edit/v0/edit (Editing API)
 
 Provides simple reconciliation of Item edits.
 
 ### Reconciliation 0.0.1
+
+Initial reconciliation is `urlReconcile` which allows for simple reconciliation against a single statement value that is a URL.
 
 The default initial behavior is:
 
