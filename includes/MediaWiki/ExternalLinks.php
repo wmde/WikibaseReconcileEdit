@@ -4,7 +4,6 @@ namespace MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki;
 
 use LinkFilter;
 use MediaWiki\MediaWikiServices;
-use Wikimedia\Rdbms\ResultWrapper;
 
 /**
  * Interface for the externallinks MediaWiki table.
@@ -22,15 +21,14 @@ class ExternalLinks {
 	 */
 	public function pageIdsContainingUrl( string $url ) : array {
 		$dbr = $this->loadBalancer->getConnection( DB_REPLICA );
-		$result = $dbr->select(
+		return $dbr->selectFieldValues(
 			'externallinks',
 			'el_from',
 			[
-				'el_index' => $this->getSingleIndexOrDie( $url )
+				'el_index' => $this->getSingleIndexOrDie( $url ),
 			],
 			__METHOD__
 		);
-		return $this->pageIdsFromResult( $result );
 	}
 
 	/**
@@ -43,18 +41,6 @@ class ExternalLinks {
 			die( 'Unexpected issue with LinkFilter return' );
 		}
 		return $indexes[0];
-	}
-
-	/**
-	 * @param ResultWrapper $result
-	 * @return int[] Page Ids
-	 */
-	private function pageIdsFromResult( ResultWrapper $result ) : array {
-		$pageIds = [];
-		foreach ( $result as $row ) {
-			$pageIds[] = (int)$row->el_from;
-		}
-		return $pageIds;
 	}
 
 }
