@@ -3,7 +3,7 @@
 namespace MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki;
 
 use LinkFilter;
-use MediaWiki\MediaWikiServices;
+use Wikimedia\Rdbms\ILoadBalancer;
 
 /**
  * Interface for the externallinks MediaWiki table.
@@ -11,8 +11,11 @@ use MediaWiki\MediaWikiServices;
  */
 class ExternalLinks {
 
-	public function __construct() {
-		$this->loadBalancer = MediaWikiServices::getInstance()->getDBLoadBalancer();
+	/** @var ILoadBalancer */
+	private $loadBalancer;
+
+	public function __construct( ILoadBalancer $loadBalancer ) {
+		$this->loadBalancer = $loadBalancer;
 	}
 
 	/**

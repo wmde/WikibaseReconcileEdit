@@ -2,5 +2,10 @@
 <ruleset>
 	<rule ref="./vendor/mediawiki/mediawiki-codesniffer/MediaWiki">
 	</rule>
+
+	<rule ref="MediaWiki.Commenting.FunctionComment">
+		<severity>0</severity>
+	</rule>
+
 	<file>.</file>
 </ruleset>

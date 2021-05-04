@@ -4,6 +4,7 @@ namespace MediaWiki\Extension\WikibaseReconcileEdit\Test\MediaWiki\Api;
 
 use MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\Api\EditEndpoint;
 use MediaWiki\Rest\LocalizedHttpException;
+use MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\ExternalLinks;
 use MediaWiki\Rest\RequestData;
 use MediaWiki\Rest\RequestInterface;
 use MediaWiki\Tests\Rest\Handler\HandlerTestTrait;
@@ -14,6 +15,7 @@ use Wikibase\DataModel\Entity\PropertyId;
 use Wikibase\DataModel\Services\Lookup\PropertyDataTypeLookupException;
 use Wikibase\DataModel\Snak\PropertyValueSnak;
 use Wikibase\Repo\WikibaseRepo;
+use Wikimedia\Rdbms\LoadBalancerSingle;
 
 /**
  * @covers MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\Api\EditEndpoint
@@ -30,7 +32,11 @@ class EditEndpointTest extends \MediaWikiIntegrationTestCase {
 	}
 
 	private function newHandler() {
-		return new EditEndpoint();
+		return new EditEndpoint(
+			new ExternalLinks(
+				LoadBalancerSingle::newFromConnection( $this->db )
+			)
+		);
 	}
 
 	private function newRequest( array $params ): RequestInterface {

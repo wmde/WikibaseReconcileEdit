@@ -18,8 +18,14 @@
 		{
 			"path": "/wikibase-reconcile-edit/v0/edit",
 			"method": "POST",
-			"class": "MediaWiki\\Extension\\WikibaseReconcileEdit\\MediaWiki\\Api\\EditEndpoint"
+			"class": "MediaWiki\\Extension\\WikibaseReconcileEdit\\MediaWiki\\Api\\EditEndpoint",
+			"services": [
+				"WikibaseReconcileEdit.ExternalLinks"
+			]
 		}
+	],
+	"ServiceWiringFiles": [
+		"includes/ServiceWiring.php"
 	],
 	"manifest_version": 2
 }
