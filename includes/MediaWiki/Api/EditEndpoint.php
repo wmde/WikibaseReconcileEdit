@@ -32,6 +32,15 @@ class EditEndpoint extends SimpleHandler {
 	 */
 	private $entityIdLookup;
 
+	/** @var ExternalLinks */
+	private $externalLinks;
+
+	public function __construct(
+		ExternalLinks $externalLinks
+	) {
+		$this->externalLinks = $externalLinks;
+	}
+
 	/**
 	 * Get an EditRequest object from the current request
 	 * @return EditRequest
@@ -128,7 +137,7 @@ class EditEndpoint extends SimpleHandler {
 
 		// Find Items that use the URL
 		$itemIdsThatReferenceTheUrl = $this->getItemIdsFromPageIds(
-			( new ExternalLinks() )->pageIdsContainingUrl( $reconciliationUrl )
+			$this->externalLinks->pageIdsContainingUrl( $reconciliationUrl )
 		);
 
 		// Find Items that match the URL and Property ID
