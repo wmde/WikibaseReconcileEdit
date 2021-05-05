@@ -1,0 +1,63 @@
+name: WikibaseReconcileEdit CI
+
+on:
+    push:
+
+jobs:
+    lint:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v2
+            - name: lint
+              run: |
+                  composer install
+                  composer test
+    ci:
+        needs:
+            - lint
+        runs-on: ubuntu-latest
+        strategy:
+            fail-fast: false
+            matrix:
+                include:
+                    - env:
+                          MW_BRANCH: REL1_35
+                          DBTYPE: mysql
+                          LANG: en
+                          WB: both
+                      php-versions: '7.3.26'
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v2
+            - name: Set up MySQL
+              uses: mirromutth/mysql-action@v1.1
+              with:
+                  mysql version: '5.7'
+                  mysql database: 'test_db_wiki'
+                  mysql root password: 'root'
+            - name: Setup PHP
+              uses: shivammathur/setup-php@v2
+              with:
+                  php-version: ${{ matrix.php-versions }}
+                  extensions: pdo_sqlite, mysqlnd
+            - name: Cache Composer cache
+              uses: actions/cache@v2
+              with:
+                  path: $HOME/.composer/cache
+                  key: composer-cache-php${{ matrix.php-versions }}
+            - name: install.sh
+              env: ${{ matrix.env }}
+              run: |
+                  bash ./build/ci-scripts/install.sh
+            - name: Apply WB settings
+              env: ${{ matrix.env }}
+              run: |
+                  bash ./build/ci-scripts/mw-apply-wb-settings.sh
+            - name: Update DB
+              env: ${{ matrix.env }}
+              run: |
+                  bash ./build/ci-scripts/update-db.sh
+            - name: Run script
+              env: ${{ matrix.env }}
+              run: |
+                  bash ./build/ci-scripts/script.sh
