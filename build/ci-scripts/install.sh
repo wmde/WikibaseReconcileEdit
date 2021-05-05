@@ -7,7 +7,7 @@ originalDirectory=$(pwd)
 cd ..
 
 mkdir mediawiki
-wget -O- https://github.com/wikimedia/mediawiki/archive/$MW_BRANCH.tar.gz | tar -zxf - -C mediawiki --strip-components 1
+wget -O- https://github.com/wikimedia/mediawiki/archive/$MW_BRANCH.tar.gz | tar -zx -C mediawiki --strip-components 1
 
 cd mediawiki/extensions
 
