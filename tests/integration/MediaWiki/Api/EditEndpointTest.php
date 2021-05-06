@@ -5,10 +5,10 @@ namespace MediaWiki\Extension\WikibaseReconcileEdit\Test\MediaWiki\Api;
 use MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\Api\EditEndpoint;
 use MediaWiki\Rest\RequestData;
 use MediaWiki\Tests\Rest\Handler\HandlerTestTrait;
+use Wikibase\DataModel\Services\Lookup\PropertyDataTypeLookupException;
 
 /**
- * @covers MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\Api\EditEndpoint;
- *
+ * @covers MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\Api\EditEndpoint
  * @group Database
  */
 class EditEndpointTest extends \MediaWikiIntegrationTestCase {
@@ -19,9 +19,9 @@ class EditEndpointTest extends \MediaWikiIntegrationTestCase {
 		return new EditEndpoint();
 	}
 
-	public function testExecute() {
+	public function testExecuteNoPropertyFound() {
 		$reconcilePayload = [
-			'hello',
+			'urlReconcile' => 'P1',
 			EditEndpoint::VERSION_KEY => '0.0.1'
 		];
 
@@ -38,8 +38,8 @@ class EditEndpointTest extends \MediaWikiIntegrationTestCase {
 
 		$handler = $this->newHandler();
 
-		$data = $this->executeHandlerAndGetBodyData( $handler, $request );
-		dd( $data );
+		$this->expectException( PropertyDataTypeLookupException::class );
+		$this->executeHandlerAndGetBodyData( $handler, $request );
 	}
 
 }
