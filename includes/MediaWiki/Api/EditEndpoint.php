@@ -79,7 +79,11 @@ class EditEndpoint extends SimpleHandler {
 			!array_key_exists( 'urlReconcile', $inputReconcile ) ||
 			!preg_match( PropertyId::PATTERN, $inputReconcile['urlReconcile'] )
 		) {
-			die( '0.0.1 requires a single urlReconcile key mapped to a property id, such as P123' );
+			throw new LocalizedHttpException(
+				MessageValue::new( 'wikibasereconcileedit-editendpoint-invalid-reconcile-propertyid' )
+					->textParams( $inputReconcile[self::VERSION_KEY], 'urlReconcile' ),
+				400
+			);
 		}
 		$reconcileUrlProperty = new PropertyId( $inputReconcile['urlReconcile'] );
 		// For now this property must be of URL type

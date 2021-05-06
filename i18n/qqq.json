@@ -7,5 +7,6 @@
 	},
 	"wikibasereconcileedit-desc": "{{desc|name=WikibaseReconcileEdit}}",
 	"wikibasereconcileedit-editendpoint-invalid-reconcile-json": "Error returned by the API if the “reconcile” request parameter is invalid.",
-	"wikibasereconcileedit-editendpoint-unsupported-reconcile-version": "Error returned by the API if the “reconcile” request parameter specifies an unsupported version.\n\nParameters:\n* $1 – the supported versions (comma-separated list)\n* $2 – the number of supported versions"
+	"wikibasereconcileedit-editendpoint-unsupported-reconcile-version": "Error returned by the API if the “reconcile” request parameter specifies an unsupported version.\n\nParameters:\n* $1 – the supported versions (comma-separated list)\n* $2 – the number of supported versions",
+	"wikibasereconcileedit-editendpoint-invalid-reconcile-propertyid": "Error returned by the API if the “reconcile” request parameter contains no valid field to specify the property ID to reconcile on.\n\nParameters:\n* $1 – the version of the request parameter, e.g. 0.0.1\n* $2 – the name of the field, e.g. urlReconcile"
 }

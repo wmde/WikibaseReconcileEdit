@@ -138,4 +138,34 @@ class EditEndpointTest extends \MediaWikiIntegrationTestCase {
 			$exception->getMessageValue()->getKey() );
 	}
 
+	/** @dataProvider provideInvalidUrlReconcile */
+	public function testInvalidUrlReconcile( ?string $urlReconcile ): void {
+		$params = [
+			EditEndpoint::VERSION_KEY => '0.0.1',
+		];
+		if ( $urlReconcile !== null ) {
+			$params['urlReconcile'] = $urlReconcile;
+		}
+		/** @var LocalizedHttpException $exception */
+		$exception = $this->executeHandlerAndGetHttpException(
+			$this->newHandler(),
+			$this->newRequest( [
+				'entity' => '',
+				'reconcile' => $params,
+			] )
+		);
+
+		$this->assertInstanceOf( LocalizedHttpException::class, $exception );
+		$this->assertSame( 'wikibasereconcileedit-editendpoint-invalid-reconcile-propertyid',
+			$exception->getMessageValue()->getKey() );
+	}
+
+	public function provideInvalidUrlReconcile(): iterable {
+		yield 'missing' => [ null ];
+		yield 'empty' => [ '' ];
+		yield 'item ID' => [ 'Q123' ];
+		yield 'statement ID' => [ 'P40$ea25003c-4c23-63fa-86d9-62bfcd2b05a4' ];
+		yield 'numeric part missing' => [ 'P' ];
+	}
+
 }
