@@ -10,6 +10,7 @@ use MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\ExternalLinks;
 use MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\Request\EditRequest;
 use MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\Request\MockEditDiskRequest;
 use MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\Request\UrlInputEditRequest;
+use MediaWiki\Rest\LocalizedHttpException;
 use MediaWiki\Rest\SimpleHandler;
 use Title;
 use Wikibase\DataModel\Entity\Item;
@@ -19,6 +20,7 @@ use Wikibase\DataModel\Snak\PropertyValueSnak;
 use Wikibase\Lib\Store\EntityIdLookup;
 use Wikibase\Lib\Store\EntityRevision;
 use Wikibase\Repo\WikibaseRepo;
+use Wikimedia\Message\MessageValue;
 use Wikimedia\ParamValidator\ParamValidator;
 
 class EditEndpoint extends SimpleHandler {
@@ -56,7 +58,10 @@ class EditEndpoint extends SimpleHandler {
 		// TODO output an object that controls the reconciliations spec?
 		$inputReconcile = $request->reconcile();
 		if ( $inputReconcile === null ) {
-			die( 'Invalid reconcile JSON supplied' );
+			throw new LocalizedHttpException(
+				MessageValue::new( 'wikibasereconcileedit-editendpoint-invalid-reconcile-json' ),
+				400
+			);
 		}
 		if (
 			!array_key_exists( self::VERSION_KEY, $inputReconcile ) ||

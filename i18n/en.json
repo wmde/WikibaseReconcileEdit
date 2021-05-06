@@ -1,8 +1,10 @@
 {
 	"@metadata": {
 		"authors": [
-			"Addshore"
+			"Addshore",
+			"The Wikibase Team"
 		]
 	},
-	"wikibasereconcileedit-desc": "This is the ON OR Prototype extension"
+	"wikibasereconcileedit-desc": "This is the ON OR Prototype extension",
+	"wikibasereconcileedit-editendpoint-invalid-reconcile-json": "Invalid reconcile JSON supplied"
 }

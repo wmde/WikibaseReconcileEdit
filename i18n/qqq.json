@@ -1,8 +1,10 @@
 {
 	"@metadata": {
 		"authors": [
-			"Addshore"
+			"Addshore",
+			"The Wikibase Team"
 		]
 	},
-	"wikibasereconcileedit-desc": "{{desc|name=WikibaseReconcileEdit}}"
+	"wikibasereconcileedit-desc": "{{desc|name=WikibaseReconcileEdit}}",
+	"wikibasereconcileedit-editendpoint-invalid-reconcile-json": "Error returned by the API if the “reconcile” request parameter is invalid."
 }
