@@ -6,5 +6,6 @@
 		]
 	},
 	"wikibasereconcileedit-desc": "This is the ON OR Prototype extension",
-	"wikibasereconcileedit-editendpoint-invalid-reconcile-json": "Invalid reconcile JSON supplied"
+	"wikibasereconcileedit-editendpoint-invalid-reconcile-json": "Invalid reconcile JSON supplied",
+	"wikibasereconcileedit-editendpoint-unsupported-reconcile-version": "The only supported reconciliation {{PLURAL:$2|version is|versions are}} $1"
 }

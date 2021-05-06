@@ -63,11 +63,17 @@ class EditEndpoint extends SimpleHandler {
 				400
 			);
 		}
+		$supportedReconciliationVersions = [ '0.0.1' ];
 		if (
 			!array_key_exists( self::VERSION_KEY, $inputReconcile ) ||
-			$inputReconcile[self::VERSION_KEY] !== '0.0.1'
+			!in_array( $inputReconcile[self::VERSION_KEY], $supportedReconciliationVersions )
 		) {
-			die( 'Only supported reconciliation version is 0.0.1' );
+			throw new LocalizedHttpException(
+				MessageValue::new( 'wikibasereconcileedit-editendpoint-unsupported-reconcile-version' )
+					->textListParams( $supportedReconciliationVersions )
+					->numParams( count( $supportedReconciliationVersions ) ),
+				400
+			);
 		}
 		if (
 			!array_key_exists( 'urlReconcile', $inputReconcile ) ||

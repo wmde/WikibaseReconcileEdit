@@ -121,4 +121,21 @@ class EditEndpointTest extends \MediaWikiIntegrationTestCase {
 			$exception->getMessageValue()->getKey() );
 	}
 
+	public function testUnsupportedReconcileVersion(): void {
+		/** @var LocalizedHttpException $exception */
+		$exception = $this->executeHandlerAndGetHttpException(
+			$this->newHandler(),
+			$this->newRequest( [
+				'entity' => '',
+				'reconcile' => [
+					EditEndpoint::VERSION_KEY => '0.0.0',
+				],
+			] )
+		);
+
+		$this->assertInstanceOf( LocalizedHttpException::class, $exception );
+		$this->assertSame( 'wikibasereconcileedit-editendpoint-unsupported-reconcile-version',
+			$exception->getMessageValue()->getKey() );
+	}
+
 }
