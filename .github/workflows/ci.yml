@@ -16,8 +16,8 @@ jobs:
                   composer install
                   composer test
     ci:
-        needs:
-            - lint
+        # needs:
+        #     - lint
         runs-on: ubuntu-latest
         strategy:
             fail-fast: false
@@ -60,6 +60,31 @@ jobs:
               env: ${{ matrix.env }}
               run: |
                   bash ./build/ci-scripts/update-db.sh
+            - name: Run WikibaseReconcileEdit unit tests
+              continue-on-error: true
+              run: |
+                cd ../mediawiki
+                vendor/bin/phpunit extensions/WikibaseReconcileEdit/tests/unit
+            - name: Run WikibaseReconcileEdit integration tests using mw phpunit.php
+              continue-on-error: true
+              run: |
+                cd ../mediawiki
+                php tests/phpunit/phpunit.php extensions/WikibaseReconcileEdit/tests/integration
+            - name: Run WikibaseReconcileEdit integration tests using vendor phpunit
+              continue-on-error: true
+              run: |
+                cd ../mediawiki
+                vendor/bin/phpunit extensions/WikibaseReconcileEdit/tests/integration
+            - name: Run MediaWiki unit tests
+              continue-on-error: true
+              run: |
+                cd ../mediawiki
+                composer phpunit:unit
+            - name: Run MediaWiki integration tests
+              continue-on-error: true
+              run: |
+                cd ../mediawiki
+                composer phpunit:integration
             - name: Run unit test
               env: ${{ matrix.env }}
               run: |
