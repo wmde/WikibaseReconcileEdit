@@ -60,7 +60,13 @@ jobs:
               env: ${{ matrix.env }}
               run: |
                   bash ./build/ci-scripts/update-db.sh
-            - name: Run script
+            - name: Run unit test
               env: ${{ matrix.env }}
               run: |
-                  bash ./build/ci-scripts/script.sh
+                  cd ..
+                  php mediawiki/tests/phpunit/phpunit.php mediawiki/extensions/WikibaseReconcileEdit/tests/unit
+            - name: Run integration test
+              env: ${{ matrix.env }}
+              run: |
+                  cd ..
+                  php mediawiki/tests/phpunit/phpunit.php mediawiki/extensions/WikibaseReconcileEdit/tests/integration

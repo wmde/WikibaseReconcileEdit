@@ -1,12 +1,13 @@
 <?php
 
-namespace MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\Api;
+namespace MediaWiki\Extension\WikibaseReconcileEdit\Test\MediaWiki\Api;
 
+use MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\Api\EditEndpoint;
 use MediaWiki\Rest\RequestData;
 use MediaWiki\Tests\Rest\Handler\HandlerTestTrait;
 
 /**
- * @covers \MediaWiki\Rest\Handler\LanguageLinksHandler
+ * @covers MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\Api\EditEndpoint;
  *
  * @group Database
  */
