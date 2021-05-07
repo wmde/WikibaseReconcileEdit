@@ -17,6 +17,7 @@ use Wikibase\DataModel\Entity\ItemId;
 use Wikibase\DataModel\Entity\PropertyId;
 use Wikibase\DataModel\Snak\PropertyValueSnak;
 use Wikibase\Lib\Store\EntityIdLookup;
+use Wikibase\Lib\Store\EntityRevision;
 use Wikibase\Repo\WikibaseRepo;
 use Wikimedia\ParamValidator\ParamValidator;
 
@@ -181,6 +182,12 @@ class EditEndpoint extends SimpleHandler {
 		$response = [
 			'success' => $saveStatus->isGood()
 		];
+		if ( $saveStatus->isGood() ) {
+			/** @var EntityRevision $entityRevision */
+			$entityRevision = $saveStatus->getValue()['revision'];
+			$response['entityId'] = $entityRevision->getEntity()->getId()->getSerialization();
+			$response['revisionId'] = $entityRevision->getRevisionId();
+		}
 		return json_encode( $response );
 	}
 
