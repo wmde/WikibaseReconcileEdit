@@ -3,6 +3,7 @@
 namespace MediaWiki\Extension\WikibaseReconcileEdit\Test\MediaWiki\Api;
 
 use MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\Api\EditEndpoint;
+use MediaWiki\Rest\LocalizedHttpException;
 use MediaWiki\Rest\RequestData;
 use MediaWiki\Rest\RequestInterface;
 use MediaWiki\Tests\Rest\Handler\HandlerTestTrait;
@@ -98,6 +99,73 @@ class EditEndpointTest extends \MediaWikiIntegrationTestCase {
 
 		$this->expectException( PropertyDataTypeLookupException::class );
 		$this->executeHandlerAndGetBodyData( $handler, $request );
+	}
+
+	public function testInvalidReconcile(): void {
+		/** @var LocalizedHttpException $exception */
+		$exception = $this->executeHandlerAndGetHttpException(
+			$this->newHandler(),
+			// don’t use newRequest() since we want to pass invalid JSON
+			new RequestData( [
+				'postParams' => [
+					'entity' => '',
+					'reconcile' => '',
+				],
+				'headers' => [ 'Content-Type' => 'application/json' ],
+				'method' => 'POST',
+			] )
+		);
+
+		$this->assertInstanceOf( LocalizedHttpException::class, $exception );
+		$this->assertSame( 'wikibasereconcileedit-editendpoint-invalid-reconcile-json',
+			$exception->getMessageValue()->getKey() );
+	}
+
+	public function testUnsupportedReconcileVersion(): void {
+		/** @var LocalizedHttpException $exception */
+		$exception = $this->executeHandlerAndGetHttpException(
+			$this->newHandler(),
+			$this->newRequest( [
+				'entity' => '',
+				'reconcile' => [
+					EditEndpoint::VERSION_KEY => '0.0.0',
+				],
+			] )
+		);
+
+		$this->assertInstanceOf( LocalizedHttpException::class, $exception );
+		$this->assertSame( 'wikibasereconcileedit-editendpoint-unsupported-reconcile-version',
+			$exception->getMessageValue()->getKey() );
+	}
+
+	/** @dataProvider provideInvalidUrlReconcile */
+	public function testInvalidUrlReconcile( ?string $urlReconcile ): void {
+		$params = [
+			EditEndpoint::VERSION_KEY => '0.0.1',
+		];
+		if ( $urlReconcile !== null ) {
+			$params['urlReconcile'] = $urlReconcile;
+		}
+		/** @var LocalizedHttpException $exception */
+		$exception = $this->executeHandlerAndGetHttpException(
+			$this->newHandler(),
+			$this->newRequest( [
+				'entity' => '',
+				'reconcile' => $params,
+			] )
+		);
+
+		$this->assertInstanceOf( LocalizedHttpException::class, $exception );
+		$this->assertSame( 'wikibasereconcileedit-editendpoint-invalid-reconcile-propertyid',
+			$exception->getMessageValue()->getKey() );
+	}
+
+	public function provideInvalidUrlReconcile(): iterable {
+		yield 'missing' => [ null ];
+		yield 'empty' => [ '' ];
+		yield 'item ID' => [ 'Q123' ];
+		yield 'statement ID' => [ 'P40$ea25003c-4c23-63fa-86d9-62bfcd2b05a4' ];
+		yield 'numeric part missing' => [ 'P' ];
 	}
 
 }

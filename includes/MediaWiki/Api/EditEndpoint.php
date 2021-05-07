@@ -10,6 +10,7 @@ use MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\ExternalLinks;
 use MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\Request\EditRequest;
 use MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\Request\MockEditDiskRequest;
 use MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\Request\UrlInputEditRequest;
+use MediaWiki\Rest\LocalizedHttpException;
 use MediaWiki\Rest\SimpleHandler;
 use Title;
 use Wikibase\DataModel\Entity\Item;
@@ -19,6 +20,7 @@ use Wikibase\DataModel\Snak\PropertyValueSnak;
 use Wikibase\Lib\Store\EntityIdLookup;
 use Wikibase\Lib\Store\EntityRevision;
 use Wikibase\Repo\WikibaseRepo;
+use Wikimedia\Message\MessageValue;
 use Wikimedia\ParamValidator\ParamValidator;
 
 class EditEndpoint extends SimpleHandler {
@@ -56,19 +58,32 @@ class EditEndpoint extends SimpleHandler {
 		// TODO output an object that controls the reconciliations spec?
 		$inputReconcile = $request->reconcile();
 		if ( $inputReconcile === null ) {
-			die( 'Invalid reconcile JSON supplied' );
+			throw new LocalizedHttpException(
+				MessageValue::new( 'wikibasereconcileedit-editendpoint-invalid-reconcile-json' ),
+				400
+			);
 		}
+		$supportedReconciliationVersions = [ '0.0.1' ];
 		if (
 			!array_key_exists( self::VERSION_KEY, $inputReconcile ) ||
-			$inputReconcile[self::VERSION_KEY] !== '0.0.1'
+			!in_array( $inputReconcile[self::VERSION_KEY], $supportedReconciliationVersions )
 		) {
-			die( 'Only supported reconciliation version is 0.0.1' );
+			throw new LocalizedHttpException(
+				MessageValue::new( 'wikibasereconcileedit-editendpoint-unsupported-reconcile-version' )
+					->textListParams( $supportedReconciliationVersions )
+					->numParams( count( $supportedReconciliationVersions ) ),
+				400
+			);
 		}
 		if (
 			!array_key_exists( 'urlReconcile', $inputReconcile ) ||
 			!preg_match( PropertyId::PATTERN, $inputReconcile['urlReconcile'] )
 		) {
-			die( '0.0.1 requires a single urlReconcile key mapped to a property id, such as P123' );
+			throw new LocalizedHttpException(
+				MessageValue::new( 'wikibasereconcileedit-editendpoint-invalid-reconcile-propertyid' )
+					->textParams( $inputReconcile[self::VERSION_KEY], 'urlReconcile' ),
+				400
+			);
 		}
 		$reconcileUrlProperty = new PropertyId( $inputReconcile['urlReconcile'] );
 		// For now this property must be of URL type
