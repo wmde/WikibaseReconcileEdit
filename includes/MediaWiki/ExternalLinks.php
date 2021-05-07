@@ -28,6 +28,7 @@ class ExternalLinks {
 			'externallinks',
 			'el_from',
 			[
+				'el_to' => $url,
 				'el_index' => $this->getSingleIndexOrDie( $url ),
 			],
 			__METHOD__
