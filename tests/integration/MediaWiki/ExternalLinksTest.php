@@ -70,6 +70,22 @@ class ExternalLinksTest extends \MediaWikiIntegrationTestCase {
 		$this->assertSame( [ '1' ], $result );
 	}
 
+	public function testPageIdsContainingLinksWithDifferentUserinfo(): void {
+		$userinfoAndPageIds = [
+			[ 'me:mypassword', 1 ],
+			[ 'someoneelse:theirpassword', 2 ],
+		];
+		foreach ( $userinfoAndPageIds as [ $userinfo, $pageId ] ) {
+			$rows = $this->getExternalLinksRows( "http://$userinfo@example.com/", $pageId );
+			$this->db->insert( 'externallinks', $rows, __METHOD__ );
+		}
+
+		$externalLinks = $this->newExternalLinks();
+		$result = $externalLinks->pageIdsContainingUrl( 'http://me:mypassword@example.com/' );
+
+		$this->assertSame( [ '1' ], $result );
+	}
+
 	public function testPageIdsContainingNothing() {
 		$url = 'http://something.not.found';
 		$externalLinks = $this->newExternalLinks();
