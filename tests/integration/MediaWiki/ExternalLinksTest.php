@@ -55,7 +55,7 @@ class ExternalLinksTest extends \MediaWikiIntegrationTestCase {
 
 		$result = $externalLinks->pageIdsContainingUrl( $url );
 
-		$this->assertSame( [ 1, 2 ], $result );
+		$this->assertSame( [ '1', '2' ], $result );
 	}
 
 	public function testPageIdsContainingALink() {
@@ -67,7 +67,7 @@ class ExternalLinksTest extends \MediaWikiIntegrationTestCase {
 
 		$result = $externalLinks->pageIdsContainingUrl( $url );
 
-		$this->assertSame( [ 1 ], $result );
+		$this->assertSame( [ '1' ], $result );
 	}
 
 	public function testPageIdsContainingNothing() {
