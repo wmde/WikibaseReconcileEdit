@@ -20,7 +20,7 @@
 			"method": "POST",
 			"class": "MediaWiki\\Extension\\WikibaseReconcileEdit\\MediaWiki\\Api\\EditEndpoint",
 			"services": [
-				"WikibaseReconcileEdit.ExternalLinks"
+				"WikibaseReconcileEdit.ReconciliationService"
 			]
 		}
 	],

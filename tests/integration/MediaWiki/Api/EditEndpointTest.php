@@ -4,6 +4,7 @@ namespace MediaWiki\Extension\WikibaseReconcileEdit\Test\MediaWiki\Api;
 
 use MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\Api\EditEndpoint;
 use MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\ExternalLinks;
+use MediaWiki\Extension\WikibaseReconcileEdit\Wikibase\ReconciliationService;
 use MediaWiki\Rest\LocalizedHttpException;
 use MediaWiki\Rest\RequestData;
 use MediaWiki\Rest\RequestInterface;
@@ -33,8 +34,15 @@ class EditEndpointTest extends \MediaWikiIntegrationTestCase {
 
 	private function newHandler() {
 		return new EditEndpoint(
-			new ExternalLinks(
-				LoadBalancerSingle::newFromConnection( $this->db )
+			new ReconciliationService(
+				new ExternalLinks(
+					LoadBalancerSingle::newFromConnection( $this->db )
+				),
+				WikibaseRepo::getDefaultInstance()->getEntityIdLookup(),
+				WikibaseRepo::getDefaultInstance()->getEntityLookup(),
+				WikibaseRepo::getDefaultInstance()->getPropertyDataTypeLookup(),
+				WikibaseRepo::getDefaultInstance()->getEntityRevisionLookup(),
+				WikibaseRepo::getDefaultInstance()->newIdGenerator(),
 			)
 		);
 	}
@@ -62,7 +70,7 @@ class EditEndpointTest extends \MediaWikiIntegrationTestCase {
 			$this->newHandler(),
 			$this->newRequest( [
 				'entity' => [
-					EditEndpoint::VERSION_KEY => '0.0.1/minimal',
+					ReconciliationService::VERSION_KEY => '0.0.1/minimal',
 					'statements' => [
 						[
 							'property' => $propertyId->getSerialization(),
@@ -71,7 +79,7 @@ class EditEndpointTest extends \MediaWikiIntegrationTestCase {
 					],
 				],
 				'reconcile' => [
-					EditEndpoint::VERSION_KEY => '0.0.1',
+					ReconciliationService::VERSION_KEY => '0.0.1',
 					'urlReconcile' => $propertyId->getSerialization(),
 				],
 			] )
@@ -93,7 +101,7 @@ class EditEndpointTest extends \MediaWikiIntegrationTestCase {
 	public function testExecuteNoPropertyFound() {
 		$reconcilePayload = [
 			'urlReconcile' => 'P1',
-			EditEndpoint::VERSION_KEY => '0.0.1'
+			ReconciliationService::VERSION_KEY => '0.0.1'
 		];
 
 		$request = $this->newRequest( [
@@ -134,7 +142,7 @@ class EditEndpointTest extends \MediaWikiIntegrationTestCase {
 			$this->newRequest( [
 				'entity' => '',
 				'reconcile' => [
-					EditEndpoint::VERSION_KEY => '0.0.0',
+					ReconciliationService::VERSION_KEY => '0.0.0',
 				],
 			] )
 		);
@@ -147,7 +155,7 @@ class EditEndpointTest extends \MediaWikiIntegrationTestCase {
 	/** @dataProvider provideInvalidUrlReconcile */
 	public function testInvalidUrlReconcile( ?string $urlReconcile ): void {
 		$params = [
-			EditEndpoint::VERSION_KEY => '0.0.1',
+			ReconciliationService::VERSION_KEY => '0.0.1',
 		];
 		if ( $urlReconcile !== null ) {
 			$params['urlReconcile'] = $urlReconcile;
