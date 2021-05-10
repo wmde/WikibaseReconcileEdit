@@ -2,9 +2,11 @@
 
 namespace MediaWiki\Extension\WikibaseReconcileEdit\Test\MediaWiki\Api;
 
+use MediaWiki\Extension\WikibaseReconcileEdit\InputToEntity\MinimalItemInput;
 use MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\Api\EditEndpoint;
 use MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\ExternalLinks;
 use MediaWiki\MediaWikiServices;
+use MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\WikibaseReconcileEditServices;
 use MediaWiki\Rest\LocalizedHttpException;
 use MediaWiki\Rest\RequestData;
 use MediaWiki\Rest\RequestInterface;
@@ -55,6 +57,10 @@ class EditEndpointTest extends \MediaWikiIntegrationTestCase {
 			$propertyDataTypeLookup,
 			new ExternalLinks(
 				LoadBalancerSingle::newFromConnection( $this->db )
+			),
+			WikibaseReconcileEditServices::getFullWikibaseItemInput(),
+			new MinimalItemInput(
+				$propertyDataTypeLookup
 			)
 		);
 	}

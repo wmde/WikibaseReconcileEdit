@@ -2,6 +2,8 @@
 
 namespace MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki;
 
+use MediaWiki\Extension\WikibaseReconcileEdit\InputToEntity\FullWikibaseItemInput;
+use MediaWiki\Extension\WikibaseReconcileEdit\InputToEntity\MinimalItemInput;
 use MediaWiki\MediaWikiServices;
 use Psr\Container\ContainerInterface;
 
@@ -14,6 +16,16 @@ class WikibaseReconcileEditServices {
 	public static function getExternalLinks( ContainerInterface $services = null ): ExternalLinks {
 		return ( $services ?: MediaWikiServices::getInstance() )
 			->get( 'WikibaseReconcileEdit.ExternalLinks' );
+	}
+
+	public static function getFullWikibaseItemInput( ContainerInterface $services = null ): FullWikibaseItemInput {
+		return ( $services ?: MediaWikiServices::getInstance() )
+			->get( 'WikibaseReconcileEdit.FullWikibaseItemInput' );
+	}
+
+	public static function getMinimalItemInput( ContainerInterface $services = null ): MinimalItemInput {
+		return ( $services ?: MediaWikiServices::getInstance() )
+			->get( 'WikibaseReconcileEdit.MinimalItemInput' );
 	}
 
 }

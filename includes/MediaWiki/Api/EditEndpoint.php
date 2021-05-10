@@ -56,6 +56,12 @@ class EditEndpoint extends SimpleHandler {
 	/** @var ExternalLinks */
 	private $externalLinks;
 
+	/** @var FullWikibaseItemInput */
+	private $fullWikibaseItemInput;
+
+	/** @var MinimalItemInput */
+	private $minimalItemInput;
+
 	public function __construct(
 		TitleFactory $titleFactory,
 		MediawikiEditEntityFactory $editEntityFactory,
@@ -64,7 +70,9 @@ class EditEndpoint extends SimpleHandler {
 		EntityRevisionLookup $entityRevisionLookup,
 		IdGenerator $idGenerator,
 		PropertyDataTypeLookup $propertyDataTypeLookup,
-		ExternalLinks $externalLinks
+		ExternalLinks $externalLinks,
+		FullWikibaseItemInput $fullWikibaseItemInput,
+		MinimalItemInput $minimalItemInput
 	) {
 		$this->titleFactory = $titleFactory;
 		$this->editEntityFactory = $editEntityFactory;
@@ -74,11 +82,15 @@ class EditEndpoint extends SimpleHandler {
 		$this->idGenerator = $idGenerator;
 		$this->propertyDataTypeLookup = $propertyDataTypeLookup;
 		$this->externalLinks = $externalLinks;
+		$this->fullWikibaseItemInput = $fullWikibaseItemInput;
+		$this->minimalItemInput = $minimalItemInput;
 	}
 
 	public static function factory(
 		TitleFactory $titleFactory,
-		ExternalLinks $externalLinks
+		ExternalLinks $externalLinks,
+		FullWikibaseItemInput $fullWikibaseItemInput,
+		MinimalItemInput $minimalItemInput
 	): self {
 		$repo = WikibaseRepo::getDefaultInstance();
 
@@ -90,7 +102,9 @@ class EditEndpoint extends SimpleHandler {
 			$repo->getEntityRevisionLookup(),
 			$repo->newIdGenerator(),
 			$repo->getPropertyDataTypeLookup(),
-			$externalLinks
+			$externalLinks,
+			$fullWikibaseItemInput,
+			$minimalItemInput
 		);
 	}
 
@@ -153,9 +167,9 @@ class EditEndpoint extends SimpleHandler {
 		}
 		$inputEntityVersion = $request->entity()[self::VERSION_KEY];
 		if ( $inputEntityVersion === '0.0.1/full' ) {
-			$inputEntity = ( new FullWikibaseItemInput )->getItem( $request );
+			$inputEntity = $this->fullWikibaseItemInput->getItem( $request );
 		} elseif ( $inputEntityVersion === '0.0.1/minimal' ) {
-			$inputEntity = ( new MinimalItemInput( $this->propertyDataTypeLookup ) )->getItem( $request );
+			$inputEntity = $this->minimalItemInput->getItem( $request );
 		} else {
 			die( 'unknown entity input version' );
 		}
