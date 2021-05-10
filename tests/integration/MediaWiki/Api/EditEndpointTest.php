@@ -5,6 +5,7 @@ namespace MediaWiki\Extension\WikibaseReconcileEdit\Test\MediaWiki\Api;
 use MediaWiki\Extension\WikibaseReconcileEdit\InputToEntity\MinimalItemInput;
 use MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\Api\EditEndpoint;
 use MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\ExternalLinks;
+use MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\ReconciliationService;
 use MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\WikibaseReconcileEditServices;
 use MediaWiki\MediaWikiServices;
 use MediaWiki\Rest\LocalizedHttpException;
@@ -48,21 +49,23 @@ class EditEndpointTest extends \MediaWikiIntegrationTestCase {
 		$repo = WikibaseRepo::getDefaultInstance();
 
 		return new EditEndpoint(
-			MediaWikiServices::getInstance()->getTitleFactory(),
 			$repo->newEditEntityFactory(),
-			$repo->getEntityIdLookup(),
-			$repo->getEntityLookup(),
-			$repo->getEntityRevisionLookup(),
-			$repo->newIdGenerator(),
 			$propertyDataTypeLookup,
-			new ExternalLinks(
-				LoadBalancerSingle::newFromConnection( $this->db )
-			),
 			WikibaseReconcileEditServices::getFullWikibaseItemInput(),
 			new MinimalItemInput(
 				$propertyDataTypeLookup,
 				$repo->getValueParserFactory()
-			)
+			),
+			new ReconciliationService(
+				$repo->getEntityIdLookup(),
+				$repo->getEntityLookup(),
+				$repo->getEntityRevisionLookup(),
+				$repo->newIdGenerator(),
+				new ExternalLinks(
+					LoadBalancerSingle::newFromConnection( $this->db )
+				),
+				MediaWikiServices::getInstance()->getTitleFactory()
+			),
 		);
 	}
 

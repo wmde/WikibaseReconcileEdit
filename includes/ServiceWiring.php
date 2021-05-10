@@ -3,6 +3,7 @@
 use MediaWiki\Extension\WikibaseReconcileEdit\InputToEntity\FullWikibaseItemInput;
 use MediaWiki\Extension\WikibaseReconcileEdit\InputToEntity\MinimalItemInput;
 use MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\ExternalLinks;
+use MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\ReconciliationService;
 use MediaWiki\MediaWikiServices;
 use Wikibase\Repo\WikibaseRepo;
 
@@ -30,6 +31,19 @@ return [
 		return new MinimalItemInput(
 			$repo->getPropertyDataTypeLookup(),
 			$repo->getValueParserFactory()
+		);
+	},
+
+	'WikibaseReconcileEdit.ReconciliationService' => function ( MediaWikiServices $services ): ReconciliationService {
+		$repo = WikibaseRepo::getDefaultInstance();
+
+		return new ReconciliationService(
+			$repo->getEntityIdLookup(),
+			$repo->getEntityLookup(),
+			$repo->getEntityRevisionLookup(),
+			$repo->newIdGenerator(),
+			$services->get( 'WikibaseReconcileEdit.ExternalLinks' ),
+			$services->getTitleFactory()
 		);
 	},
 
