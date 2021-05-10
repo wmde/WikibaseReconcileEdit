@@ -267,12 +267,11 @@ class EditEndpoint extends SimpleHandler {
 	 * @return ItemId[]
 	 */
 	private function getItemIdsFromPageIds( array $pageIds ) : array {
+		$titles = $this->titleFactory->newFromIDs( $pageIds );
+		$entityIds = $this->entityIdLookup->getEntityIds( $titles );
 		$itemIds = [];
-		foreach ( $pageIds as $pageId ) {
-			$entityId = $this->entityIdLookup->getEntityIdForTitle(
-				$this->titleFactory->newFromID( $pageId )
-			);
-			if ( $entityId && $entityId instanceof ItemId ) {
+		foreach ( $entityIds as $entityId ) {
+			if ( $entityId instanceof ItemId ) {
 				$itemIds[] = $entityId;
 			}
 		}
