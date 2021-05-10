@@ -16,11 +16,6 @@ use Wikibase\Repo\ValueParserFactory;
  */
 class MinimalItemInputTest extends \MediaWikiUnitTestCase {
 
-	public function testBasicConstruction() {
-		new MinimalItemInputTest();
-		$this->expectNotToPerformAssertions();
-	}
-
 	private function mockPropertyDataTypeLookup() {
 		$mock = $this->createMock( PropertyDataTypeLookup::class );
 		$mock->method( 'getDataTypeIdForProperty' )

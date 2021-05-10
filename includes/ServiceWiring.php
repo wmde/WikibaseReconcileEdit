@@ -4,6 +4,7 @@ use MediaWiki\Extension\WikibaseReconcileEdit\InputToEntity\FullWikibaseItemInpu
 use MediaWiki\Extension\WikibaseReconcileEdit\InputToEntity\MinimalItemInput;
 use MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\ExternalLinks;
 use MediaWiki\MediaWikiServices;
+use Wikibase\Repo\WikibaseRepo;
 
 /** @phpcs-require-sorted-array */
 return [
@@ -15,11 +16,21 @@ return [
 	},
 
 	'WikibaseReconcileEdit.FullWikibaseItemInput' => function ( MediaWikiServices $services ): FullWikibaseItemInput {
-		return new FullWikibaseItemInput();
+		$repo = WikibaseRepo::getDefaultInstance();
+
+		return new FullWikibaseItemInput(
+			$repo->getBaseDataModelDeserializerFactory()
+				->newEntityDeserializer()
+		);
 	},
 
 	'WikibaseReconcileEdit.MinimalItemInput' => function ( MediaWikiServices $services ): MinimalItemInput {
-		return new MinimalItemInput();
+		$repo = WikibaseRepo::getDefaultInstance();
+
+		return new MinimalItemInput(
+			$repo->getPropertyDataTypeLookup(),
+			$repo->getValueParserFactory()
+		);
 	},
 
 ];
