@@ -10,8 +10,8 @@ use MediaWiki\Rest\RequestInterface;
 use MediaWiki\Tests\Rest\Handler\HandlerTestTrait;
 use Wikibase\DataModel\Entity\Item;
 use Wikibase\DataModel\Entity\ItemId;
-use Wikibase\DataModel\Entity\Property;
 use Wikibase\DataModel\Entity\PropertyId;
+use Wikibase\DataModel\Services\Lookup\InMemoryDataTypeLookup;
 use Wikibase\DataModel\Services\Lookup\PropertyDataTypeLookupException;
 use Wikibase\DataModel\Snak\PropertyValueSnak;
 use Wikibase\Repo\WikibaseRepo;
@@ -25,6 +25,9 @@ class EditEndpointTest extends \MediaWikiIntegrationTestCase {
 
 	use HandlerTestTrait;
 
+	private const URL_PROPERTY = 'P1';
+	private const MISSING_PROPERTY = 'P1000';
+
 	protected function setUp(): void {
 		parent::setUp();
 		$this->tablesUsed[] = 'page';
@@ -32,7 +35,22 @@ class EditEndpointTest extends \MediaWikiIntegrationTestCase {
 	}
 
 	private function newHandler() {
+		$propertyDataTypeLookup = new InMemoryDataTypeLookup();
+
+		$propertyDataTypeLookup->setDataTypeForProperty(
+			new PropertyId( self::URL_PROPERTY ),
+			'url'
+		);
+
+		$repo = WikibaseRepo::getDefaultInstance();
+
 		return new EditEndpoint(
+			$repo->newEditEntityFactory(),
+			$repo->getEntityIdLookup(),
+			$repo->getEntityLookup(),
+			$repo->getEntityRevisionLookup(),
+			$repo->newIdGenerator(),
+			$propertyDataTypeLookup,
 			new ExternalLinks(
 				LoadBalancerSingle::newFromConnection( $this->db )
 			)
@@ -50,14 +68,6 @@ class EditEndpointTest extends \MediaWikiIntegrationTestCase {
 	}
 
 	public function testCreateNewItem(): void {
-		/** @var PropertyId $propertyId */
-		$propertyId = WikibaseRepo::getDefaultInstance()->getEntityStore()->saveEntity(
-			new Property( null, null, 'url' ),
-			__METHOD__,
-			$this->getTestUser()->getUser(),
-			EDIT_NEW
-		)->getEntity()->getId();
-
 		$response = $this->executeHandlerAndGetBodyData(
 			$this->newHandler(),
 			$this->newRequest( [
@@ -65,14 +75,14 @@ class EditEndpointTest extends \MediaWikiIntegrationTestCase {
 					EditEndpoint::VERSION_KEY => '0.0.1/minimal',
 					'statements' => [
 						[
-							'property' => $propertyId->getSerialization(),
+							'property' => self::URL_PROPERTY,
 							'value' => 'http://example.com/',
 						],
 					],
 				],
 				'reconcile' => [
 					EditEndpoint::VERSION_KEY => '0.0.1',
-					'urlReconcile' => $propertyId->getSerialization(),
+					'urlReconcile' => self::URL_PROPERTY,
 				],
 			] )
 		);
@@ -82,7 +92,9 @@ class EditEndpointTest extends \MediaWikiIntegrationTestCase {
 		$itemId = new ItemId( $response['entityId'] );
 		/** @var Item $item */
 		$item = WikibaseRepo::getDefaultInstance()->getEntityLookup()->getEntity( $itemId );
-		$snaks = $item->getStatements()->getByPropertyId( $propertyId )->getMainSnaks();
+		$snaks = $item->getStatements()
+			->getByPropertyId( new PropertyId( self::URL_PROPERTY ) )
+			->getMainSnaks();
 		$this->assertCount( 1, $snaks );
 		/** @var PropertyValueSnak $snak */
 		$snak = $snaks[0];
@@ -92,7 +104,7 @@ class EditEndpointTest extends \MediaWikiIntegrationTestCase {
 
 	public function testExecuteNoPropertyFound() {
 		$reconcilePayload = [
-			'urlReconcile' => 'P1',
+			'urlReconcile' => self::MISSING_PROPERTY,
 			EditEndpoint::VERSION_KEY => '0.0.1'
 		];
 

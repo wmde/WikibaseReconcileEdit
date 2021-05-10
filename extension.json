@@ -19,6 +19,7 @@
 			"path": "/wikibase-reconcile-edit/v0/edit",
 			"method": "POST",
 			"class": "MediaWiki\\Extension\\WikibaseReconcileEdit\\MediaWiki\\Api\\EditEndpoint",
+			"factory": "MediaWiki\\Extension\\WikibaseReconcileEdit\\MediaWiki\\Api\\EditEndpoint::factory",
 			"services": [
 				"WikibaseReconcileEdit.ExternalLinks"
 			]
