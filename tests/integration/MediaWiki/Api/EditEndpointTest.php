@@ -4,6 +4,7 @@ namespace MediaWiki\Extension\WikibaseReconcileEdit\Test\MediaWiki\Api;
 
 use MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\Api\EditEndpoint;
 use MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\ExternalLinks;
+use MediaWiki\MediaWikiServices;
 use MediaWiki\Rest\LocalizedHttpException;
 use MediaWiki\Rest\RequestData;
 use MediaWiki\Rest\RequestInterface;
@@ -45,6 +46,7 @@ class EditEndpointTest extends \MediaWikiIntegrationTestCase {
 		$repo = WikibaseRepo::getDefaultInstance();
 
 		return new EditEndpoint(
+			MediaWikiServices::getInstance()->getTitleFactory(),
 			$repo->newEditEntityFactory(),
 			$repo->getEntityIdLookup(),
 			$repo->getEntityLookup(),

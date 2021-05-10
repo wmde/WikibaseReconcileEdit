@@ -12,7 +12,7 @@ use MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\Request\MockEditDiskRequ
 use MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\Request\UrlInputEditRequest;
 use MediaWiki\Rest\LocalizedHttpException;
 use MediaWiki\Rest\SimpleHandler;
-use Title;
+use TitleFactory;
 use Wikibase\DataModel\Entity\Item;
 use Wikibase\DataModel\Entity\ItemId;
 use Wikibase\DataModel\Entity\PropertyId;
@@ -31,6 +31,9 @@ use Wikimedia\ParamValidator\ParamValidator;
 class EditEndpoint extends SimpleHandler {
 
 	public const VERSION_KEY = "wikibasereconcileedit-version";
+
+	/** @var TitleFactory */
+	private $titleFactory;
 
 	/** @var MediawikiEditEntityFactory */
 	private $editEntityFactory;
@@ -54,6 +57,7 @@ class EditEndpoint extends SimpleHandler {
 	private $externalLinks;
 
 	public function __construct(
+		TitleFactory $titleFactory,
 		MediawikiEditEntityFactory $editEntityFactory,
 		EntityIdLookup $entityIdLookup,
 		EntityLookup $entityLookup,
@@ -62,6 +66,7 @@ class EditEndpoint extends SimpleHandler {
 		PropertyDataTypeLookup $propertyDataTypeLookup,
 		ExternalLinks $externalLinks
 	) {
+		$this->titleFactory = $titleFactory;
 		$this->editEntityFactory = $editEntityFactory;
 		$this->entityIdLookup = $entityIdLookup;
 		$this->entityLookup = $entityLookup;
@@ -72,11 +77,13 @@ class EditEndpoint extends SimpleHandler {
 	}
 
 	public static function factory(
+		TitleFactory $titleFactory,
 		ExternalLinks $externalLinks
 	): self {
 		$repo = WikibaseRepo::getDefaultInstance();
 
 		return new self(
+			$titleFactory,
 			$repo->newEditEntityFactory(),
 			$repo->getEntityIdLookup(),
 			$repo->getEntityLookup(),
@@ -262,7 +269,9 @@ class EditEndpoint extends SimpleHandler {
 	private function getItemIdsFromPageIds( array $pageIds ) : array {
 		$itemIds = [];
 		foreach ( $pageIds as $pageId ) {
-			$entityId = $this->entityIdLookup->getEntityIdForTitle( Title::newFromID( $pageId ) );
+			$entityId = $this->entityIdLookup->getEntityIdForTitle(
+				$this->titleFactory->newFromID( $pageId )
+			);
 			if ( $entityId && $entityId instanceof ItemId ) {
 				$itemIds[] = $entityId;
 			}
