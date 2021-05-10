@@ -11,7 +11,6 @@ use Wikibase\DataModel\Services\Lookup\PropertyDataTypeLookup;
 use Wikibase\DataModel\SiteLink;
 use Wikibase\DataModel\Snak\PropertyValueSnak;
 use Wikibase\Repo\ValueParserFactory;
-use Wikibase\Repo\WikibaseRepo;
 
 class MinimalItemInput {
 
@@ -25,23 +24,12 @@ class MinimalItemInput {
 	 */
 	private $valueParserFactory;
 
-	/**
-	 * @param PropertyDataTypeLookup|null $propertyDataTypeLookup
-	 * @param ValueParserFactory|null $valueParserFactory
-	 */
 	public function __construct(
-		?PropertyDataTypeLookup $propertyDataTypeLookup = null,
-		?ValueParserFactory $valueParserFactory = null
+		PropertyDataTypeLookup $propertyDataTypeLookup,
+		ValueParserFactory $valueParserFactory
 	) {
 		$this->propertyDataTypeLookup = $propertyDataTypeLookup;
 		$this->valueParserFactory = $valueParserFactory;
-		if ( !$this->propertyDataTypeLookup ) {
-			$this->propertyDataTypeLookup = WikibaseRepo::getDefaultInstance()->getPropertyDataTypeLookup();
-		}
-		if ( !$this->valueParserFactory ) {
-			// In modern Wikibase (Dec 2020) this is a static method, but call on the object for backwards compatability
-			$this->valueParserFactory = WikibaseRepo::getDefaultInstance()->getValueParserFactory();
-		}
 	}
 
 	/**

@@ -5,7 +5,6 @@ namespace MediaWiki\Extension\WikibaseReconcileEdit\InputToEntity;
 use Deserializers\Deserializer;
 use MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\Request\EditRequest;
 use Wikibase\DataModel\Entity\Item;
-use Wikibase\Repo\WikibaseRepo;
 
 class FullWikibaseItemInput {
 
@@ -15,15 +14,10 @@ class FullWikibaseItemInput {
 	private $deserializer;
 
 	/**
-	 * @param Deserializer|null $deserializer a deserializer for full Item JSON
+	 * @param Deserializer $deserializer a deserializer for full Item JSON
 	 */
-	public function __construct( ?Deserializer $deserializer = null ) {
+	public function __construct( Deserializer $deserializer ) {
 		$this->deserializer = $deserializer;
-		if ( !$this->deserializer ) {
-			$this->deserializer = WikibaseRepo::getDefaultInstance()
-				->getBaseDataModelDeserializerFactory()
-				->newEntityDeserializer();
-		}
 	}
 
 	/**
