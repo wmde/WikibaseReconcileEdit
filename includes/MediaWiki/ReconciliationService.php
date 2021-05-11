@@ -57,11 +57,6 @@ class ReconciliationService {
 	 */
 	private function getItemIdsFromPageIds( array $pageIds ) : array {
 		$titles = $this->titleFactory->newFromIDs( $pageIds );
-
-		if ( empty( $titles ) ) {
-			return [];
-		}
-
 		$entityIds = $this->entityIdLookup->getEntityIds( $titles );
 		$itemIds = [];
 		foreach ( $entityIds as $entityId ) {

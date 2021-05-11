@@ -27,11 +27,19 @@ class ReconciliationServiceTest extends \MediaWikiUnitTestCase {
 	public function testNoExternalLinksFound() {
 		$expectedItem = new Item( new ItemId( 'Q10' ) );
 
-		$entityIdLookup = $this->createMock( EntityIdLookup::class );
-
 		$entityLookup = $this->createMock( EntityLookup::class );
 		$entityLookup->expects( $this->never() )
 			->method( 'getEntity' );
+
+		$titleFactory = $this->createMock( TitleFactory::class );
+		$titleFactory->method( 'newFromIDs' )
+			->with( [] )
+			->willReturn( [] );
+
+		$entityIdLookup = $this->createMock( EntityIdLookup::class );
+		$entityIdLookup->method( 'getEntityIds' )
+			->with( [] )
+			->willReturn( [] );
 
 		$entityRevisionLookup = $this->createMock( EntityRevisionLookup::class );
 		$entityRevisionLookup->expects( $this->never() )
@@ -46,8 +54,6 @@ class ReconciliationServiceTest extends \MediaWikiUnitTestCase {
 		$externalLinks->expects( $this->once() )
 			->method( 'pageIdsContainingUrl' )
 			->willReturn( [] );
-
-		$titleFactory = $this->createMock( TitleFactory::class );
 
 		$service = new ReconciliationService(
 			$entityIdLookup,
