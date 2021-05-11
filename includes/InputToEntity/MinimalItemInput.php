@@ -3,8 +3,10 @@
 namespace MediaWiki\Extension\WikibaseReconcileEdit\InputToEntity;
 
 use DataValues\DataValue;
+use MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\ReconciliationService;
 use MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\Request\EditRequest;
 use ValueParsers\ParserOptions;
+use Wikibase\DataModel\Entity\EntityIdValue;
 use Wikibase\DataModel\Entity\Item;
 use Wikibase\DataModel\Entity\PropertyId;
 use Wikibase\DataModel\Services\Lookup\PropertyDataTypeLookup;
@@ -24,22 +26,30 @@ class MinimalItemInput {
 	 */
 	private $valueParserFactory;
 
+	/**
+	 * @var ReconciliationService
+	 */
+	private $reconciliationService;
+
 	public function __construct(
 		PropertyDataTypeLookup $propertyDataTypeLookup,
-		ValueParserFactory $valueParserFactory
+		ValueParserFactory $valueParserFactory,
+		ReconciliationService $reconciliationService
 	) {
 		$this->propertyDataTypeLookup = $propertyDataTypeLookup;
 		$this->valueParserFactory = $valueParserFactory;
+		$this->reconciliationService = $reconciliationService;
 	}
 
 	/**
 	 * @param EditRequest $request
-	 * @return Item
+	 * @return array( Item, Item[] )
 	 */
-	public function getItem( EditRequest $request ) : Item {
+	public function getItem( EditRequest $request, PropertyId $reconcileUrlProperty ) : array {
 		$inputEntity = $request->entity();
 
 		$item = new Item();
+		$otherItems = [];
 
 		if ( array_key_exists( 'labels', $inputEntity ) ) {
 			foreach ( $inputEntity['labels'] as $lang => $label ) {
@@ -75,34 +85,48 @@ class MinimalItemInput {
 					die( 'statements must have property and value keys' );
 				}
 				$propertyId = new PropertyId( $statementDetails['property'] );
-				$dataValue = $this->getDataValue(
+				[ $dataValue, $items ] = $this->getDataValue(
 					$propertyId,
-					$statementDetails['value']
+					$statementDetails['value'],
+					$reconcileUrlProperty
 				);
 				$item->getStatements()->addNewStatement(
 					new PropertyValueSnak( $propertyId, $dataValue )
 				);
+				foreach ( $items as $otherItem ) {
+					/** @var Item $otherItem */
+					$otherItems[$otherItem->getId()->getSerialization()] = $otherItem;
+				}
 			}
 		}
 
-		return $item;
+		return [ $item, array_values( $otherItems ) ];
 	}
 
 	/**
 	 * @param PropertyId $id
 	 * @param string $value
-	 * @return DataValue
+	 * @return array( DataValue, Item[] )
 	 */
-	private function getDataValue( PropertyId $id, string $value ) : DataValue {
-		// TODO this code is copied mainly from ParseValue api module
+	private function getDataValue(
+		PropertyId $id,
+		string $value,
+		PropertyId $reconcileUrlProperty
+	) : array {
 		$name = $this->propertyDataTypeLookup->getDataTypeIdForProperty( $id );
+		if ( $name === 'wikibase-item' && wfParseUrl( $value ) !== false ) {
+			$item = $this->reconciliationService
+				->getOrCreateItemByStatementUrl( $reconcileUrlProperty, $value )
+				->getItem();
+			return [ new EntityIdValue( $item->getId() ), [ $item ] ];
+		}
 		// TODO add specific options?
 		$parser = $this->valueParserFactory->newParser( $name, new ParserOptions );
 		$parseResult = $parser->parse( $value );
 		if ( !$parseResult instanceof DataValue ) {
 			die( 'Failed to parse statement value' );
 		}
-		return $parseResult;
+		return [ $parseResult, [] ];
 	}
 
 }

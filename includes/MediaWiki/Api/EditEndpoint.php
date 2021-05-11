@@ -12,6 +12,7 @@ use MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\Request\MockEditDiskRequ
 use MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\Request\UrlInputEditRequest;
 use MediaWiki\Rest\LocalizedHttpException;
 use MediaWiki\Rest\SimpleHandler;
+use Status;
 use Wikibase\DataModel\Entity\PropertyId;
 use Wikibase\DataModel\Services\Lookup\PropertyDataTypeLookup;
 use Wikibase\DataModel\Snak\PropertyValueSnak;
@@ -137,8 +138,12 @@ class EditEndpoint extends SimpleHandler {
 		$inputEntityVersion = $request->entity()[self::VERSION_KEY];
 		if ( $inputEntityVersion === '0.0.1/full' ) {
 			$inputEntity = $this->fullWikibaseItemInput->getItem( $request );
+			$otherItems = [];
 		} elseif ( $inputEntityVersion === '0.0.1/minimal' ) {
-			$inputEntity = $this->minimalItemInput->getItem( $request );
+			[ $inputEntity, $otherItems ] = $this->minimalItemInput->getItem(
+				$request,
+				$reconcileUrlProperty
+			);
 		} else {
 			die( 'unknown entity input version' );
 		}
@@ -173,19 +178,36 @@ class EditEndpoint extends SimpleHandler {
 
 		// And make the edit
 		$toSave = $this->simplePutStrategy->apply( $reconciliationItem->getItem(), $inputEntity );
+
 		$editEntity = $this->editEntityFactory->newEditEntity(
 			// TODO use a real user
 			\User::newSystemUser( 'WikibaseReconcileEditReconciliator' ),
 			$toSave->getId(),
 			$reconciliationItem->getRevision()
 		);
-		$saveStatus = $editEntity->attemptSave(
-			$toSave,
-			'Reconciliation Edit',
-			$reconciliationItem->getRevision() ? null : EDIT_NEW,
-			// TODO actually do a token check?
-			false
-		);
+
+		$saveStatus = Status::newGood();
+		foreach ( $otherItems as $otherItem ) {
+			$saveStatus->merge( $editEntity->attemptSave(
+				$otherItem,
+				'Reconciliation Edit',
+				EDIT_NEW, // TODO assert $otherItem->getRevision() === null?
+				false // TODO actually do a token check?
+			), true );
+			if ( !$saveStatus->isOK() ) {
+				break;
+			}
+		}
+
+		if ( $saveStatus->isOK() ) {
+			$saveStatus->merge( $editEntity->attemptSave(
+				$toSave,
+				'Reconciliation Edit',
+				$reconciliationItem->getRevision() ? null : EDIT_NEW,
+				// TODO actually do a token check?
+				false
+			), true );
+		}
 
 		// Make some sort of response
 		$response = [

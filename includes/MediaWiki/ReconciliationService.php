@@ -31,6 +31,9 @@ class ReconciliationService {
 	/** @var TitleFactory */
 	private $titleFactory;
 
+	/** @var ReconciliationItem[][] */
+	private $reconciliationItems = [];
+
 	public function __construct(
 		EntityIdLookup $entityIdLookup,
 		EntityRevisionLookup $entityRevisionLookup,
@@ -74,6 +77,13 @@ class ReconciliationService {
 		PropertyID $reconcileUrlProperty,
 		string $reconciliationUrl
 	) : ReconciliationItem {
+		// return the same item if we already reconciled it
+		$propertyId = $reconcileUrlProperty->getSerialization();
+		if ( array_key_exists( $propertyId, $this->reconciliationItems )
+		     && array_key_exists( $reconciliationUrl, $this->reconciliationItems[$propertyId] ) ) {
+			return $this->reconciliationItems[$propertyId][$reconciliationUrl];
+		}
+
 		// Find Items that use the URL
 		$itemIdsThatReferenceTheUrl = $this->getItemIdsFromPageIds(
 			$this->externalLinks->pageIdsContainingUrl( $reconciliationUrl )
@@ -108,15 +118,20 @@ class ReconciliationService {
 			die( 'Matched multiple Items during reconciliation :(' );
 		}
 
+		$reconciliationItem = null;
+
 		// Get our base
 		if ( count( $itemsThatReferenceTheUrlInCorrectStatement ) === 1 ) {
-			return $itemsThatReferenceTheUrlInCorrectStatement[0];
+			$reconciliationItem = $itemsThatReferenceTheUrlInCorrectStatement[0];
 		} else {
 			$base = new Item();
 			// XXX: this is a bit evil, but needed to work around the fact we want to mint statement guids
 			$base->setId( ItemId::newFromNumber( $this->idGenerator->getNewId( 'wikibase-item' ) ) );
-			return new ReconciliationItem( $base, false );
+			$reconciliationItem = new ReconciliationItem( $base, false );
 		}
+
+		$this->reconciliationItems[$propertyId][$reconciliationUrl] = $reconciliationItem;
+		return $reconciliationItem;
 	}
 
 }
