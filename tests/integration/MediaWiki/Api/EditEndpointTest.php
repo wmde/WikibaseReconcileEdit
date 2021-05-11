@@ -4,9 +4,7 @@ namespace MediaWiki\Extension\WikibaseReconcileEdit\Test\MediaWiki\Api;
 
 use MediaWiki\Extension\WikibaseReconcileEdit\InputToEntity\MinimalItemInput;
 use MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\Api\EditEndpoint;
-use MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\ExternalLinks;
 use MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\WikibaseReconcileEditServices;
-use MediaWiki\MediaWikiServices;
 use MediaWiki\Rest\LocalizedHttpException;
 use MediaWiki\Rest\RequestData;
 use MediaWiki\Rest\RequestInterface;
@@ -18,7 +16,6 @@ use Wikibase\DataModel\Services\Lookup\InMemoryDataTypeLookup;
 use Wikibase\DataModel\Services\Lookup\PropertyDataTypeLookupException;
 use Wikibase\DataModel\Snak\PropertyValueSnak;
 use Wikibase\Repo\WikibaseRepo;
-use Wikimedia\Rdbms\LoadBalancerSingle;
 
 /**
  * @covers MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\Api\EditEndpoint
@@ -48,21 +45,14 @@ class EditEndpointTest extends \MediaWikiIntegrationTestCase {
 		$repo = WikibaseRepo::getDefaultInstance();
 
 		return new EditEndpoint(
-			MediaWikiServices::getInstance()->getTitleFactory(),
 			$repo->newEditEntityFactory(),
-			$repo->getEntityIdLookup(),
-			$repo->getEntityLookup(),
-			$repo->getEntityRevisionLookup(),
-			$repo->newIdGenerator(),
 			$propertyDataTypeLookup,
-			new ExternalLinks(
-				LoadBalancerSingle::newFromConnection( $this->db )
-			),
 			WikibaseReconcileEditServices::getFullWikibaseItemInput(),
 			new MinimalItemInput(
 				$propertyDataTypeLookup,
 				$repo->getValueParserFactory()
-			)
+			),
+			WikibaseReconcileEditServices::getReconciliationService(),
 		);
 	}
 

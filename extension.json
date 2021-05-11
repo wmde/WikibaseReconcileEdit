@@ -21,10 +21,9 @@
 			"class": "MediaWiki\\Extension\\WikibaseReconcileEdit\\MediaWiki\\Api\\EditEndpoint",
 			"factory": "MediaWiki\\Extension\\WikibaseReconcileEdit\\MediaWiki\\Api\\EditEndpoint::factory",
 			"services": [
-				"TitleFactory",
-				"WikibaseReconcileEdit.ExternalLinks",
 				"WikibaseReconcileEdit.FullWikibaseItemInput",
-				"WikibaseReconcileEdit.MinimalItemInput"
+				"WikibaseReconcileEdit.MinimalItemInput",
+				"WikibaseReconcileEdit.ReconciliationService"
 			]
 		}
 	],

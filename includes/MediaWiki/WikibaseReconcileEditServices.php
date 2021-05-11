@@ -28,4 +28,9 @@ class WikibaseReconcileEditServices {
 			->get( 'WikibaseReconcileEdit.MinimalItemInput' );
 	}
 
+	public static function getReconciliationService( ContainerInterface $services = null ): ReconciliationService {
+		return ( $services ?: MediaWikiServices::getInstance() )
+			->get( 'WikibaseReconcileEdit.ReconciliationService' );
+	}
+
 }
