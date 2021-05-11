@@ -159,7 +159,7 @@ class EditEndpoint extends SimpleHandler {
 		$reconciliationDataValue = $reconciliationMainSnak->getDataValue();
 		$reconciliationUrl = $reconciliationDataValue->getValue();
 
-		$reconciliationItem = $this->reconciliationService->getItemByStatementUrl(
+		$reconciliationItem = $this->reconciliationService->getOrCreateItemByStatementUrl(
 			$reconcileUrlProperty,
 			$reconciliationUrl
 		);

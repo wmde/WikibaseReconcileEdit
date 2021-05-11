@@ -13,6 +13,11 @@ class WikibaseReconcileEditServices {
 		// should not be instantiated
 	}
 
+	public static function getReconciliationService( ContainerInterface $services = null ): ReconciliationService {
+		return ( $services ?: MediaWikiServices::getInstance() )
+			->get( 'WikibaseReconcileEdit.ReconciliationService' );
+	}
+
 	public static function getExternalLinks( ContainerInterface $services = null ): ExternalLinks {
 		return ( $services ?: MediaWikiServices::getInstance() )
 			->get( 'WikibaseReconcileEdit.ExternalLinks' );

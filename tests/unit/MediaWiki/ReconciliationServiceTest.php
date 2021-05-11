@@ -18,25 +18,11 @@ use Wikibase\Lib\Store\EntityIdLookup;
 use Wikibase\Lib\Store\EntityRevisionLookup;
 use Wikibase\Lib\Store\LatestRevisionIdResult;
 use Wikibase\Repo\Store\IdGenerator;
-use Wikibase\Repo\WikibaseRepo;
 
 /**
  * @covers \MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\ReconciliationService
  */
 class ReconciliationServiceTest extends \MediaWikiUnitTestCase {
-
-	public function testBasicConstruction() {
-		$service = new ReconciliationService(
-			$this->createMock( EntityIdLookup::class ),
-			$this->createMock( EntityLookup::class ),
-			$this->createMock( EntityRevisionLookup::class ),
-			WikibaseRepo::getDefaultInstance()->newIdGenerator(),
-			$this->createMock( ExternalLinks::class ),
-			$this->createMock( TitleFactory::class )
-		);
-
-		$this->assertInstanceOf( ReconciliationService::class, $service );
-	}
 
 	public function testNoExternalLinksFound() {
 		$expectedItem = new Item( new ItemId( 'Q10' ) );
@@ -75,7 +61,7 @@ class ReconciliationServiceTest extends \MediaWikiUnitTestCase {
 		$propertyId = new PropertyId( 'P1' );
 		$reconcileUrl = "http://www.something-nice";
 
-		$reconcileItem = $service->getItemByStatementUrl( $propertyId, $reconcileUrl );
+		$reconcileItem = $service->getOrCreateItemByStatementUrl( $propertyId, $reconcileUrl );
 
 		$this->assertEquals( $expectedItem, $reconcileItem->getItem() );
 		$this->assertFalse( $reconcileItem->getRevision() );
@@ -195,7 +181,7 @@ class ReconciliationServiceTest extends \MediaWikiUnitTestCase {
 			$titleFactory
 		);
 
-		$reconcileItem = $service->getItemByStatementUrl( $reconcilePropertyId, $reconcileUrl );
+		$reconcileItem = $service->getOrCreateItemByStatementUrl( $reconcilePropertyId, $reconcileUrl );
 
 		$this->assertEquals( $revision ? $itemId : $newItemID, $reconcileItem->getItem()->getId() );
 		$this->assertEquals( $revision, $reconcileItem->getRevision() );

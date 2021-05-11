@@ -81,7 +81,7 @@ class ReconciliationService {
 	 * @return ReconciliationItem
 	 * @throws \Exception
 	 */
-	public function getItemByStatementUrl(
+	public function getOrCreateItemByStatementUrl(
 		PropertyID $reconcileUrlProperty,
 		string $reconciliationUrl
 	) : ReconciliationItem {
