@@ -3,11 +3,13 @@
 namespace MediaWiki\Extension\WikibaseReconcileEdit\Tests\Unit\InputToEntity;
 
 use MediaWiki\Extension\WikibaseReconcileEdit\InputToEntity\MinimalItemInput;
+use MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\ReconciliationService;
 use MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\Request\MockEditDiskRequest;
 use MediaWiki\Extension\WikibaseReconcileEdit\Wikibase\FluidItem;
 use ValueParsers\StringParser;
 use Wikibase\DataModel\Entity\EntityId;
 use Wikibase\DataModel\Entity\Item;
+use Wikibase\DataModel\Entity\PropertyId;
 use Wikibase\DataModel\Services\Lookup\PropertyDataTypeLookup;
 use Wikibase\Repo\ValueParserFactory;
 
@@ -62,13 +64,28 @@ class MinimalItemInputTest extends \MediaWikiUnitTestCase {
 	 * @dataProvider provideTestGetItem
 	 */
 	public function testGetItem( string $requestJsonFile, Item $expected ) {
-		$sut = new MinimalItemInput( $this->mockPropertyDataTypeLookup(), $this->mockValueParserFactory() );
-		$new = $sut->getItem( new MockEditDiskRequest( $requestJsonFile, null ) );
+		$sut = new MinimalItemInput(
+			$this->mockPropertyDataTypeLookup(),
+			$this->mockValueParserFactory(),
+			$this->mockReconciliationService()
+		);
+		$new = $sut->getItem(
+			new MockEditDiskRequest( $requestJsonFile, null ),
+			new PropertyId( 'P23' )
+		);
+		/** @var Item $new */
+		$new = $new[0];
 		$this->assertTrue(
 			$new->equals( $expected ),
 			'Expected:' . PHP_EOL . var_export( $expected, true ) . PHP_EOL . PHP_EOL .
 			'Actual:' . PHP_EOL . var_export( $new, true )
 		);
+	}
+
+	private function mockReconciliationService() {
+		$mock = $this->createMock( ReconciliationService::class );
+
+		return $mock;
 	}
 
 }

@@ -5,14 +5,17 @@ namespace MediaWiki\Extension\WikibaseReconcileEdit\Test\MediaWiki\Api;
 use MediaWiki\Extension\WikibaseReconcileEdit\InputToEntity\MinimalItemInput;
 use MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\Api\EditEndpoint;
 use MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\WikibaseReconcileEditServices;
+use MediaWiki\MediaWikiServices;
 use MediaWiki\Rest\LocalizedHttpException;
 use MediaWiki\Rest\RequestData;
 use MediaWiki\Rest\RequestInterface;
 use MediaWiki\Tests\Rest\Handler\HandlerTestTrait;
+use User;
+use Wikibase\DataModel\Entity\EntityIdValue;
 use Wikibase\DataModel\Entity\Item;
 use Wikibase\DataModel\Entity\ItemId;
+use Wikibase\DataModel\Entity\Property;
 use Wikibase\DataModel\Entity\PropertyId;
-use Wikibase\DataModel\Services\Lookup\InMemoryDataTypeLookup;
 use Wikibase\DataModel\Services\Lookup\PropertyDataTypeLookupException;
 use Wikibase\DataModel\Snak\PropertyValueSnak;
 use Wikibase\Repo\WikibaseRepo;
@@ -25,34 +28,52 @@ class EditEndpointTest extends \MediaWikiIntegrationTestCase {
 
 	use HandlerTestTrait;
 
-	private const URL_PROPERTY = 'P1';
+	/** @var PropertyId URL_PROPERTY */
+	private $URL_PROPERTY = null;
+
+	/** @var PropertyId URL_PROPERTY */
+	private $ITEM_PROPERTY = null;
+
 	private const MISSING_PROPERTY = 'P1000';
 
 	protected function setUp(): void {
 		parent::setUp();
 		$this->tablesUsed[] = 'page';
+		$this->tablesUsed[] = 'externallinks';
 		$this->tablesUsed[] = 'wb_property_info';
+		$this->tablesUsed[] = 'wb_id_counters';
+
+		/** @var PropertyId URL_PROPERTY */
+		$this->URL_PROPERTY = WikibaseRepo::getDefaultInstance()->getEntityStore()->saveEntity(
+			new Property( null, null, 'url' ),
+			__METHOD__,
+			User::newSystemUser( 'TestUSer' ),
+			EDIT_NEW
+		)->getEntity()->getId();
+
+		/** @var PropertyId URL_PROPERTY */
+		$this->ITEM_PROPERTY = WikibaseRepo::getDefaultInstance()->getEntityStore()->saveEntity(
+			new Property( null, null, 'wikibase-item' ),
+			__METHOD__,
+			User::newSystemUser( 'TestUSer' ),
+			EDIT_NEW
+		)->getEntity()->getId();
 	}
 
 	private function newHandler() {
-		$propertyDataTypeLookup = new InMemoryDataTypeLookup();
-
-		$propertyDataTypeLookup->setDataTypeForProperty(
-			new PropertyId( self::URL_PROPERTY ),
-			'url'
-		);
-
 		$repo = WikibaseRepo::getDefaultInstance();
-
+		$reconciliationService = WikibaseReconcileEditServices::getReconciliationService();
+		$propertyDataTypeLookup = WikibaseRepo::getDefaultInstance()->getPropertyDataTypeLookup();
 		return new EditEndpoint(
 			$repo->newEditEntityFactory(),
 			$propertyDataTypeLookup,
 			WikibaseReconcileEditServices::getFullWikibaseItemInput(),
 			new MinimalItemInput(
 				$propertyDataTypeLookup,
-				$repo->getValueParserFactory()
+				$repo->getValueParserFactory(),
+				$reconciliationService
 			),
-			WikibaseReconcileEditServices::getReconciliationService(),
+			$reconciliationService,
 			WikibaseReconcileEditServices::getSimplePutStrategy()
 		);
 	}
@@ -75,14 +96,14 @@ class EditEndpointTest extends \MediaWikiIntegrationTestCase {
 					EditEndpoint::VERSION_KEY => '0.0.1/minimal',
 					'statements' => [
 						[
-							'property' => self::URL_PROPERTY,
+							'property' => $this->URL_PROPERTY->serialize(),
 							'value' => 'http://example.com/',
 						],
 					],
 				],
 				'reconcile' => [
 					EditEndpoint::VERSION_KEY => '0.0.1',
-					'urlReconcile' => self::URL_PROPERTY,
+					'urlReconcile' => $this->URL_PROPERTY->serialize(),
 				],
 			] )
 		);
@@ -93,7 +114,7 @@ class EditEndpointTest extends \MediaWikiIntegrationTestCase {
 		/** @var Item $item */
 		$item = WikibaseRepo::getDefaultInstance()->getEntityLookup()->getEntity( $itemId );
 		$snaks = $item->getStatements()
-			->getByPropertyId( new PropertyId( self::URL_PROPERTY ) )
+			->getByPropertyId( $this->URL_PROPERTY )
 			->getMainSnaks();
 		$this->assertCount( 1, $snaks );
 		/** @var PropertyValueSnak $snak */
@@ -154,6 +175,96 @@ class EditEndpointTest extends \MediaWikiIntegrationTestCase {
 		$this->assertInstanceOf( LocalizedHttpException::class, $exception );
 		$this->assertSame( 'wikibasereconcileedit-editendpoint-unsupported-reconcile-version',
 			$exception->getMessageValue()->getKey() );
+	}
+
+	public function testItemStatementReconciliation(): void {
+		$url = "http://some-url/";
+		$response = $this->executeHandlerAndGetBodyData(
+			$this->newHandler(),
+			$this->newRequest( [
+				'entity' => [
+					EditEndpoint::VERSION_KEY => '0.0.1/minimal',
+					'statements' => [
+						[
+							'property' => $this->URL_PROPERTY->serialize(),
+							'value' => $url . '1',
+						],
+					],
+				],
+				'reconcile' => [
+					EditEndpoint::VERSION_KEY => '0.0.1',
+					'urlReconcile' => $this->URL_PROPERTY->serialize(),
+				],
+			] )
+		);
+
+		$response = json_decode( $response['value'], true );
+		$this->assertTrue( $response['success'] );
+
+		$itemId = new ItemId( $response['entityId'] );
+
+		/** @var Item $item */
+		$item = WikibaseRepo::getDefaultInstance()->getEntityLookup()->getEntity( $itemId );
+		$snaks = $item->getStatements()
+			->getByPropertyId( $this->URL_PROPERTY )
+			->getMainSnaks();
+		$this->assertCount( 1, $snaks );
+		/** @var PropertyValueSnak $snak */
+		$snak = $snaks[0];
+		$this->assertInstanceOf( PropertyValueSnak::class, $snak );
+		$this->assertSame( $url . '1', $snak->getDataValue()->getValue() );
+
+		// TODO DO THIS
+		MediaWikiServices::getInstance()->resetServiceForTesting( 'WikibaseReconcileEdit.ReconciliationService' );
+
+		$responseTwo = $this->executeHandlerAndGetBodyData(
+			$this->newHandler(),
+			$this->newRequest( [
+				'entity' => [
+					EditEndpoint::VERSION_KEY => '0.0.1/minimal',
+					'statements' => [
+						[
+							'property' => $this->URL_PROPERTY->serialize(),
+							'value' => $url . '2',
+						],
+						[
+							'property' => $this->ITEM_PROPERTY->serialize(),
+							'value' => $url . '1',
+						],
+					],
+				],
+				'reconcile' => [
+					EditEndpoint::VERSION_KEY => '0.0.1',
+					'urlReconcile' => $this->URL_PROPERTY->serialize(),
+				],
+			] )
+		);
+
+		$responseTwo = json_decode( $responseTwo['value'], true );
+		$this->assertTrue( $responseTwo['success'] );
+
+		$itemId = new ItemId( $responseTwo['entityId'] );
+
+		/** @var Item $item */
+		$item = WikibaseRepo::getDefaultInstance()->getEntityLookup()->getEntity( $itemId );
+		$snaks = $item->getStatements()
+			->getByPropertyId( $this->URL_PROPERTY )
+			->getMainSnaks();
+		$this->assertCount( 1, $snaks );
+		/** @var PropertyValueSnak $snak */
+		$snak = $snaks[0];
+		$this->assertInstanceOf( PropertyValueSnak::class, $snak );
+		$this->assertSame( $url . '2', $snak->getDataValue()->getValue() );
+
+		$snaks = $item->getStatements()
+			->getByPropertyId( $this->ITEM_PROPERTY )
+			->getMainSnaks();
+		$this->assertCount( 1, $snaks );
+		/** @var PropertyValueSnak $snak */
+		$snak = $snaks[0];
+		$this->assertInstanceOf( PropertyValueSnak::class, $snak );
+		$this->assertInstanceOf( EntityIdValue::class, $snak->getDataValue()->getValue() );
+		$this->assertEquals( new EntityIdValue( new ItemId( 'Q1' ) ), $snak->getDataValue()->getValue() );
 	}
 
 	/** @dataProvider provideInvalidUrlReconcile */

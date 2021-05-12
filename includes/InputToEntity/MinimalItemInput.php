@@ -3,6 +3,7 @@
 namespace MediaWiki\Extension\WikibaseReconcileEdit\InputToEntity;
 
 use DataValues\DataValue;
+use MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\ReconciliationItem;
 use MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\ReconciliationService;
 use MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\Request\EditRequest;
 use ValueParsers\ParserOptions;
@@ -43,7 +44,7 @@ class MinimalItemInput {
 
 	/**
 	 * @param EditRequest $request
-	 * @return array( Item, Item[] )
+	 * @return array( Item, ReconciliationItem[] )
 	 */
 	public function getItem( EditRequest $request, PropertyId $reconcileUrlProperty ) : array {
 		$inputEntity = $request->entity();
@@ -85,7 +86,7 @@ class MinimalItemInput {
 					die( 'statements must have property and value keys' );
 				}
 				$propertyId = new PropertyId( $statementDetails['property'] );
-				[ $dataValue, $items ] = $this->getDataValue(
+				[ $dataValue, $reconciliationItems ] = $this->getDataValue(
 					$propertyId,
 					$statementDetails['value'],
 					$reconcileUrlProperty
@@ -93,9 +94,9 @@ class MinimalItemInput {
 				$item->getStatements()->addNewStatement(
 					new PropertyValueSnak( $propertyId, $dataValue )
 				);
-				foreach ( $items as $otherItem ) {
-					/** @var Item $otherItem */
-					$otherItems[$otherItem->getId()->getSerialization()] = $otherItem;
+				foreach ( $reconciliationItems as $otherItem ) {
+					/** @var ReconciliationItem $otherItem */
+					$otherItems[$otherItem->getItem()->getId()->getSerialization()] = $otherItem;
 				}
 			}
 		}
@@ -106,7 +107,7 @@ class MinimalItemInput {
 	/**
 	 * @param PropertyId $id
 	 * @param string $value
-	 * @return array( DataValue, Item[] )
+	 * @return array( DataValue, ReconciliationItem[] )
 	 */
 	private function getDataValue(
 		PropertyId $id,
@@ -115,10 +116,9 @@ class MinimalItemInput {
 	) : array {
 		$name = $this->propertyDataTypeLookup->getDataTypeIdForProperty( $id );
 		if ( $name === 'wikibase-item' && wfParseUrl( $value ) !== false ) {
-			$item = $this->reconciliationService
-				->getOrCreateItemByStatementUrl( $reconcileUrlProperty, $value )
-				->getItem();
-			return [ new EntityIdValue( $item->getId() ), [ $item ] ];
+			$reconciliationItem = $this->reconciliationService
+				->getOrCreateItemByStatementUrl( $reconcileUrlProperty, $value );
+			return [ new EntityIdValue( $reconciliationItem->getItem()->getId() ), [ $reconciliationItem ] ];
 		}
 		// TODO add specific options?
 		$parser = $this->valueParserFactory->newParser( $name, new ParserOptions );

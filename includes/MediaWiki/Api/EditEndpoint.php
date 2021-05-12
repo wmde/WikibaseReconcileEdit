@@ -6,6 +6,7 @@ use DataValues\StringValue;
 use MediaWiki\Extension\WikibaseReconcileEdit\EditStrategy\SimplePutStrategy;
 use MediaWiki\Extension\WikibaseReconcileEdit\InputToEntity\FullWikibaseItemInput;
 use MediaWiki\Extension\WikibaseReconcileEdit\InputToEntity\MinimalItemInput;
+use MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\ReconciliationItem;
 use MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\ReconciliationService;
 use MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\Request\EditRequest;
 use MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\Request\MockEditDiskRequest;
@@ -188,11 +189,29 @@ class EditEndpoint extends SimpleHandler {
 
 		$saveStatus = Status::newGood();
 		foreach ( $otherItems as $otherItem ) {
-			$saveStatus->merge( $editEntity->attemptSave(
-				$otherItem,
+			if ( !( $otherItem instanceof ReconciliationItem ) ) {
+				continue;
+			}
+
+			// don't need to save this again
+			if ( $otherItem->getRevision() ) {
+				continue;
+			}
+
+			$otherItemEdit = $this->editEntityFactory->newEditEntity(
+				// TODO use a real user
+				\User::newSystemUser( 'WikibaseReconcileEditReconciliator' ),
+				$otherItem->getItem()->getId(),
+				false
+			);
+
+			$saveStatus->merge( $otherItemEdit->attemptSave(
+				$otherItem->getItem(),
 				'Reconciliation Edit',
-				EDIT_NEW, // TODO assert $otherItem->getRevision() === null?
-				false // TODO actually do a token check?
+				// TODO assert $otherItem->getRevision() === null?
+				EDIT_NEW,
+				// TODO actually do a token check?
+				false
 			), true );
 			if ( !$saveStatus->isOK() ) {
 				break;

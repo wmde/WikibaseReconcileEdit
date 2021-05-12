@@ -80,14 +80,13 @@ class ReconciliationService {
 		// return the same item if we already reconciled it
 		$propertyId = $reconcileUrlProperty->getSerialization();
 		if ( array_key_exists( $propertyId, $this->reconciliationItems )
-		     && array_key_exists( $reconciliationUrl, $this->reconciliationItems[$propertyId] ) ) {
+			 && array_key_exists( $reconciliationUrl, $this->reconciliationItems[$propertyId] ) ) {
 			return $this->reconciliationItems[$propertyId][$reconciliationUrl];
 		}
 
 		// Find Items that use the URL
-		$itemIdsThatReferenceTheUrl = $this->getItemIdsFromPageIds(
-			$this->externalLinks->pageIdsContainingUrl( $reconciliationUrl )
-		);
+		$externalLinkIds = $this->externalLinks->pageIdsContainingUrl( $reconciliationUrl );
+		$itemIdsThatReferenceTheUrl = $this->getItemIdsFromPageIds( $externalLinkIds );
 
 		// Find Items that match the URL and Property ID
 		$itemsThatReferenceTheUrlInCorrectStatement = [];
