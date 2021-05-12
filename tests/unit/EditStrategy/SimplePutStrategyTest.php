@@ -13,11 +13,6 @@ use Wikibase\DataModel\Services\Statement\GuidGenerator;
  */
 class SimplePutStrategyTest extends \MediaWikiUnitTestCase {
 
-	public function testBasicConstruction() {
-		new SimplePutStrategy();
-		$this->expectNotToPerformAssertions();
-	}
-
 	private function mockGuidGenerator() {
 		// TODO it would be nice if datamodel-services provided nicer GuidGenerator stuff for tests?
 		$mock = $this->createMock( GuidGenerator::class );

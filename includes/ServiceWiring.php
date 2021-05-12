@@ -7,6 +7,7 @@ use MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\ExternalLinks;
 use MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\ReconciliationService;
 use MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\WikibaseReconcileEditServices;
 use MediaWiki\MediaWikiServices;
+use Wikibase\DataModel\Services\Statement\GuidGenerator;
 use Wikibase\Repo\WikibaseRepo;
 
 /** @phpcs-require-sorted-array */
@@ -50,7 +51,9 @@ return [
 	},
 
 	'WikibaseReconcileEdit.SimplePutStrategy' => function ( MediaWikiServices $services ): SimplePutStrategy {
-		return new SimplePutStrategy();
+		return new SimplePutStrategy(
+			new GuidGenerator()
+		);
 	},
 
 ];

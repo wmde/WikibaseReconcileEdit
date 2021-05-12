@@ -15,14 +15,8 @@ class SimplePutStrategy {
 	 */
 	private $guidGenerator;
 
-	/**
-	 * @param GuidGenerator|null $guidGenerator
-	 */
-	public function __construct( ?GuidGenerator $guidGenerator = null ) {
+	public function __construct( GuidGenerator $guidGenerator ) {
 		$this->guidGenerator = $guidGenerator;
-		if ( !$this->guidGenerator ) {
-			$this->guidGenerator = new GuidGenerator();
-		}
 	}
 
 	/**
