@@ -164,7 +164,10 @@ class EditEndpoint extends SimpleHandler {
 		// Check for our reconciliation value
 		$reconciliationStatements = $inputEntity->getStatements()->getByPropertyId( $reconcileUrlProperty );
 		if ( $reconciliationStatements->count() !== 1 ) {
-			die( 'Entity must have at least one statement for the reconciliation Property' );
+			throw new LocalizedHttpException(
+				MessageValue::new( 'wikibasereconcileedit-editendpoint-reconciliation-property-missing-in-statements' ),
+				400
+			);
 		}
 		$reconciliationStatement = $reconciliationStatements->toArray()[0];
 		if ( !$reconciliationStatement->getMainSnak() instanceof PropertyValueSnak ) {

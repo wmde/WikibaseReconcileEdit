@@ -26,6 +26,7 @@ class EditEndpointTest extends \MediaWikiIntegrationTestCase {
 	use HandlerTestTrait;
 
 	private const URL_PROPERTY = 'P1';
+	private const URL_PROPERTY_NOT_RECONCILED = 'P15';
 	private const STRING_PROPERTY = 'P2';
 	private const MISSING_PROPERTY = 'P1000';
 
@@ -40,6 +41,11 @@ class EditEndpointTest extends \MediaWikiIntegrationTestCase {
 
 		$propertyDataTypeLookup->setDataTypeForProperty(
 			new PropertyId( self::URL_PROPERTY ),
+			'url'
+		);
+
+		$propertyDataTypeLookup->setDataTypeForProperty(
+			new PropertyId( self::URL_PROPERTY_NOT_RECONCILED ),
 			'url'
 		);
 
@@ -363,6 +369,32 @@ class EditEndpointTest extends \MediaWikiIntegrationTestCase {
 
 		$this->assertInstanceOf( LocalizedHttpException::class, $exception );
 		$this->assertSame( 'wikibasereconcileedit-editendpoint-qualifiers-references-not-supported',
+			$exception->getMessageValue()->getKey() );
+	}
+
+	public function testReconciliationPropertyMissingInStatements(): void {
+		/** @var LocalizedHttpException $exception */
+		$exception = $this->executeHandlerAndGetHttpException(
+			$this->newHandler(),
+			$this->newRequest( [
+				'entity' => [
+					EditEndpoint::VERSION_KEY => '0.0.1/minimal',
+					'statements' => [
+						[
+							'property' => self::URL_PROPERTY_NOT_RECONCILED,
+							'value' => 'http://example.com/',
+						],
+					],
+				],
+				'reconcile' => [
+					EditEndpoint::VERSION_KEY => '0.0.1',
+					'urlReconcile' => self::URL_PROPERTY,
+				],
+			] )
+		);
+
+		$this->assertInstanceOf( LocalizedHttpException::class, $exception );
+		$this->assertSame( 'wikibasereconcileedit-editendpoint-reconciliation-property-missing-in-statements',
 			$exception->getMessageValue()->getKey() );
 	}
 

@@ -12,5 +12,6 @@
 	"wikibasereconcileedit-editendpoint-invalid-type-property-must-be-url": "Error returned by the API if the “reconcile” request propertyId parameter is not of type URL.\n\nParameters:\n* $1 – the name of the property, e.g. P123\n* $2 – the name of the field, e.g. urlReconcile.\n* $3 – the datatype of the provided reconcile property, e.g. string",
 	"wikibasereconcileedit-editendpoint-unspecified-entity-input-version": "Error returned by the API if the “entity” request parameter contains no version field in the entity input",
 	"wikibasereconcileedit-editendpoint-invalid-entity-input-version": "Error returned by the API if the “entity” request parameter specifies an unsupported version.\n\nParameters:\n* $1 is the specified (unsupported) version, $2 the supported versions, and $3 the number of supported versions\n",
-	"wikibasereconcileedit-editendpoint-qualifiers-references-not-supported": "Error returned by the API if the “entity” request parameter specifies qualifiers and/or references. They are not yet supported."
+	"wikibasereconcileedit-editendpoint-qualifiers-references-not-supported": "Error returned by the API if the “entity” request parameter specifies qualifiers and/or references. They are not yet supported.",
+	"wikibasereconcileedit-editendpoint-reconciliation-property-missing-in-statements": "Error returned by the API if the “entity” request parameter doesn't contain a statement that uses the reconciliation property"
 }
