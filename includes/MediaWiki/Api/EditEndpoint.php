@@ -40,24 +40,30 @@ class EditEndpoint extends SimpleHandler {
 	/** @var MinimalItemInput */
 	private $minimalItemInput;
 
+	/** @var SimplePutStrategy */
+	private $simplePutStrategy;
+
 	public function __construct(
 		MediawikiEditEntityFactory $editEntityFactory,
 		PropertyDataTypeLookup $propertyDataTypeLookup,
 		FullWikibaseItemInput $fullWikibaseItemInput,
 		MinimalItemInput $minimalItemInput,
-		ReconciliationService $reconciliationService
+		ReconciliationService $reconciliationService,
+		SimplePutStrategy $simplePutStrategy
 	) {
 		$this->editEntityFactory = $editEntityFactory;
 		$this->propertyDataTypeLookup = $propertyDataTypeLookup;
 		$this->reconciliationService = $reconciliationService;
 		$this->fullWikibaseItemInput = $fullWikibaseItemInput;
 		$this->minimalItemInput = $minimalItemInput;
+		$this->simplePutStrategy = $simplePutStrategy;
 	}
 
 	public static function factory(
 		FullWikibaseItemInput $fullWikibaseItemInput,
 		MinimalItemInput $minimalItemInput,
-		ReconciliationService $reconciliationService
+		ReconciliationService $reconciliationService,
+		SimplePutStrategy $simplePutStrategy
 	): self {
 		$repo = WikibaseRepo::getDefaultInstance();
 
@@ -66,7 +72,8 @@ class EditEndpoint extends SimpleHandler {
 			$repo->getPropertyDataTypeLookup(),
 			$fullWikibaseItemInput,
 			$minimalItemInput,
-			$reconciliationService
+			$reconciliationService,
+			$simplePutStrategy
 		);
 	}
 
@@ -165,7 +172,7 @@ class EditEndpoint extends SimpleHandler {
 		);
 
 		// And make the edit
-		$toSave = ( new SimplePutStrategy() )->apply( $reconciliationItem->getItem(), $inputEntity );
+		$toSave = $this->simplePutStrategy->apply( $reconciliationItem->getItem(), $inputEntity );
 		$editEntity = $this->editEntityFactory->newEditEntity(
 			// TODO use a real user
 			\User::newSystemUser( 'WikibaseReconcileEditReconciliator' ),

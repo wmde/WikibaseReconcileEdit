@@ -23,7 +23,8 @@
 			"services": [
 				"WikibaseReconcileEdit.FullWikibaseItemInput",
 				"WikibaseReconcileEdit.MinimalItemInput",
-				"WikibaseReconcileEdit.ReconciliationService"
+				"WikibaseReconcileEdit.ReconciliationService",
+				"WikibaseReconcileEdit.SimplePutStrategy"
 			]
 		}
 	],

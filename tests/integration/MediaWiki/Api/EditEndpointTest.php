@@ -53,6 +53,7 @@ class EditEndpointTest extends \MediaWikiIntegrationTestCase {
 				$repo->getValueParserFactory()
 			),
 			WikibaseReconcileEditServices::getReconciliationService(),
+			WikibaseReconcileEditServices::getSimplePutStrategy()
 		);
 	}
 
