@@ -1,5 +1,6 @@
 <?php
 
+use MediaWiki\Extension\WikibaseReconcileEdit\EditStrategy\SimplePutStrategy;
 use MediaWiki\Extension\WikibaseReconcileEdit\InputToEntity\FullWikibaseItemInput;
 use MediaWiki\Extension\WikibaseReconcileEdit\InputToEntity\MinimalItemInput;
 use MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\ExternalLinks;
@@ -45,6 +46,10 @@ return [
 			WikibaseReconcileEditServices::getExternalLinks( $services ),
 			$services->getTitleFactory()
 		);
+	},
+
+	'WikibaseReconcileEdit.SimplePutStrategy' => function ( MediaWikiServices $services ): SimplePutStrategy {
+		return new SimplePutStrategy();
 	},
 
 ];
