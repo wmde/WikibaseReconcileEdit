@@ -13,5 +13,6 @@
 	"wikibasereconcileedit-editendpoint-unspecified-entity-input-version": "Entity input version must be specified",
 	"wikibasereconcileedit-editendpoint-invalid-entity-input-version": "Unknown entity input version $1; the only supported {{PLURAL:$3|version is|versions are}} $2",
 	"wikibasereconcileedit-editendpoint-qualifiers-references-not-supported": "Qualifiers and References are not currently supported",
-	"wikibasereconcileedit-editendpoint-reconciliation-property-missing-in-statements": "Entity must have at least one statement for the reconciliation Property"
+	"wikibasereconcileedit-editendpoint-reconciliation-property-missing-in-statements": "Entity must have at least one statement for the reconciliation Property",
+	"wikibasereconcileedit-editendpoint-invalid-reconciliation-statement-type": "Reconciliation statement must be of type value"
 }

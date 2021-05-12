@@ -171,7 +171,10 @@ class EditEndpoint extends SimpleHandler {
 		}
 		$reconciliationStatement = $reconciliationStatements->toArray()[0];
 		if ( !$reconciliationStatement->getMainSnak() instanceof PropertyValueSnak ) {
-			die( 'Reconciliation statement must be of type value ' );
+			throw new LocalizedHttpException(
+				MessageValue::new( 'wikibasereconcileedit-editendpoint-invalid-reconciliation-statement-type' ),
+				400
+			);
 		}
 
 		/** @var PropertyValueSnak $reconciliationMainSnak */

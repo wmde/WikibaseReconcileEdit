@@ -398,6 +398,40 @@ class EditEndpointTest extends \MediaWikiIntegrationTestCase {
 			$exception->getMessageValue()->getKey() );
 	}
 
+	public function testInvalidSnakTypeValue(): void {
+		/** @var LocalizedHttpException $exception */
+		$exception = $this->executeHandlerAndGetHttpException(
+			$this->newHandler(),
+			$this->newRequest( [
+				'entity' => [
+					EditEndpoint::VERSION_KEY => '0.0.1/full',
+					'type' => 'item',
+					'claims' => [
+						self::URL_PROPERTY => [
+							[
+								'mainsnak' => [
+									'snaktype' => 'somevalue',
+									'property' => self::URL_PROPERTY,
+									'datatype' => 'url'
+								],
+								'type' => 'statement',
+								'rank' => 'normal',
+							]
+						],
+					],
+				],
+				'reconcile' => [
+					EditEndpoint::VERSION_KEY => '0.0.1',
+					'urlReconcile' => self::URL_PROPERTY,
+				],
+			] )
+		);
+
+		$this->assertInstanceOf( LocalizedHttpException::class, $exception );
+		$this->assertSame( 'wikibasereconcileedit-editendpoint-invalid-reconciliation-statement-type',
+			$exception->getMessageValue()->getKey() );
+	}
+
 	public function provideInvalidUrlReconcile(): iterable {
 		yield 'missing' => [ null ];
 		yield 'empty' => [ '' ];
