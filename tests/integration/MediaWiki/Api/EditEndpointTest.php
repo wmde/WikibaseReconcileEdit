@@ -31,7 +31,6 @@ class EditEndpointTest extends \MediaWikiIntegrationTestCase {
 	protected function setUp(): void {
 		parent::setUp();
 		$this->tablesUsed[] = 'page';
-		$this->tablesUsed[] = 'wb_property_info';
 	}
 
 	private function newHandler() {
