@@ -6,7 +6,6 @@ use TitleFactory;
 use Wikibase\DataModel\Entity\Item;
 use Wikibase\DataModel\Entity\ItemId;
 use Wikibase\DataModel\Entity\PropertyId;
-use Wikibase\DataModel\Services\Lookup\EntityLookup;
 use Wikibase\DataModel\Snak\PropertyValueSnak;
 use Wikibase\Lib\Store\EntityIdLookup;
 use Wikibase\Lib\Store\EntityRevisionLookup;
@@ -19,9 +18,6 @@ class ReconciliationService {
 
 	/** @var EntityIdLookup */
 	private $entityIdLookup;
-
-	/** @var EntityLookup */
-	private $entityLookup;
 
 	/** @var EntityRevisionLookup */
 	private $entityRevisionLookup;
@@ -37,14 +33,12 @@ class ReconciliationService {
 
 	public function __construct(
 		EntityIdLookup $entityIdLookup,
-		EntityLookup $entityLookup,
 		EntityRevisionLookup $entityRevisionLookup,
 		IdGenerator $idGenerator,
 		ExternalLinks $externalLinks,
 		TitleFactory $titleFactory
 	) {
 		$this->entityIdLookup = $entityIdLookup;
-		$this->entityLookup = $entityLookup;
 		$this->entityRevisionLookup = $entityRevisionLookup;
 		$this->idGenerator = $idGenerator;
 		$this->externalLinks = $externalLinks;
@@ -88,8 +82,9 @@ class ReconciliationService {
 		// Find Items that match the URL and Property ID
 		$itemsThatReferenceTheUrlInCorrectStatement = [];
 		foreach ( $itemIdsThatReferenceTheUrl as $itemId ) {
+			$entityRevision = $this->entityRevisionLookup->getEntityRevision( $itemId );
 			/** @var Item $item */
-			$item = $this->entityLookup->getEntity( $itemId );
+			$item = $entityRevision->getEntity();
 
 			foreach ( $item->getStatements()->getByPropertyId( $reconcileUrlProperty )->toArray() as $statement ) {
 				if ( !$statement->getMainSnak() instanceof PropertyValueSnak ) {
@@ -100,7 +95,10 @@ class ReconciliationService {
 
 				$urlOfStatement = $mainSnak->getDataValue()->getValue();
 				if ( $urlOfStatement === $reconciliationUrl ) {
-					$itemsThatReferenceTheUrlInCorrectStatement[] = $item;
+					$itemsThatReferenceTheUrlInCorrectStatement[] = new ReconciliationItem(
+						$item,
+						$entityRevision->getRevisionId()
+					);
 				}
 			}
 		}
@@ -112,28 +110,13 @@ class ReconciliationService {
 
 		// Get our base
 		if ( count( $itemsThatReferenceTheUrlInCorrectStatement ) === 1 ) {
-			$base = $itemsThatReferenceTheUrlInCorrectStatement[0];
-			// XXX: This bit is so annoying...
-			$baseRevId = $this->entityRevisionLookup
-				->getLatestRevisionId( $base->getId() )
-				->onConcreteRevision( function ( $revId ) {
-					return $revId;
-				} )
-				->onRedirect( function () {
-					throw new \RuntimeException();
-				} )
-				->onNonexistentEntity( function () {
-					throw new \RuntimeException();
-				} )
-				->map();
+			return $itemsThatReferenceTheUrlInCorrectStatement[0];
 		} else {
 			$base = new Item();
-			$baseRevId = false;
 			// XXX: this is a bit evil, but needed to work around the fact we want to mint statement guids
 			$base->setId( ItemId::newFromNumber( $this->idGenerator->getNewId( 'wikibase-item' ) ) );
+			return new ReconciliationItem( $base, false );
 		}
-
-		return new ReconciliationItem( $base, $baseRevId );
 	}
 
 }
