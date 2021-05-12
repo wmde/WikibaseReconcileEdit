@@ -10,13 +10,12 @@ use TitleFactory;
 use Wikibase\DataModel\Entity\Item;
 use Wikibase\DataModel\Entity\ItemId;
 use Wikibase\DataModel\Entity\PropertyId;
-use Wikibase\DataModel\Services\Lookup\EntityLookup;
 use Wikibase\DataModel\Snak\PropertyValueSnak;
 use Wikibase\DataModel\Statement\Statement;
 use Wikibase\DataModel\Statement\StatementList;
 use Wikibase\Lib\Store\EntityIdLookup;
+use Wikibase\Lib\Store\EntityRevision;
 use Wikibase\Lib\Store\EntityRevisionLookup;
-use Wikibase\Lib\Store\LatestRevisionIdResult;
 use Wikibase\Repo\Store\IdGenerator;
 
 /**
@@ -26,10 +25,6 @@ class ReconciliationServiceTest extends \MediaWikiUnitTestCase {
 
 	public function testNoExternalLinksFound() {
 		$expectedItem = new Item( new ItemId( 'Q10' ) );
-
-		$entityLookup = $this->createMock( EntityLookup::class );
-		$entityLookup->expects( $this->never() )
-			->method( 'getEntity' );
 
 		$titleFactory = $this->createMock( TitleFactory::class );
 		$titleFactory->method( 'newFromIDs' )
@@ -43,7 +38,7 @@ class ReconciliationServiceTest extends \MediaWikiUnitTestCase {
 
 		$entityRevisionLookup = $this->createMock( EntityRevisionLookup::class );
 		$entityRevisionLookup->expects( $this->never() )
-			->method( 'getLatestRevisionId' );
+			->method( 'getEntityRevision' );
 
 		$idGenerator = $this->createMock( IdGenerator::class );
 		$idGenerator->expects( $this->once() )
@@ -57,7 +52,6 @@ class ReconciliationServiceTest extends \MediaWikiUnitTestCase {
 
 		$service = new ReconciliationService(
 			$entityIdLookup,
-			$entityLookup,
 			$entityRevisionLookup,
 			$idGenerator,
 			$externalLinks,
@@ -89,8 +83,8 @@ class ReconciliationServiceTest extends \MediaWikiUnitTestCase {
 					)
 				)
 			),
-			// revision
-			1234
+			'itemRevision' => 1234,
+			'expectedRevision' => 1234,
 		];
 
 		yield 'in external links but does not match on string url' => [
@@ -105,7 +99,8 @@ class ReconciliationServiceTest extends \MediaWikiUnitTestCase {
 					)
 				)
 			),
-			false
+			'itemRevision' => 1234,
+			'expectedRevision' => false,
 		];
 
 		yield 'does not have statements' => [
@@ -113,7 +108,8 @@ class ReconciliationServiceTest extends \MediaWikiUnitTestCase {
 			$someUrl,
 			new ItemId( 'Q1' ),
 			new StatementList( [] ),
-			false
+			'itemRevision' => 1234,
+			'expectedRevision' => false,
 		];
 	}
 
@@ -124,14 +120,17 @@ class ReconciliationServiceTest extends \MediaWikiUnitTestCase {
 	 * @param string $reconcileUrl
 	 * @param ItemId $itemId
 	 * @param StatementList $itemStatements
-	 * @param int|false $revision
+	 * @param int $itemRevision revision ID returned by the entity revision lookup
+	 * @param int|false $expectedRevision expected revision ID returned by the reconciliation service
+	 * (either $itemRevision or false)
 	 */
 	public function testGetItemByStatementUrlFoundSomething(
 		PropertyId $reconcilePropertyId,
 		string $reconcileUrl,
 		ItemId $itemId,
 		StatementList $itemStatements,
-		$revision
+		int $itemRevision,
+		$expectedRevision
 	) {
 		$newItemIDNumeric = 10;
 		$newItemID = new ItemId( 'Q' . $newItemIDNumeric );
@@ -156,31 +155,25 @@ class ReconciliationServiceTest extends \MediaWikiUnitTestCase {
 			->with( [ Title::newFromID( $pageId ) ] )
 			->willReturn( [ $itemId ] );
 
-		$entityLookup = $this->createMock( EntityLookup::class );
-		$entityLookup->method( 'getEntity' )
-			->with( $itemId )
-			->willReturn( $item );
-
 		$entityRevisionLookup = $this->createMock( EntityRevisionLookup::class );
+		$entityRevisionLookup->method( 'getEntityRevision' )
+			->with( $itemId )
+			->willReturn( new EntityRevision( $item, $itemRevision ) );
+
 		$idGenerator = $this->createMock( IdGenerator::class );
 
 		// id generator should not be run if revision was found
-		if ( !$revision ) {
+		if ( !$expectedRevision ) {
 			$idGenerator->expects( $this->once() )
 				->method( 'getNewId' )
 				->willReturn( $newItemIDNumeric );
 		} else {
-
-			$entityRevisionLookup->method( 'getLatestRevisionId' )
-				->willReturn( LatestRevisionIdResult::concreteRevision( $revision ) );
-
 			$idGenerator->expects( $this->never() )
 				->method( 'getNewId' );
 		}
 
 		$service = new ReconciliationService(
 			$entityIdLookup,
-			$entityLookup,
 			$entityRevisionLookup,
 			$idGenerator,
 			$externalLinks,
@@ -189,7 +182,7 @@ class ReconciliationServiceTest extends \MediaWikiUnitTestCase {
 
 		$reconcileItem = $service->getOrCreateItemByStatementUrl( $reconcilePropertyId, $reconcileUrl );
 
-		$this->assertEquals( $revision ? $itemId : $newItemID, $reconcileItem->getItem()->getId() );
-		$this->assertEquals( $revision, $reconcileItem->getRevision() );
+		$this->assertEquals( $expectedRevision ? $itemId : $newItemID, $reconcileItem->getItem()->getId() );
+		$this->assertEquals( $expectedRevision, $reconcileItem->getRevision() );
 	}
 }

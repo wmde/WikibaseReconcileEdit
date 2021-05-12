@@ -40,7 +40,6 @@ return [
 
 		return new ReconciliationService(
 			$repo->getEntityIdLookup(),
-			$repo->getEntityLookup(),
 			$repo->getEntityRevisionLookup(),
 			$repo->newIdGenerator(),
 			WikibaseReconcileEditServices::getExternalLinks( $services ),
