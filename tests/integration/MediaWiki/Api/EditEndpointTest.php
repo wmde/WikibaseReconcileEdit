@@ -136,26 +136,6 @@ class EditEndpointTest extends \MediaWikiIntegrationTestCase {
 		$this->executeHandlerAndGetBodyData( $handler, $request );
 	}
 
-	public function testInvalidReconcile(): void {
-		/** @var LocalizedHttpException $exception */
-		$exception = $this->executeHandlerAndGetHttpException(
-			$this->newHandler(),
-			// don’t use newRequest() since we want to pass invalid JSON
-			new RequestData( [
-				'postParams' => [
-					'entity' => '',
-					'reconcile' => '',
-				],
-				'headers' => [ 'Content-Type' => 'application/json' ],
-				'method' => 'POST',
-			] )
-		);
-
-		$this->assertInstanceOf( LocalizedHttpException::class, $exception );
-		$this->assertSame( 'wikibasereconcileedit-editendpoint-invalid-reconcile-json',
-			$exception->getMessageValue()->getKey() );
-	}
-
 	public function testUnsupportedReconcileVersion(): void {
 		/** @var LocalizedHttpException $exception */
 		$exception = $this->executeHandlerAndGetHttpException(

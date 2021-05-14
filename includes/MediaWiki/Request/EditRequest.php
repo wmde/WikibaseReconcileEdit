@@ -7,18 +7,18 @@ namespace MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\Request;
  */
 class EditRequest {
 
-	/** @var array|null */
+	/** @var array */
 	private $reconcile;
 
 	/** @var array|null */
 	private $entity;
 
-	public function __construct( ?array $reconcile, ?array $entity ) {
+	public function __construct( array $reconcile, ?array $entity ) {
 		$this->reconcile = $reconcile;
 		$this->entity = $entity;
 	}
 
-	public function reconcile() : ?array {
+	public function reconcile() : array {
 		return $this->reconcile;
 	}
 
