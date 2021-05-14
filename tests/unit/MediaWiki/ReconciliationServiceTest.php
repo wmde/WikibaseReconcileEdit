@@ -24,7 +24,18 @@ use Wikibase\Repo\Store\IdGenerator;
 class ReconciliationServiceTest extends \MediaWikiUnitTestCase {
 
 	public function testNoExternalLinksFound() {
+		$propertyId = new PropertyId( 'P1' );
+		$reconcileUrl = "http://www.something-nice";
+
 		$expectedItem = new Item( new ItemId( 'Q10' ) );
+		$expectedItem->setStatements( new StatementList(
+			new Statement(
+				new PropertyValueSnak(
+					$propertyId,
+					new StringValue( $reconcileUrl )
+				)
+			)
+		) );
 
 		$titleFactory = $this->createMock( TitleFactory::class );
 		$titleFactory->method( 'newFromIDs' )
@@ -57,9 +68,6 @@ class ReconciliationServiceTest extends \MediaWikiUnitTestCase {
 			$externalLinks,
 			$titleFactory
 		);
-
-		$propertyId = new PropertyId( 'P1' );
-		$reconcileUrl = "http://www.something-nice";
 
 		$reconcileItem = $service->getOrCreateItemByStatementUrl( $propertyId, $reconcileUrl );
 

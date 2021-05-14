@@ -2,6 +2,7 @@
 
 namespace MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki;
 
+use DataValues\StringValue;
 use TitleFactory;
 use Wikibase\DataModel\Entity\Item;
 use Wikibase\DataModel\Entity\ItemId;
@@ -127,6 +128,11 @@ class ReconciliationService {
 			// XXX: this is a bit evil, but needed to work around the fact we want to mint statement guids
 			$base->setId( ItemId::newFromNumber( $this->idGenerator->getNewId( 'wikibase-item' ) ) );
 			$reconciliationItem = new ReconciliationItem( $base, false );
+
+			// if this is a new item, we need to put the reconciliation statement in it
+			$reconciliationItem->getItem()->getStatements()->addNewStatement(
+				new PropertyValueSnak( $reconcileUrlProperty, new StringValue( $reconciliationUrl ) )
+			);
 		}
 
 		$this->reconciliationItems[$propertyId][$reconciliationUrl] = $reconciliationItem;
