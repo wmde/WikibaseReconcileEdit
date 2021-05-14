@@ -14,7 +14,7 @@ use ReflectionClass;
 class WikibaseReconcileEditServicesTest extends TestCase {
 
 	public function testServiceAccessorsExistInRightOrder() {
-		$serviceInstantiators = require __DIR__ . '/../../../includes/ServiceWiring.php';
+		$serviceInstantiators = require __DIR__ . '/../../../../includes/ServiceWiring.php';
 		$serviceWiringServiceNames = [];
 		foreach ( $serviceInstantiators as $serviceName => $serviceInstantiator ) {
 			$prefix = 'WikibaseReconcileEdit.';
