@@ -198,6 +198,11 @@ class EditEndpoint extends SimpleHandler {
 				continue;
 			}
 
+			// don't need to save references to itself again
+			if ( $otherItem->getItem() === $toSave ) {
+				continue;
+			}
+
 			$otherItemEdit = $this->editEntityFactory->newEditEntity(
 				// TODO use a real user
 				\User::newSystemUser( 'WikibaseReconcileEditReconciliator' ),

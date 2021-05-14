@@ -118,6 +118,19 @@ class MinimalItemInput {
 		if ( $name === 'wikibase-item' && wfParseUrl( $value ) !== false ) {
 			$reconciliationItem = $this->reconciliationService
 				->getOrCreateItemByStatementUrl( $reconcileUrlProperty, $value );
+
+			// if this is a new item, we need to put the reconciliation statement in it
+			if ( !$reconciliationItem->getRevision() ) {
+				$parser = $this->valueParserFactory->newParser( 'url', new ParserOptions );
+				$parseResult = $parser->parse( $value );
+				if ( !$parseResult instanceof DataValue ) {
+					die( 'Failed to parse statement value' );
+				}
+				$reconciliationItem->getItem()->getStatements()->addNewStatement(
+					new PropertyValueSnak( $reconcileUrlProperty, $parseResult )
+				);
+			}
+
 			return [ new EntityIdValue( $reconciliationItem->getItem()->getId() ), [ $reconciliationItem ] ];
 		}
 		// TODO add specific options?
