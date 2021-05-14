@@ -11,7 +11,6 @@ use MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\Request\EditRequestParse
 use MediaWiki\Rest\LocalizedHttpException;
 use MediaWiki\Rest\SimpleHandler;
 use Status;
-use Wikibase\DataModel\Entity\PropertyId;
 use Wikibase\DataModel\Services\Lookup\PropertyDataTypeLookup;
 use Wikibase\DataModel\Snak\PropertyValueSnak;
 use Wikibase\Lib\Store\EntityRevision;
@@ -87,39 +86,13 @@ class EditEndpoint extends SimpleHandler {
 		// Get the request
 		$request = $this->editRequestParser->parseRequestInterface( $this->getRequest() );
 
-		// Validate and process reconciliation input
-		// TODO use different services per version
-		// TODO output an object that controls the reconciliations spec?
-		$inputReconcile = $request->reconcile();
-		$supportedReconciliationVersions = [ '0.0.1' ];
-		if (
-			!array_key_exists( self::VERSION_KEY, $inputReconcile ) ||
-			!in_array( $inputReconcile[self::VERSION_KEY], $supportedReconciliationVersions )
-		) {
-			throw new LocalizedHttpException(
-				MessageValue::new( 'wikibasereconcileedit-editendpoint-unsupported-reconcile-version' )
-					->textListParams( $supportedReconciliationVersions )
-					->numParams( count( $supportedReconciliationVersions ) ),
-				400
-			);
-		}
-		if (
-			!array_key_exists( 'urlReconcile', $inputReconcile ) ||
-			!preg_match( PropertyId::PATTERN, $inputReconcile['urlReconcile'] )
-		) {
-			throw new LocalizedHttpException(
-				MessageValue::new( 'wikibasereconcileedit-editendpoint-invalid-reconcile-propertyid' )
-					->textParams( $inputReconcile[self::VERSION_KEY], 'urlReconcile' ),
-				400
-			);
-		}
-		$reconcileUrlProperty = new PropertyId( $inputReconcile['urlReconcile'] );
+		$reconcileUrlProperty = $request->reconcilePropertyId();
 		// For now this property must be of URL type
 		$datatypeReconcileProperty = $this->propertyDataTypeLookup->getDataTypeIdForProperty( $reconcileUrlProperty );
 		if ( $datatypeReconcileProperty !== 'url' ) {
 			throw new LocalizedHttpException(
 				MessageValue::new( 'wikibasereconcileedit-editendpoint-invalid-type-property-must-be-url' )
-				->textParams( 'urlReconcile', $inputReconcile['urlReconcile'], $datatypeReconcileProperty ),
+				->textParams( 'urlReconcile', $reconcileUrlProperty->getSerialization(), $datatypeReconcileProperty ),
 				400
 			);
 		}

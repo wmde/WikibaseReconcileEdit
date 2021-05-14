@@ -95,11 +95,8 @@ class MinimalItemInputTest extends \MediaWikiUnitTestCase {
 
 		$prop = new PropertyId( 'P23' );
 
-		$req->method( 'reconcile' )
-			->willReturn( [
-				'wikibasereconcileedit-version' => '0.0.1',
-				'urlReconcile' => $prop->serialize(),
-			] );
+		$req->method( 'reconcilePropertyId' )
+			->willReturn( $prop );
 
 		$newItems = $sut->getItem( $req, $prop );
 		$new = $newItems[0];
