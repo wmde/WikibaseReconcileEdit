@@ -5,6 +5,7 @@ namespace MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki;
 use MediaWiki\Extension\WikibaseReconcileEdit\EditStrategy\SimplePutStrategy;
 use MediaWiki\Extension\WikibaseReconcileEdit\InputToEntity\FullWikibaseItemInput;
 use MediaWiki\Extension\WikibaseReconcileEdit\InputToEntity\MinimalItemInput;
+use MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\Request\EditRequestParser;
 use MediaWiki\MediaWikiServices;
 use Psr\Container\ContainerInterface;
 
@@ -12,6 +13,11 @@ class WikibaseReconcileEditServices {
 
 	private function __construct() {
 		// should not be instantiated
+	}
+
+	public static function getEditRequestParser( ContainerInterface $services = null ): EditRequestParser {
+		return ( $services ?: MediaWikiServices::getInstance() )
+			->get( 'WikibaseReconcileEdit.EditRequestParser' );
 	}
 
 	public static function getExternalLinks( ContainerInterface $services = null ): ExternalLinks {

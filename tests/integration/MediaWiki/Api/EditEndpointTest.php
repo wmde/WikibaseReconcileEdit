@@ -62,6 +62,7 @@ class EditEndpointTest extends \MediaWikiIntegrationTestCase {
 		return new EditEndpoint(
 			$repo->newEditEntityFactory(),
 			$propertyDataTypeLookup,
+			WikibaseReconcileEditServices::getEditRequestParser(),
 			WikibaseReconcileEditServices::getFullWikibaseItemInput(),
 			new MinimalItemInput(
 				$propertyDataTypeLookup,
@@ -125,7 +126,7 @@ class EditEndpointTest extends \MediaWikiIntegrationTestCase {
 		];
 
 		$request = $this->newRequest( [
-			'entity' => 'Q1',
+			'entity' => [],
 			'reconcile' => $reconcilePayload,
 		] );
 

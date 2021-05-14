@@ -7,7 +7,7 @@ use MediaWiki\Extension\WikibaseReconcileEdit\EditStrategy\SimplePutStrategy;
 use MediaWiki\Extension\WikibaseReconcileEdit\InputToEntity\FullWikibaseItemInput;
 use MediaWiki\Extension\WikibaseReconcileEdit\InputToEntity\MinimalItemInput;
 use MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\ReconciliationService;
-use MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\Request\UrlInputEditRequest;
+use MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\Request\EditRequestParser;
 use MediaWiki\Rest\LocalizedHttpException;
 use MediaWiki\Rest\SimpleHandler;
 use Status;
@@ -30,6 +30,9 @@ class EditEndpoint extends SimpleHandler {
 	/** @var PropertyDataTypeLookup */
 	private $propertyDataTypeLookup;
 
+	/** @var EditRequestParser */
+	private $editRequestParser;
+
 	/** @var ReconciliationService */
 	private $reconciliationService;
 
@@ -45,6 +48,7 @@ class EditEndpoint extends SimpleHandler {
 	public function __construct(
 		MediawikiEditEntityFactory $editEntityFactory,
 		PropertyDataTypeLookup $propertyDataTypeLookup,
+		EditRequestParser $editRequestParser,
 		FullWikibaseItemInput $fullWikibaseItemInput,
 		MinimalItemInput $minimalItemInput,
 		ReconciliationService $reconciliationService,
@@ -52,6 +56,7 @@ class EditEndpoint extends SimpleHandler {
 	) {
 		$this->editEntityFactory = $editEntityFactory;
 		$this->propertyDataTypeLookup = $propertyDataTypeLookup;
+		$this->editRequestParser = $editRequestParser;
 		$this->reconciliationService = $reconciliationService;
 		$this->fullWikibaseItemInput = $fullWikibaseItemInput;
 		$this->minimalItemInput = $minimalItemInput;
@@ -59,6 +64,7 @@ class EditEndpoint extends SimpleHandler {
 	}
 
 	public static function factory(
+		EditRequestParser $editRequestParser,
 		FullWikibaseItemInput $fullWikibaseItemInput,
 		MinimalItemInput $minimalItemInput,
 		ReconciliationService $reconciliationService,
@@ -69,6 +75,7 @@ class EditEndpoint extends SimpleHandler {
 		return new self(
 			$repo->newEditEntityFactory(),
 			$repo->getPropertyDataTypeLookup(),
+			$editRequestParser,
 			$fullWikibaseItemInput,
 			$minimalItemInput,
 			$reconciliationService,
@@ -78,7 +85,7 @@ class EditEndpoint extends SimpleHandler {
 
 	public function run() {
 		// Get the request
-		$request = new UrlInputEditRequest( $this->getRequest() );
+		$request = $this->editRequestParser->parseRequestInterface( $this->getRequest() );
 
 		// Validate and process reconciliation input
 		// TODO use different services per version

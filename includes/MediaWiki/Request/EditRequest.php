@@ -2,10 +2,28 @@
 
 namespace MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\Request;
 
-interface EditRequest {
+/**
+ * @license GPL-2.0-or-later
+ */
+class EditRequest {
 
-	public function entity() : ?array;
+	/** @var array|null */
+	private $reconcile;
 
-	public function reconcile() : ?array;
+	/** @var array|null */
+	private $entity;
+
+	public function __construct( ?array $reconcile, ?array $entity ) {
+		$this->reconcile = $reconcile;
+		$this->entity = $entity;
+	}
+
+	public function reconcile() : ?array {
+		return $this->reconcile;
+	}
+
+	public function entity() : ?array {
+		return $this->entity;
+	}
 
 }
