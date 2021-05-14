@@ -198,7 +198,8 @@ class EditEndpoint extends SimpleHandler {
 				continue;
 			}
 
-			// don't need to save references to itself again
+			// The base item references itself through a statement
+			// It will be saved at a later stage so no need to do it here
 			if ( $otherItem->getItem() === $toSave ) {
 				continue;
 			}
@@ -213,7 +214,6 @@ class EditEndpoint extends SimpleHandler {
 			$saveStatus->merge( $otherItemEdit->attemptSave(
 				$otherItem->getItem(),
 				'Reconciliation Edit',
-				// TODO assert $otherItem->getRevision() === null?
 				EDIT_NEW,
 				// TODO actually do a token check?
 				false

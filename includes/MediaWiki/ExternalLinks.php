@@ -24,7 +24,6 @@ class ExternalLinks {
 	 */
 	public function pageIdsContainingUrl( string $url ) : array {
 		$dbr = $this->loadBalancer->getConnectionRef( ILoadBalancer::DB_REPLICA );
-
 		return $dbr->selectFieldValues(
 			'externallinks',
 			'el_from',

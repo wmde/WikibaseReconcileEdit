@@ -10,7 +10,6 @@ use MediaWiki\Rest\LocalizedHttpException;
 use MediaWiki\Rest\RequestData;
 use MediaWiki\Rest\RequestInterface;
 use MediaWiki\Tests\Rest\Handler\HandlerTestTrait;
-use User;
 use Wikibase\DataModel\Entity\EntityIdValue;
 use Wikibase\DataModel\Entity\Item;
 use Wikibase\DataModel\Entity\ItemId;
@@ -28,11 +27,11 @@ class EditEndpointTest extends \MediaWikiIntegrationTestCase {
 
 	use HandlerTestTrait;
 
-	/** @var PropertyId URL_PROPERTY */
-	private $URL_PROPERTY = 'P1';
+	/** @var PropertyId */
+	private $urlProperty = 'P1';
 
-	/** @var PropertyId URL_PROPERTY */
-	private $ITEM_PROPERTY = 'P2';
+	/** @var PropertyId */
+	private $itemProperty = 'P2';
 
 	private const MISSING_PROPERTY = 'P1000';
 
@@ -43,19 +42,17 @@ class EditEndpointTest extends \MediaWikiIntegrationTestCase {
 		$this->tablesUsed[] = 'wb_property_info';
 		$this->tablesUsed[] = 'wb_id_counters';
 
-		/** @var PropertyId URL_PROPERTY */
 		WikibaseRepo::getDefaultInstance()->getEntityStore()->saveEntity(
-			new Property( new PropertyId( $this->URL_PROPERTY ), null, 'url' ),
+			new Property( new PropertyId( $this->urlProperty ), null, 'url' ),
 			__METHOD__,
-			User::newSystemUser( 'TestUSer' ),
+			$this->getTestUser()->getUser(),
 			EDIT_NEW
 		)->getEntity()->getId();
 
-		/** @var PropertyId URL_PROPERTY */
 		WikibaseRepo::getDefaultInstance()->getEntityStore()->saveEntity(
-			new Property( new PropertyId( $this->ITEM_PROPERTY ), null, 'wikibase-item' ),
+			new Property( new PropertyId( $this->itemProperty ), null, 'wikibase-item' ),
 			__METHOD__,
-			User::newSystemUser( 'TestUSer' ),
+			$this->getTestUser()->getUser(),
 			EDIT_NEW
 		)->getEntity()->getId();
 	}
@@ -96,14 +93,14 @@ class EditEndpointTest extends \MediaWikiIntegrationTestCase {
 					EditEndpoint::VERSION_KEY => '0.0.1/minimal',
 					'statements' => [
 						[
-							'property' => $this->URL_PROPERTY,
+							'property' => $this->urlProperty,
 							'value' => 'http://example.com/',
 						],
 					],
 				],
 				'reconcile' => [
 					EditEndpoint::VERSION_KEY => '0.0.1',
-					'urlReconcile' => $this->URL_PROPERTY,
+					'urlReconcile' => $this->urlProperty,
 				],
 			] )
 		);
@@ -114,7 +111,7 @@ class EditEndpointTest extends \MediaWikiIntegrationTestCase {
 		/** @var Item $item */
 		$item = WikibaseRepo::getDefaultInstance()->getEntityLookup()->getEntity( $itemId );
 		$snaks = $item->getStatements()
-			->getByPropertyId( new PropertyId( $this->URL_PROPERTY ) )
+			->getByPropertyId( new PropertyId( $this->urlProperty ) )
 			->getMainSnaks();
 		$this->assertCount( 1, $snaks );
 		/** @var PropertyValueSnak $snak */
@@ -185,7 +182,7 @@ class EditEndpointTest extends \MediaWikiIntegrationTestCase {
 			],
 			'reconcile' => [
 				EditEndpoint::VERSION_KEY => '0.0.1',
-				'urlReconcile' => $this->URL_PROPERTY,
+				'urlReconcile' => $this->urlProperty,
 			],
 		] );
 	}
@@ -198,25 +195,25 @@ class EditEndpointTest extends \MediaWikiIntegrationTestCase {
 			[
 				[
 					// first request creates one item
-					[ 'property' => $this->URL_PROPERTY, 'value' => $url . '1', ],
+					[ 'property' => $this->urlProperty, 'value' => $url . '1', ],
 				],
 				[
 					// second request creates another item and links first
-					[ 'property' => $this->URL_PROPERTY, 'value' => $url . '2', ],
-					[ 'property' => $this->ITEM_PROPERTY, 'value' => $url . '1', ],
+					[ 'property' => $this->urlProperty, 'value' => $url . '2', ],
+					[ 'property' => $this->itemProperty, 'value' => $url . '1', ],
 				]
 			],
 			// expected results after each request
 			[
 				// After first should only be one
-				[ 'Q1' => [ $this->URL_PROPERTY => $url . '1' ] ],
+				[ 'Q1' => [ $this->urlProperty => $url . '1' ] ],
 
 				// After second request should be two items where the second one points to the first
 				[
-					'Q1' => [ $this->URL_PROPERTY => $url . '1' ],
+					'Q1' => [ $this->urlProperty => $url . '1' ],
 					'Q2' => [
-						$this->URL_PROPERTY => $url . '2',
-						$this->ITEM_PROPERTY => new EntityIdValue( new ItemId( 'Q1' ) )
+						$this->urlProperty => $url . '2',
+						$this->itemProperty => new EntityIdValue( new ItemId( 'Q1' ) )
 					]
 				]
 			]
@@ -227,29 +224,29 @@ class EditEndpointTest extends \MediaWikiIntegrationTestCase {
 
 				[
 					// first request creates a single item
-					[ 'property' => $this->URL_PROPERTY, 'value' => $url . '1', ],
+					[ 'property' => $this->urlProperty, 'value' => $url . '1', ],
 				],
 				[
 					// Second request creates a new item and tries to look up non existing third one
-					[ 'property' => $this->URL_PROPERTY, 'value' => $url . '2', ],
-					[ 'property' => $this->ITEM_PROPERTY, 'value' => $url . '3', ],
+					[ 'property' => $this->urlProperty, 'value' => $url . '2', ],
+					[ 'property' => $this->itemProperty, 'value' => $url . '3', ],
 				]
 			],
 			// expected results after each request
 			[
 				// Only one item after first request
-				[ 'Q1' => [ $this->URL_PROPERTY => $url . '1' ] ],
+				[ 'Q1' => [ $this->urlProperty => $url . '1' ] ],
 
 				// After second request we should have three items.
 				// Q3 has been assigned to the "second" item but links to the "third"
 				// Q2 has been assigned to the "third" item but with the correct url.
 				[
-					'Q1' => [ $this->URL_PROPERTY => $url . '1' ],
+					'Q1' => [ $this->urlProperty => $url . '1' ],
 					'Q3' => [
-						$this->URL_PROPERTY => $url . '2',
-						$this->ITEM_PROPERTY => new EntityIdValue( new ItemId( 'Q2' ) )
+						$this->urlProperty => $url . '2',
+						$this->itemProperty => new EntityIdValue( new ItemId( 'Q2' ) )
 					],
-					'Q2' => [ $this->URL_PROPERTY => $url . '3' ],
+					'Q2' => [ $this->urlProperty => $url . '3' ],
 				]
 			]
 		];
@@ -258,24 +255,24 @@ class EditEndpointTest extends \MediaWikiIntegrationTestCase {
 			[
 				[
 					// request that should create one item that links to itself and a second item
-					[ 'property' => $this->URL_PROPERTY, 'value' => $url . '1', ],
-					[ 'property' => $this->ITEM_PROPERTY, 'value' => $url . '1', ],
-					[ 'property' => $this->ITEM_PROPERTY, 'value' => $url . '2', ],
+					[ 'property' => $this->urlProperty, 'value' => $url . '1', ],
+					[ 'property' => $this->itemProperty, 'value' => $url . '1', ],
+					[ 'property' => $this->itemProperty, 'value' => $url . '2', ],
 				],
 			],
 			// expected results after each request
 			[
 				[
 					'Q1' => [
-						$this->URL_PROPERTY => $url . '1',
-						$this->ITEM_PROPERTY => [
+						$this->urlProperty => $url . '1',
+						$this->itemProperty => [
 							new EntityIdValue( new ItemId( 'Q1' ) ),
 							new EntityIdValue( new ItemId( 'Q2' ) )
 						],
 
 					],
 					'Q2' => [
-						$this->URL_PROPERTY => $url . '2',
+						$this->urlProperty => $url . '2',
 					]
 				],
 			]
