@@ -61,12 +61,14 @@ class EditEndpointTest extends \MediaWikiIntegrationTestCase {
 		$propertyDataTypeLookup = WikibaseRepo::getDefaultInstance()->getPropertyDataTypeLookup();
 		return new EditEndpoint(
 			$repo->newEditEntityFactory(),
-			new EditRequestParser( $propertyDataTypeLookup ),
-			WikibaseReconcileEditServices::getFullWikibaseItemInput(),
-			new MinimalItemInput(
+			new EditRequestParser(
 				$propertyDataTypeLookup,
-				$repo->getValueParserFactory(),
-				$reconciliationService
+				WikibaseReconcileEditServices::getFullWikibaseItemInput(),
+				new MinimalItemInput(
+					$propertyDataTypeLookup,
+					$repo->getValueParserFactory(),
+					$reconciliationService
+				)
 			),
 			$reconciliationService,
 			WikibaseReconcileEditServices::getSimplePutStrategy()
@@ -88,7 +90,7 @@ class EditEndpointTest extends \MediaWikiIntegrationTestCase {
 			$this->newHandler(),
 			$this->newRequest( [
 				'entity' => [
-					EditEndpoint::VERSION_KEY => '0.0.1/minimal',
+					EditRequestParser::VERSION_KEY => '0.0.1/minimal',
 					'statements' => [
 						[
 							'property' => self::URL_PROPERTY,
@@ -121,7 +123,7 @@ class EditEndpointTest extends \MediaWikiIntegrationTestCase {
 	public function getRequestByStatements( array $statements ): RequestInterface {
 		return $this->newRequest( [
 			'entity' => [
-				EditEndpoint::VERSION_KEY => '0.0.1/minimal',
+				EditRequestParser::VERSION_KEY => '0.0.1/minimal',
 				'statements' => $statements,
 			],
 			'reconcile' => [
@@ -279,64 +281,13 @@ class EditEndpointTest extends \MediaWikiIntegrationTestCase {
 		}
 	}
 
-	public function testUnspecifiedEntityInputVersion(): void {
-		/** @var LocalizedHttpException $exception */
-		$exception = $this->executeHandlerAndGetHttpException(
-			$this->newHandler(),
-			$this->newRequest( [
-				'entity' => [
-					'statements' => [
-						[
-							'property' => self::URL_PROPERTY,
-							'value' => 'http://example.com/',
-						],
-					],
-				],
-				'reconcile' => [
-					EditRequestParser::VERSION_KEY => '0.0.1',
-					'urlReconcile' => self::URL_PROPERTY,
-				],
-			] )
-		);
-
-		$this->assertInstanceOf( LocalizedHttpException::class, $exception );
-		$this->assertSame( 'wikibasereconcileedit-editendpoint-unspecified-entity-input-version',
-			$exception->getMessageValue()->getKey() );
-	}
-
-	public function testUnsupportedEntityVersion(): void {
-		/** @var LocalizedHttpException $exception */
-		$exception = $this->executeHandlerAndGetHttpException(
-			$this->newHandler(),
-			$this->newRequest( [
-				'entity' => [
-					EditEndpoint::VERSION_KEY => '0.0.1/potato',
-					'statements' => [
-						[
-							'property' => self::URL_PROPERTY,
-							'value' => 'http://example.com/',
-						],
-					],
-				],
-				'reconcile' => [
-					EditRequestParser::VERSION_KEY => '0.0.1',
-					'urlReconcile' => self::URL_PROPERTY,
-				],
-			] )
-		);
-
-		$this->assertInstanceOf( LocalizedHttpException::class, $exception );
-		$this->assertSame( 'wikibasereconcileedit-editendpoint-invalid-entity-input-version',
-			$exception->getMessageValue()->getKey() );
-	}
-
 	public function testUnsupportedQualifiers(): void {
 		/** @var LocalizedHttpException $exception */
 		$exception = $this->executeHandlerAndGetHttpException(
 			$this->newHandler(),
 			$this->newRequest( [
 				'entity' => [
-					EditEndpoint::VERSION_KEY => '0.0.1/full',
+					EditRequestParser::VERSION_KEY => '0.0.1/full',
 					'type' => 'item',
 					'claims' => [
 						self::URL_PROPERTY => [
@@ -387,7 +338,7 @@ class EditEndpointTest extends \MediaWikiIntegrationTestCase {
 			$this->newHandler(),
 			$this->newRequest( [
 				'entity' => [
-					EditEndpoint::VERSION_KEY => '0.0.1/full',
+					EditRequestParser::VERSION_KEY => '0.0.1/full',
 					'type' => 'item',
 					'claims' => [
 						self::URL_PROPERTY => [
@@ -442,7 +393,7 @@ class EditEndpointTest extends \MediaWikiIntegrationTestCase {
 			$this->newHandler(),
 			$this->newRequest( [
 				'entity' => [
-					EditEndpoint::VERSION_KEY => '0.0.1/minimal',
+					EditRequestParser::VERSION_KEY => '0.0.1/minimal',
 					'statements' => [
 						[
 							'property' => self::URL_PROPERTY_NOT_RECONCILED,
@@ -468,7 +419,7 @@ class EditEndpointTest extends \MediaWikiIntegrationTestCase {
 			$this->newHandler(),
 			$this->newRequest( [
 				'entity' => [
-					EditEndpoint::VERSION_KEY => '0.0.1/full',
+					EditRequestParser::VERSION_KEY => '0.0.1/full',
 					'type' => 'item',
 					'claims' => [
 						self::URL_PROPERTY => [
