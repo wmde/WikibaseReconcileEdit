@@ -7,8 +7,6 @@ use MediaWiki\Extension\WikibaseReconcileEdit\EditStrategy\SimplePutStrategy;
 use MediaWiki\Extension\WikibaseReconcileEdit\InputToEntity\FullWikibaseItemInput;
 use MediaWiki\Extension\WikibaseReconcileEdit\InputToEntity\MinimalItemInput;
 use MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\ReconciliationService;
-use MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\Request\EditRequest;
-use MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\Request\MockEditDiskRequest;
 use MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\Request\UrlInputEditRequest;
 use MediaWiki\Rest\LocalizedHttpException;
 use MediaWiki\Rest\SimpleHandler;
@@ -77,20 +75,9 @@ class EditEndpoint extends SimpleHandler {
 		);
 	}
 
-	/**
-	 * Get an EditRequest object from the current request
-	 * @return EditRequest
-	 */
-	private function getEditRequest() : EditRequest {
-		if ( isset( $_SERVER[ 'HTTP_X_WIKIBASERECONCILEEDIT_USE_DISK_REQUEST' ] ) ) {
-			return new MockEditDiskRequest();
-		}
-		return new UrlInputEditRequest( $this->getRequest() );
-	}
-
 	public function run() {
 		// Get the request
-		$request = $this->getEditRequest();
+		$request = new UrlInputEditRequest( $this->getRequest() );
 
 		// Validate and process reconciliation input
 		// TODO use different services per version
