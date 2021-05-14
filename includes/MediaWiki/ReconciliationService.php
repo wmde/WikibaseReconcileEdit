@@ -11,6 +11,7 @@ use Wikibase\DataModel\Snak\PropertyValueSnak;
 use Wikibase\Lib\Store\EntityIdLookup;
 use Wikibase\Lib\Store\EntityRevisionLookup;
 use Wikibase\Repo\Store\IdGenerator;
+use Wikimedia\Message\MessageValue;
 
 /**
  * Service for reconciling items based on url statements
@@ -79,7 +80,8 @@ class ReconciliationService {
 	 * @param PropertyId $reconcileUrlProperty
 	 * @param string $reconciliationUrl
 	 * @return ReconciliationItem
-	 * @throws \Exception
+	 * @throws ReconciliationException
+	 * @throws \Wikibase\Lib\Store\StorageException
 	 */
 	public function getOrCreateItemByStatementUrl(
 		PropertyID $reconcileUrlProperty,
@@ -98,6 +100,7 @@ class ReconciliationService {
 
 		// Find Items that match the URL and Property ID
 		$itemsThatReferenceTheUrlInCorrectStatement = [];
+		$idsOfItemsThatReferenceTheUrlInCorrectStatement = [];
 		foreach ( $itemIdsThatReferenceTheUrl as $itemId ) {
 			$entityRevision = $this->entityRevisionLookup->getEntityRevision( $itemId );
 			/** @var Item $item */
@@ -116,13 +119,19 @@ class ReconciliationService {
 						$item,
 						$entityRevision->getRevisionId()
 					);
+					array_push( $idsOfItemsThatReferenceTheUrlInCorrectStatement, $item->getId()->serialize() );
 				}
 			}
 		}
 
+		$numberItemsThatReferenceTheUrlInCorrectStatement = count( $itemsThatReferenceTheUrlInCorrectStatement );
 		// If we have more than one item matches, something is wrong and we can't edit
-		if ( count( $itemsThatReferenceTheUrlInCorrectStatement ) > 1 ) {
-			die( 'Matched multiple Items during reconciliation :(' );
+		if ( $numberItemsThatReferenceTheUrlInCorrectStatement > 1 ) {
+			throw new ReconciliationException(
+				MessageValue::new( 'wikibasereconcileedit-reconciliationservice-matched-multiple-items' )
+					->textListParams( $idsOfItemsThatReferenceTheUrlInCorrectStatement )
+					->numParams( $numberItemsThatReferenceTheUrlInCorrectStatement ),
+			);
 		}
 
 		$reconciliationItem = null;
