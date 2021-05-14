@@ -91,12 +91,6 @@ class EditEndpoint extends SimpleHandler {
 		// TODO use different services per version
 		// TODO output an object that controls the reconciliations spec?
 		$inputReconcile = $request->reconcile();
-		if ( $inputReconcile === null ) {
-			throw new LocalizedHttpException(
-				MessageValue::new( 'wikibasereconcileedit-editendpoint-invalid-reconcile-json' ),
-				400
-			);
-		}
 		$supportedReconciliationVersions = [ '0.0.1' ];
 		if (
 			!array_key_exists( self::VERSION_KEY, $inputReconcile ) ||
