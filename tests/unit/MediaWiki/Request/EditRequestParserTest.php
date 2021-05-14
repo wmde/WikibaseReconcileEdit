@@ -7,6 +7,7 @@ use MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\Request\EditRequestParse
 use MediaWiki\Rest\LocalizedHttpException;
 use MediaWiki\Rest\RequestData;
 use PHPUnit\Framework\TestCase;
+use Wikibase\DataModel\Entity\PropertyId;
 
 /**
  * @covers \MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\Request\EditRequestParser
@@ -41,7 +42,7 @@ class EditRequestParserTest extends TestCase {
 				],
 			] ),
 			'reconcile' => json_encode( [
-				EditEndpoint::VERSION_KEY => '0.0.1',
+				EditRequestParser::VERSION_KEY => '0.0.1',
 				'urlReconcile' => 'P1',
 			] ),
 		] ] );
@@ -58,10 +59,10 @@ class EditRequestParserTest extends TestCase {
 				],
 			],
 		], $editRequest->entity() );
-		$this->assertSame( [
-			EditEndpoint::VERSION_KEY => '0.0.1',
-			'urlReconcile' => 'P1',
-		], $editRequest->reconcile() );
+		$this->assertEquals(
+			new PropertyId( 'P1' ),
+			$editRequest->reconcilePropertyId()
+		);
 	}
 
 	/** @dataProvider provideInvalidReconcileJson */
@@ -86,6 +87,63 @@ class EditRequestParserTest extends TestCase {
 		yield 'number' => [ '1' ];
 		yield 'string' => [ '""' ];
 		yield 'null' => [ 'null' ];
+	}
+
+	/** @dataProvider provideUnsupportedReconcileVersion */
+	public function testParseRequestInterface_unsupportedReconcileVersion(
+		?string $reconcileVersion
+	): void {
+		$request = new RequestData( [ 'postParams' => [
+			'entity' => json_encode( self::VALID_ENTITY_PAYLOAD ),
+			'reconcile' => json_encode(
+				$reconcileVersion !== null
+					? [ EditRequestParser::VERSION_KEY => $reconcileVersion ]
+					: []
+			),
+		] ] );
+		$requestParser = new EditRequestParser();
+
+		try {
+			$requestParser->parseRequestInterface( $request );
+			$this->fail( 'expected LocalizedHttpException to be thrown' );
+		} catch ( LocalizedHttpException $e ) {
+			$this->assertSame( 'wikibasereconcileedit-editendpoint-unsupported-reconcile-version',
+				$e->getMessageValue()->getKey() );
+		}
+	}
+
+	public function provideUnsupportedReconcileVersion(): iterable {
+		yield 'missing' => [ null ];
+		yield '0.0.0' => [ '0.0.0' ];
+	}
+
+	/** @dataProvider provideInvalidPropertyId */
+	public function testParseRequestInterface_invalidPropertyId( ?string $propertyId ): void {
+		$request = new RequestData( [ 'postParams' => [
+			'entity' => json_encode( self::VALID_ENTITY_PAYLOAD ),
+			'reconcile' => json_encode(
+				$propertyId !== null
+					? [ EditRequestParser::VERSION_KEY => '0.0.1', 'reconcileUrl' => $propertyId ]
+					: [ EditRequestParser::VERSION_KEY => '0.0.1' ]
+			),
+		] ] );
+		$requestParser = new EditRequestParser();
+
+		try {
+			$requestParser->parseRequestInterface( $request );
+			$this->fail( 'expected LocalizedHttpException to be thrown' );
+		} catch ( LocalizedHttpException $e ) {
+			$this->assertSame( 'wikibasereconcileedit-editendpoint-invalid-reconcile-propertyid',
+				$e->getMessageValue()->getKey() );
+		}
+	}
+
+	public function provideInvalidPropertyId(): iterable {
+		yield 'missing' => [ null ];
+		yield 'empty' => [ '' ];
+		yield 'item ID' => [ 'Q123' ];
+		yield 'statement ID' => [ 'P40$ea25003c-4c23-63fa-86d9-62bfcd2b05a4' ];
+		yield 'numeric part missing' => [ 'P' ];
 	}
 
 }

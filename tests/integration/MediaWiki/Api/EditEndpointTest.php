@@ -4,6 +4,7 @@ namespace MediaWiki\Extension\WikibaseReconcileEdit\Test\MediaWiki\Api;
 
 use MediaWiki\Extension\WikibaseReconcileEdit\InputToEntity\MinimalItemInput;
 use MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\Api\EditEndpoint;
+use MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\Request\EditRequestParser;
 use MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\WikibaseReconcileEditServices;
 use MediaWiki\MediaWikiServices;
 use MediaWiki\Rest\LocalizedHttpException;
@@ -98,7 +99,7 @@ class EditEndpointTest extends \MediaWikiIntegrationTestCase {
 					],
 				],
 				'reconcile' => [
-					EditEndpoint::VERSION_KEY => '0.0.1',
+					EditRequestParser::VERSION_KEY => '0.0.1',
 					'urlReconcile' => self::URL_PROPERTY,
 				],
 			] )
@@ -122,7 +123,7 @@ class EditEndpointTest extends \MediaWikiIntegrationTestCase {
 	public function testExecuteNoPropertyFound() {
 		$reconcilePayload = [
 			'urlReconcile' => self::MISSING_PROPERTY,
-			EditEndpoint::VERSION_KEY => '0.0.1'
+			EditRequestParser::VERSION_KEY => '0.0.1'
 		];
 
 		$request = $this->newRequest( [
@@ -136,23 +137,6 @@ class EditEndpointTest extends \MediaWikiIntegrationTestCase {
 		$this->executeHandlerAndGetBodyData( $handler, $request );
 	}
 
-	public function testUnsupportedReconcileVersion(): void {
-		/** @var LocalizedHttpException $exception */
-		$exception = $this->executeHandlerAndGetHttpException(
-			$this->newHandler(),
-			$this->newRequest( [
-				'entity' => '',
-				'reconcile' => [
-					EditEndpoint::VERSION_KEY => '0.0.0',
-				],
-			] )
-		);
-
-		$this->assertInstanceOf( LocalizedHttpException::class, $exception );
-		$this->assertSame( 'wikibasereconcileedit-editendpoint-unsupported-reconcile-version',
-			$exception->getMessageValue()->getKey() );
-	}
-
 	public function getRequestByStatements( array $statements ): RequestInterface {
 		return $this->newRequest( [
 			'entity' => [
@@ -160,7 +144,7 @@ class EditEndpointTest extends \MediaWikiIntegrationTestCase {
 				'statements' => $statements,
 			],
 			'reconcile' => [
-				EditEndpoint::VERSION_KEY => '0.0.1',
+				EditRequestParser::VERSION_KEY => '0.0.1',
 				'urlReconcile' => self::URL_PROPERTY,
 			],
 		] );
@@ -314,28 +298,6 @@ class EditEndpointTest extends \MediaWikiIntegrationTestCase {
 		}
 	}
 
-	/** @dataProvider provideInvalidUrlReconcile */
-	public function testInvalidUrlReconcile( ?string $urlReconcile ): void {
-		$params = [
-			EditEndpoint::VERSION_KEY => '0.0.1',
-		];
-		if ( $urlReconcile !== null ) {
-			$params['urlReconcile'] = $urlReconcile;
-		}
-		/** @var LocalizedHttpException $exception */
-		$exception = $this->executeHandlerAndGetHttpException(
-			$this->newHandler(),
-			$this->newRequest( [
-				'entity' => '',
-				'reconcile' => $params,
-			] )
-		);
-
-		$this->assertInstanceOf( LocalizedHttpException::class, $exception );
-		$this->assertSame( 'wikibasereconcileedit-editendpoint-invalid-reconcile-propertyid',
-			$exception->getMessageValue()->getKey() );
-	}
-
 	public function testPropertyTypeMustBeURL(): void {
 		/** @var LocalizedHttpException $exception */
 		$exception = $this->executeHandlerAndGetHttpException(
@@ -351,7 +313,7 @@ class EditEndpointTest extends \MediaWikiIntegrationTestCase {
 					],
 				],
 				'reconcile' => [
-					EditEndpoint::VERSION_KEY => '0.0.1',
+					EditRequestParser::VERSION_KEY => '0.0.1',
 					'urlReconcile' => self::STRING_PROPERTY,
 				],
 			] )
@@ -376,7 +338,7 @@ class EditEndpointTest extends \MediaWikiIntegrationTestCase {
 					],
 				],
 				'reconcile' => [
-					EditEndpoint::VERSION_KEY => '0.0.1',
+					EditRequestParser::VERSION_KEY => '0.0.1',
 					'urlReconcile' => self::URL_PROPERTY,
 				],
 			] )
@@ -402,7 +364,7 @@ class EditEndpointTest extends \MediaWikiIntegrationTestCase {
 					],
 				],
 				'reconcile' => [
-					EditEndpoint::VERSION_KEY => '0.0.1',
+					EditRequestParser::VERSION_KEY => '0.0.1',
 					'urlReconcile' => self::URL_PROPERTY,
 				],
 			] )
@@ -453,7 +415,7 @@ class EditEndpointTest extends \MediaWikiIntegrationTestCase {
 					],
 				],
 				'reconcile' => [
-					EditEndpoint::VERSION_KEY => '0.0.1',
+					EditRequestParser::VERSION_KEY => '0.0.1',
 					'urlReconcile' => self::URL_PROPERTY,
 				],
 			] )
@@ -508,7 +470,7 @@ class EditEndpointTest extends \MediaWikiIntegrationTestCase {
 					],
 				],
 				'reconcile' => [
-					EditEndpoint::VERSION_KEY => '0.0.1',
+					EditRequestParser::VERSION_KEY => '0.0.1',
 					'urlReconcile' => self::URL_PROPERTY,
 				],
 			] )
@@ -534,7 +496,7 @@ class EditEndpointTest extends \MediaWikiIntegrationTestCase {
 					],
 				],
 				'reconcile' => [
-					EditEndpoint::VERSION_KEY => '0.0.1',
+					EditRequestParser::VERSION_KEY => '0.0.1',
 					'urlReconcile' => self::URL_PROPERTY,
 				],
 			] )
@@ -568,7 +530,7 @@ class EditEndpointTest extends \MediaWikiIntegrationTestCase {
 					],
 				],
 				'reconcile' => [
-					EditEndpoint::VERSION_KEY => '0.0.1',
+					EditRequestParser::VERSION_KEY => '0.0.1',
 					'urlReconcile' => self::URL_PROPERTY,
 				],
 			] )
@@ -577,14 +539,6 @@ class EditEndpointTest extends \MediaWikiIntegrationTestCase {
 		$this->assertInstanceOf( LocalizedHttpException::class, $exception );
 		$this->assertSame( 'wikibasereconcileedit-editendpoint-invalid-reconciliation-statement-type',
 			$exception->getMessageValue()->getKey() );
-	}
-
-	public function provideInvalidUrlReconcile(): iterable {
-		yield 'missing' => [ null ];
-		yield 'empty' => [ '' ];
-		yield 'item ID' => [ 'Q123' ];
-		yield 'statement ID' => [ 'P40$ea25003c-4c23-63fa-86d9-62bfcd2b05a4' ];
-		yield 'numeric part missing' => [ 'P' ];
 	}
 
 	private function countItemsInDatabase(): int {
