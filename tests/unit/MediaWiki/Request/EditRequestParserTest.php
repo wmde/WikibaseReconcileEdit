@@ -8,6 +8,9 @@ use MediaWiki\Rest\LocalizedHttpException;
 use MediaWiki\Rest\RequestData;
 use PHPUnit\Framework\TestCase;
 use Wikibase\DataModel\Entity\PropertyId;
+use Wikibase\DataModel\Services\Lookup\InMemoryDataTypeLookup;
+use Wikibase\DataModel\Services\Lookup\PropertyDataTypeLookup;
+use Wikibase\DataModel\Services\Lookup\PropertyDataTypeLookupException;
 
 /**
  * @covers \MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\Request\EditRequestParser
@@ -15,6 +18,10 @@ use Wikibase\DataModel\Entity\PropertyId;
  * @license GPL-2.0-or-later
  */
 class EditRequestParserTest extends TestCase {
+
+	private const URL_PROPERTY = 'P1';
+	private const STRING_PROPERTY = 'P2';
+	private const MISSING_PROPERTY = 'P1000';
 
 	/**
 	 * A valid payload for the “entity” parameter,
@@ -24,11 +31,30 @@ class EditRequestParserTest extends TestCase {
 		EditEndpoint::VERSION_KEY => '0.0.1/minimal',
 		'statements' => [
 			[
-				'property' => 'P1',
+				'property' => self::URL_PROPERTY,
 				'value' => 'http://example.com/',
 			],
 		],
 	];
+
+	private function getEditRequestParser(): EditRequestParser {
+		return new EditRequestParser( $this->getPropertyDataTypeLookup() );
+	}
+
+	private function getPropertyDataTypeLookup(): PropertyDataTypeLookup {
+		$propertyDataTypeLookup = new InMemoryDataTypeLookup();
+
+		$propertyDataTypeLookup->setDataTypeForProperty(
+			new PropertyId( self::URL_PROPERTY ),
+			'url'
+		);
+		$propertyDataTypeLookup->setDataTypeForProperty(
+			new PropertyId( self::STRING_PROPERTY ),
+			'string'
+		);
+
+		return $propertyDataTypeLookup;
+	}
 
 	public function testParseRequestInterface_good(): void {
 		$request = new RequestData( [ 'postParams' => [
@@ -36,17 +62,17 @@ class EditRequestParserTest extends TestCase {
 				EditEndpoint::VERSION_KEY => '0.0.1/minimal',
 				'statements' => [
 					[
-						'property' => 'P1',
+						'property' => self::URL_PROPERTY,
 						'value' => 'http://example.com/',
 					],
 				],
 			] ),
 			'reconcile' => json_encode( [
 				EditRequestParser::VERSION_KEY => '0.0.1',
-				'urlReconcile' => 'P1',
+				'urlReconcile' => self::URL_PROPERTY,
 			] ),
 		] ] );
-		$requestParser = new EditRequestParser();
+		$requestParser = $this->getEditRequestParser();
 
 		$editRequest = $requestParser->parseRequestInterface( $request );
 
@@ -54,13 +80,13 @@ class EditRequestParserTest extends TestCase {
 			EditEndpoint::VERSION_KEY => '0.0.1/minimal',
 			'statements' => [
 				[
-					'property' => 'P1',
+					'property' => self::URL_PROPERTY,
 					'value' => 'http://example.com/',
 				],
 			],
 		], $editRequest->entity() );
 		$this->assertEquals(
-			new PropertyId( 'P1' ),
+			new PropertyId( self::URL_PROPERTY ),
 			$editRequest->reconcilePropertyId()
 		);
 	}
@@ -71,7 +97,7 @@ class EditRequestParserTest extends TestCase {
 			'entity' => json_encode( self::VALID_ENTITY_PAYLOAD ),
 			'reconcile' => $reconcile,
 		] ] );
-		$requestParser = new EditRequestParser();
+		$requestParser = $this->getEditRequestParser();
 
 		try {
 			$requestParser->parseRequestInterface( $request );
@@ -101,7 +127,7 @@ class EditRequestParserTest extends TestCase {
 					: []
 			),
 		] ] );
-		$requestParser = new EditRequestParser();
+		$requestParser = $this->getEditRequestParser();
 
 		try {
 			$requestParser->parseRequestInterface( $request );
@@ -127,7 +153,7 @@ class EditRequestParserTest extends TestCase {
 					: [ EditRequestParser::VERSION_KEY => '0.0.1' ]
 			),
 		] ] );
-		$requestParser = new EditRequestParser();
+		$requestParser = $this->getEditRequestParser();
 
 		try {
 			$requestParser->parseRequestInterface( $request );
@@ -144,6 +170,39 @@ class EditRequestParserTest extends TestCase {
 		yield 'item ID' => [ 'Q123' ];
 		yield 'statement ID' => [ 'P40$ea25003c-4c23-63fa-86d9-62bfcd2b05a4' ];
 		yield 'numeric part missing' => [ 'P' ];
+	}
+
+	public function testParseRequestInterface_invalidDataType(): void {
+		$request = new RequestData( [ 'postParams' => [
+			'entity' => json_encode( self::VALID_ENTITY_PAYLOAD ),
+			'reconcile' => json_encode( [
+				EditRequestParser::VERSION_KEY => '0.0.1',
+				'urlReconcile' => self::STRING_PROPERTY,
+			] ),
+		] ] );
+		$requestParser = $this->getEditRequestParser();
+
+		try {
+			$requestParser->parseRequestInterface( $request );
+			$this->fail( 'expected LocalizedHttpException to be thrown' );
+		} catch ( LocalizedHttpException $e ) {
+			$this->assertSame( 'wikibasereconcileedit-editendpoint-invalid-type-property-must-be-url',
+				$e->getMessageValue()->getKey() );
+		}
+	}
+
+	public function testParseRequestInterface_missingProperty(): void {
+		$request = new RequestData( [ 'postParams' => [
+			'entity' => json_encode( self::VALID_ENTITY_PAYLOAD ),
+			'reconcile' => json_encode( [
+				EditRequestParser::VERSION_KEY => '0.0.1',
+				'urlReconcile' => self::MISSING_PROPERTY,
+			] ),
+		] ] );
+		$requestParser = $this->getEditRequestParser();
+
+		$this->expectException( PropertyDataTypeLookupException::class );
+		$requestParser->parseRequestInterface( $request );
 	}
 
 }
