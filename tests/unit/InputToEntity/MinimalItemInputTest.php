@@ -3,7 +3,7 @@
 namespace MediaWiki\Extension\WikibaseReconcileEdit\Tests\Unit\InputToEntity;
 
 use MediaWiki\Extension\WikibaseReconcileEdit\InputToEntity\MinimalItemInput;
-use MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\Request\MockEditDiskRequest;
+use MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\Request\EditRequest;
 use MediaWiki\Extension\WikibaseReconcileEdit\Wikibase\FluidItem;
 use ValueParsers\StringParser;
 use Wikibase\DataModel\Entity\EntityId;
@@ -36,17 +36,37 @@ class MinimalItemInputTest extends \MediaWikiUnitTestCase {
 
 	public function provideTestGetItem() {
 		yield 'Empty' => [
-			__DIR__ . '/data/minimal-empty.json',
+			[
+				'wikibasereconcileedit-version' => '0.0.1/minimal',
+			],
 			new Item()
 		];
 		yield '1 Label' => [
-			__DIR__ . '/data/minimal-label.json',
+			[
+				'wikibasereconcileedit-version' => '0.0.1/minimal',
+				'labels' => [ 'en' => 'en-label' ],
+			],
 			FluidItem::init()
 				->withLabel( 'en', 'en-label' )
 				->item()
 		];
 		yield 'Full' => [
-			__DIR__ . '/data/minimal-complete.json',
+			[
+				'wikibasereconcileedit-version' => '0.0.1/minimal',
+				'labels' => [ 'en' => 'en-label' ],
+				'descriptions' => [ 'fr' => 'fr-desc' ],
+				'aliases' => [ 'en' => [
+					'en-alias1',
+					'en-alias2',
+				] ],
+				'sitelinks' => [ 'site1' => 'SomePage' ],
+				'statements' => [
+					[
+						'property' => 'P23',
+						'value' => 'im-a-string',
+					],
+				],
+			],
 			FluidItem::init()
 				->withLabel( 'en', 'en-label' )
 				->withDescription( 'fr', 'fr-desc' )
@@ -61,9 +81,17 @@ class MinimalItemInputTest extends \MediaWikiUnitTestCase {
 	/**
 	 * @dataProvider provideTestGetItem
 	 */
-	public function testGetItem( string $requestJsonFile, Item $expected ) {
+	public function testGetItem( array $requestEntity, Item $expected ) {
 		$sut = new MinimalItemInput( $this->mockPropertyDataTypeLookup(), $this->mockValueParserFactory() );
-		$new = $sut->getItem( new MockEditDiskRequest( $requestJsonFile, null ) );
+		$req = $this->createMock( EditRequest::class );
+		$req->method( 'entity' )
+			->willReturn( $requestEntity );
+		$req->method( 'reconcile' )
+			->willReturn( [
+				'wikibasereconcileedit-version' => '0.0.1',
+				'urlReconcile' => 'P23',
+			] );
+		$new = $sut->getItem( $req );
 		$this->assertTrue(
 			$new->equals( $expected ),
 			'Expected:' . PHP_EOL . var_export( $expected, true ) . PHP_EOL . PHP_EOL .
