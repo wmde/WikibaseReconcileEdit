@@ -4,6 +4,7 @@ namespace MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\Api;
 
 use DataValues\StringValue;
 use MediaWiki\Extension\WikibaseReconcileEdit\EditStrategy\SimplePutStrategy;
+use MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\ReconciliationException;
 use MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\ReconciliationService;
 use MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\Request\EditRequestParser;
 use MediaWiki\Rest\LocalizedHttpException;
@@ -59,7 +60,11 @@ class EditEndpoint extends SimpleHandler {
 
 	public function run() {
 		// Get the request
-		$request = $this->editRequestParser->parseRequestInterface( $this->getRequest() );
+		try {
+			$request = $this->editRequestParser->parseRequestInterface( $this->getRequest() );
+		} catch ( ReconciliationException $rex ) {
+			throw new LocalizedHttpException( $rex->getMessageValue(), 400 );
+		}
 
 		$reconcileUrlProperty = $request->reconcilePropertyId();
 		$inputEntity = $request->entity();
@@ -97,10 +102,14 @@ class EditEndpoint extends SimpleHandler {
 		$reconciliationDataValue = $reconciliationMainSnak->getDataValue();
 		$reconciliationUrl = $reconciliationDataValue->getValue();
 
-		$reconciliationItem = $this->reconciliationService->getOrCreateItemByStatementUrl(
-			$reconcileUrlProperty,
-			$reconciliationUrl
-		);
+		try {
+			$reconciliationItem = $this->reconciliationService->getOrCreateItemByStatementUrl(
+				$reconcileUrlProperty,
+				$reconciliationUrl
+			);
+		} catch ( ReconciliationException $rex ) {
+			throw new LocalizedHttpException( $rex->getMessageValue(), 400 );
+		}
 
 		// And make the edit
 		$toSave = $this->simplePutStrategy->apply( $reconciliationItem->getItem(), $inputEntity );

@@ -4,6 +4,7 @@ namespace MediaWiki\Extension\WikibaseReconcileEdit\Tests\Unit\MediaWiki;
 
 use DataValues\StringValue;
 use MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\ExternalLinks;
+use MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\ReconciliationException;
 use MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\ReconciliationItem;
 use MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\ReconciliationService;
 use Title;
@@ -221,5 +222,72 @@ class ReconciliationServiceTest extends \MediaWikiUnitTestCase {
 
 		$this->assertEquals( $expectedRevision ? $itemId : $newItemID, $reconcileItem->getItem()->getId() );
 		$this->assertEquals( $expectedRevision, $reconcileItem->getRevision() );
+	}
+
+	public function testMatchedMultipleItems() {
+		$pageId0 = 0;
+		$pageId1 = 1;
+
+		$title0 = $this->createMock( Title::class );
+		$title1 = $this->createMock( Title::class );
+
+		$itemId = new ItemId( 'Q10' );
+
+		$propertyId = new PropertyId( 'P1' );
+		$reconcileUrl = "http://www.something-nice";
+
+		$item = new Item( $itemId );
+		$item->setStatements(
+			new StatementList(
+				new Statement(
+					new PropertyValueSnak(
+						$propertyId,
+						new StringValue( $reconcileUrl )
+					)
+				),
+			)
+		);
+
+		$itemRevision = 1234;
+
+		$titleFactory = $this->createMock( TitleFactory::class );
+		$titleFactory->method( 'newFromIDs' )
+			->with( [ $pageId0, $pageId1 ] )
+			->willReturn( [ $title0, $title1 ] );
+
+		$entityIdLookup = $this->createMock( EntityIdLookup::class );
+		$entityIdLookup->method( 'getEntityIds' )
+			->with( [ $title0, $title1 ] )
+			->willReturn( [ new ItemId( 'Q1' ), new ItemId( 'Q2' ) ] );
+
+		$entityRevisionLookup = $this->createMock( EntityRevisionLookup::class );
+		$entityRevisionLookup->expects( $this->exactly( 2 ) )
+			->method( 'getEntityRevision' )
+			->willReturn( new EntityRevision( $item, $itemRevision ) );
+
+		$idGenerator = $this->createMock( IdGenerator::class );
+		$idGenerator->expects( $this->never() )
+			->method( 'getNewId' );
+
+		$externalLinks = $this->createMock( ExternalLinks::class );
+		$externalLinks->expects( $this->once() )
+			->method( 'pageIdsContainingUrl' )
+			->willReturn( [ $pageId0, $pageId1 ] );
+
+		$service = new ReconciliationService(
+			$entityIdLookup,
+			$entityRevisionLookup,
+			$idGenerator,
+			$externalLinks,
+			$titleFactory
+		);
+
+		try {
+			$exception = $service->getOrCreateItemByStatementUrl( $propertyId, $reconcileUrl );
+			$this->fail( 'expected ReconciliationException to be thrown' );
+		} catch ( ReconciliationException $rex ) {
+			$this->assertSame( 'wikibasereconcileedit-reconciliationservice-matched-multiple-items',
+				$rex->getMessageValue()->getKey() );
+		}
 	}
 }
