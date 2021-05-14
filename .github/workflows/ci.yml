@@ -62,9 +62,9 @@ jobs:
               env: ${{ matrix.env }}
               run: |
                   cd ..
-                  php mediawiki/tests/phpunit/phpunit.php mediawiki/extensions/WikibaseReconcileEdit/tests/unit
+                  php mediawiki/tests/phpunit/phpunit.php mediawiki/extensions/WikibaseReconcileEdit/tests/phpunit/unit
             - name: Run integration test
               env: ${{ matrix.env }}
               run: |
                   cd ..
-                  php mediawiki/tests/phpunit/phpunit.php mediawiki/extensions/WikibaseReconcileEdit/tests/integration
+                  php mediawiki/tests/phpunit/phpunit.php mediawiki/extensions/WikibaseReconcileEdit/tests/phpunit/integration
