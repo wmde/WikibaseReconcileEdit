@@ -18,7 +18,9 @@ return [
 		$repo = WikibaseRepo::getDefaultInstance();
 
 		return new EditRequestParser(
-			$repo->getPropertyDataTypeLookup()
+			$repo->getPropertyDataTypeLookup(),
+			WikibaseReconcileEditServices::getFullWikibaseItemInput( $services ),
+			WikibaseReconcileEditServices::getMinimalItemInput( $services )
 		);
 	},
 

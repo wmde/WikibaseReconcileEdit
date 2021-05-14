@@ -22,8 +22,6 @@
 			"factory": "MediaWiki\\Extension\\WikibaseReconcileEdit\\MediaWiki\\Api\\EditEndpoint::factory",
 			"services": [
 				"WikibaseReconcileEdit.EditRequestParser",
-				"WikibaseReconcileEdit.FullWikibaseItemInput",
-				"WikibaseReconcileEdit.MinimalItemInput",
 				"WikibaseReconcileEdit.ReconciliationService",
 				"WikibaseReconcileEdit.SimplePutStrategy"
 			]

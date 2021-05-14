@@ -4,7 +4,6 @@ namespace MediaWiki\Extension\WikibaseReconcileEdit\Tests\Unit\InputToEntity;
 
 use MediaWiki\Extension\WikibaseReconcileEdit\InputToEntity\MinimalItemInput;
 use MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\ReconciliationService;
-use MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\Request\EditRequest;
 use MediaWiki\Extension\WikibaseReconcileEdit\Wikibase\FluidItem;
 use ValueParsers\StringParser;
 use Wikibase\DataModel\Entity\EntityId;
@@ -89,16 +88,10 @@ class MinimalItemInputTest extends \MediaWikiUnitTestCase {
 			$this->mockValueParserFactory(),
 			$this->mockReconciliationService()
 		);
-		$req = $this->createMock( EditRequest::class );
-		$req->method( 'entity' )
-			->willReturn( $requestEntity );
 
 		$prop = new PropertyId( 'P23' );
 
-		$req->method( 'reconcilePropertyId' )
-			->willReturn( $prop );
-
-		$newItems = $sut->getItem( $req, $prop );
+		$newItems = $sut->getItem( $requestEntity, $prop );
 		$new = $newItems[0];
 
 		$this->assertTrue(

@@ -4,8 +4,6 @@ namespace MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\Api;
 
 use DataValues\StringValue;
 use MediaWiki\Extension\WikibaseReconcileEdit\EditStrategy\SimplePutStrategy;
-use MediaWiki\Extension\WikibaseReconcileEdit\InputToEntity\FullWikibaseItemInput;
-use MediaWiki\Extension\WikibaseReconcileEdit\InputToEntity\MinimalItemInput;
 use MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\ReconciliationService;
 use MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\Request\EditRequestParser;
 use MediaWiki\Rest\LocalizedHttpException;
@@ -20,8 +18,6 @@ use Wikimedia\ParamValidator\ParamValidator;
 
 class EditEndpoint extends SimpleHandler {
 
-	public const VERSION_KEY = "wikibasereconcileedit-version";
-
 	/** @var MediawikiEditEntityFactory */
 	private $editEntityFactory;
 
@@ -31,35 +27,23 @@ class EditEndpoint extends SimpleHandler {
 	/** @var ReconciliationService */
 	private $reconciliationService;
 
-	/** @var FullWikibaseItemInput */
-	private $fullWikibaseItemInput;
-
-	/** @var MinimalItemInput */
-	private $minimalItemInput;
-
 	/** @var SimplePutStrategy */
 	private $simplePutStrategy;
 
 	public function __construct(
 		MediawikiEditEntityFactory $editEntityFactory,
 		EditRequestParser $editRequestParser,
-		FullWikibaseItemInput $fullWikibaseItemInput,
-		MinimalItemInput $minimalItemInput,
 		ReconciliationService $reconciliationService,
 		SimplePutStrategy $simplePutStrategy
 	) {
 		$this->editEntityFactory = $editEntityFactory;
 		$this->editRequestParser = $editRequestParser;
 		$this->reconciliationService = $reconciliationService;
-		$this->fullWikibaseItemInput = $fullWikibaseItemInput;
-		$this->minimalItemInput = $minimalItemInput;
 		$this->simplePutStrategy = $simplePutStrategy;
 	}
 
 	public static function factory(
 		EditRequestParser $editRequestParser,
-		FullWikibaseItemInput $fullWikibaseItemInput,
-		MinimalItemInput $minimalItemInput,
 		ReconciliationService $reconciliationService,
 		SimplePutStrategy $simplePutStrategy
 	): self {
@@ -68,8 +52,6 @@ class EditEndpoint extends SimpleHandler {
 		return new self(
 			$repo->newEditEntityFactory(),
 			$editRequestParser,
-			$fullWikibaseItemInput,
-			$minimalItemInput,
 			$reconciliationService,
 			$simplePutStrategy
 		);
@@ -80,33 +62,8 @@ class EditEndpoint extends SimpleHandler {
 		$request = $this->editRequestParser->parseRequestInterface( $this->getRequest() );
 
 		$reconcileUrlProperty = $request->reconcilePropertyId();
-
-		// Get Item from input
-		if ( !array_key_exists( self::VERSION_KEY, $request->entity() ) ) {
-			throw new LocalizedHttpException(
-				MessageValue::new( 'wikibasereconcileedit-editendpoint-unspecified-entity-input-version' ),
-				400
-			);
-		}
-		$supportedEntityVersions = [ '0.0.1/full', '0.0.1/minimal' ];
-		$inputEntityVersion = $request->entity()[self::VERSION_KEY];
-		if ( $inputEntityVersion === '0.0.1/full' ) {
-			$inputEntity = $this->fullWikibaseItemInput->getItem( $request );
-			$otherItems = [];
-		} elseif ( $inputEntityVersion === '0.0.1/minimal' ) {
-			[ $inputEntity, $otherItems ] = $this->minimalItemInput->getItem(
-				$request,
-				$reconcileUrlProperty
-			);
-		} else {
-			throw new LocalizedHttpException(
-				MessageValue::new( 'wikibasereconcileedit-editendpoint-invalid-entity-input-version' )
-					->textParams( $inputEntityVersion )
-					->textListParams( $supportedEntityVersions )
-					->numParams( count( $supportedEntityVersions ) ),
-				400
-			);
-		}
+		$inputEntity = $request->entity();
+		$otherItems = $request->otherItems();
 
 		// Validate Entity
 		// Don't support references, qualifiers

@@ -2,6 +2,8 @@
 
 namespace MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\Request;
 
+use MediaWiki\Extension\WikibaseReconcileEdit\InputToEntity\FullWikibaseItemInput;
+use MediaWiki\Extension\WikibaseReconcileEdit\InputToEntity\MinimalItemInput;
 use MediaWiki\Rest\LocalizedHttpException;
 use MediaWiki\Rest\RequestInterface;
 use Wikibase\DataModel\Entity\PropertyId;
@@ -15,15 +17,26 @@ class EditRequestParser {
 
 	public const VERSION_KEY = "wikibasereconcileedit-version";
 
+	private const SUPPORTED_ENTITY_VERSIONS = [ '0.0.1/full', '0.0.1/minimal' ];
 	private const SUPPORTED_RECONCILE_VERSIONS = [ '0.0.1' ];
 
 	/** @var PropertyDataTypeLookup */
 	private $propertyDataTypeLookup;
 
+	/** @var FullWikibaseItemInput */
+	private $fullWikibaseItemInput;
+
+	/** @var MinimalItemInput */
+	private $minimalItemInput;
+
 	public function __construct(
-		PropertyDataTypeLookup $propertyDataTypeLookup
+		PropertyDataTypeLookup $propertyDataTypeLookup,
+		FullWikibaseItemInput $fullWikibaseItemInput,
+		MinimalItemInput $minimalItemInput
 	) {
 		$this->propertyDataTypeLookup = $propertyDataTypeLookup;
+		$this->fullWikibaseItemInput = $fullWikibaseItemInput;
+		$this->minimalItemInput = $minimalItemInput;
 	}
 
 	public function parseRequestInterface( RequestInterface $request ): EditRequest {
@@ -76,9 +89,36 @@ class EditRequestParser {
 			true
 		) ?: null;
 
+		if (
+			// TODO separate error message for invalid entity JSON?
+			!is_array( $entity ) ||
+			!array_key_exists( self::VERSION_KEY, $entity )
+		) {
+			throw new LocalizedHttpException(
+				MessageValue::new( 'wikibasereconcileedit-editendpoint-unspecified-entity-input-version' ),
+				400
+			);
+		}
+		$inputEntityVersion = $entity[self::VERSION_KEY];
+		if ( $inputEntityVersion === '0.0.1/full' ) {
+			$inputEntity = $this->fullWikibaseItemInput->getItem( $entity );
+			$otherItems = [];
+		} elseif ( $inputEntityVersion === '0.0.1/minimal' ) {
+			[ $inputEntity, $otherItems ] = $this->minimalItemInput->getItem( $entity, $reconcilePropertyId );
+		} else {
+			throw new LocalizedHttpException(
+				MessageValue::new( 'wikibasereconcileedit-editendpoint-invalid-entity-input-version' )
+					->textParams( $inputEntityVersion )
+					->textListParams( self::SUPPORTED_ENTITY_VERSIONS )
+					->numParams( count( self::SUPPORTED_ENTITY_VERSIONS ) ),
+				400
+			);
+		}
+
 		return new EditRequest(
 			$reconcilePropertyId,
-			$entity
+			$inputEntity,
+			$otherItems
 		);
 	}
 

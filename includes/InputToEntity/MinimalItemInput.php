@@ -5,7 +5,6 @@ namespace MediaWiki\Extension\WikibaseReconcileEdit\InputToEntity;
 use DataValues\DataValue;
 use MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\ReconciliationItem;
 use MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\ReconciliationService;
-use MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\Request\EditRequest;
 use ValueParsers\ParserOptions;
 use Wikibase\DataModel\Entity\EntityIdValue;
 use Wikibase\DataModel\Entity\Item;
@@ -43,12 +42,11 @@ class MinimalItemInput {
 	}
 
 	/**
-	 * @param EditRequest $request
+	 * @param array $inputEntity
+	 * @param PropertyId $reconcileUrlProperty
 	 * @return array( Item, ReconciliationItem[] )
 	 */
-	public function getItem( EditRequest $request, PropertyId $reconcileUrlProperty ) : array {
-		$inputEntity = $request->entity();
-
+	public function getItem( array $inputEntity, PropertyId $reconcileUrlProperty ) : array {
 		$item = new Item();
 		$otherItems = [];
 
