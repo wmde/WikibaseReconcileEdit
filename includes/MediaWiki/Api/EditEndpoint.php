@@ -126,38 +126,62 @@ class EditEndpoint extends SimpleHandler {
 		}
 		$reconcileUrlProperty = new PropertyId( $inputReconcile['urlReconcile'] );
 		// For now this property must be of URL type
-		if ( $this->propertyDataTypeLookup->getDataTypeIdForProperty( $reconcileUrlProperty ) !== 'url' ) {
-			die( 'urlReconcile property must be of type url' );
+		$datatypeReconcileProperty = $this->propertyDataTypeLookup->getDataTypeIdForProperty( $reconcileUrlProperty );
+		if ( $datatypeReconcileProperty !== 'url' ) {
+			throw new LocalizedHttpException(
+				MessageValue::new( 'wikibasereconcileedit-editendpoint-invalid-type-property-must-be-url' )
+				->textParams( 'urlReconcile', $inputReconcile['urlReconcile'], $datatypeReconcileProperty ),
+				400
+			);
 		}
 
 		// Get Item from input
 		if ( !array_key_exists( self::VERSION_KEY, $request->entity() ) ) {
-			die( 'entity input version must be specified in key ' . self::VERSION_KEY );
+			throw new LocalizedHttpException(
+				MessageValue::new( 'wikibasereconcileedit-editendpoint-unspecified-entity-input-version' ),
+				400
+			);
 		}
+		$supportedEntityVersions = [ '0.0.1/full', '0.0.1/minimal' ];
 		$inputEntityVersion = $request->entity()[self::VERSION_KEY];
 		if ( $inputEntityVersion === '0.0.1/full' ) {
 			$inputEntity = $this->fullWikibaseItemInput->getItem( $request );
 		} elseif ( $inputEntityVersion === '0.0.1/minimal' ) {
 			$inputEntity = $this->minimalItemInput->getItem( $request );
 		} else {
-			die( 'unknown entity input version' );
+			throw new LocalizedHttpException(
+				MessageValue::new( 'wikibasereconcileedit-editendpoint-invalid-entity-input-version' )
+					->textParams( $inputEntityVersion )
+					->textListParams( $supportedEntityVersions )
+					->numParams( count( $supportedEntityVersions ) ),
+				400
+			);
 		}
 
 		// Validate Entity
 		// Don't support references, qualifiers
 		foreach ( $inputEntity->getStatements()->toArray() as $statement ) {
 			if ( $statement->getQualifiers()->count() !== 0 || $statement->getReferences()->count() !== 0 ) {
-				die( 'Qualifiers and References are not currently supported' );
+				throw new LocalizedHttpException(
+					MessageValue::new( 'wikibasereconcileedit-editendpoint-qualifiers-references-not-supported' ),
+					400
+				);
 			}
 		}
 		// Check for our reconciliation value
 		$reconciliationStatements = $inputEntity->getStatements()->getByPropertyId( $reconcileUrlProperty );
 		if ( $reconciliationStatements->count() !== 1 ) {
-			die( 'Entity must have at least one statement for the reconciliation Property' );
+			throw new LocalizedHttpException(
+				MessageValue::new( 'wikibasereconcileedit-editendpoint-reconciliation-property-missing-in-statements' ),
+				400
+			);
 		}
 		$reconciliationStatement = $reconciliationStatements->toArray()[0];
 		if ( !$reconciliationStatement->getMainSnak() instanceof PropertyValueSnak ) {
-			die( 'Reconciliation statement must be of type value ' );
+			throw new LocalizedHttpException(
+				MessageValue::new( 'wikibasereconcileedit-editendpoint-invalid-reconciliation-statement-type' ),
+				400
+			);
 		}
 
 		/** @var PropertyValueSnak $reconciliationMainSnak */

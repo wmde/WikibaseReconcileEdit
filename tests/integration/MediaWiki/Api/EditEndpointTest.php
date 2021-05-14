@@ -26,6 +26,8 @@ class EditEndpointTest extends \MediaWikiIntegrationTestCase {
 	use HandlerTestTrait;
 
 	private const URL_PROPERTY = 'P1';
+	private const URL_PROPERTY_NOT_RECONCILED = 'P15';
+	private const STRING_PROPERTY = 'P2';
 	private const MISSING_PROPERTY = 'P1000';
 
 	protected function setUp(): void {
@@ -40,6 +42,16 @@ class EditEndpointTest extends \MediaWikiIntegrationTestCase {
 		$propertyDataTypeLookup->setDataTypeForProperty(
 			new PropertyId( self::URL_PROPERTY ),
 			'url'
+		);
+
+		$propertyDataTypeLookup->setDataTypeForProperty(
+			new PropertyId( self::URL_PROPERTY_NOT_RECONCILED ),
+			'url'
+		);
+
+		$propertyDataTypeLookup->setDataTypeForProperty(
+			new PropertyId( self::STRING_PROPERTY ),
+			'string'
 		);
 
 		$repo = WikibaseRepo::getDefaultInstance();
@@ -175,6 +187,249 @@ class EditEndpointTest extends \MediaWikiIntegrationTestCase {
 
 		$this->assertInstanceOf( LocalizedHttpException::class, $exception );
 		$this->assertSame( 'wikibasereconcileedit-editendpoint-invalid-reconcile-propertyid',
+			$exception->getMessageValue()->getKey() );
+	}
+
+	public function testPropertyTypeMustBeURL(): void {
+		/** @var LocalizedHttpException $exception */
+		$exception = $this->executeHandlerAndGetHttpException(
+			$this->newHandler(),
+			$this->newRequest( [
+				'entity' => [
+					EditEndpoint::VERSION_KEY => '0.0.1/minimal',
+					'statements' => [
+						[
+							'property' => self::STRING_PROPERTY,
+							'value' => 'http://example.com/',
+						],
+					],
+				],
+				'reconcile' => [
+					EditEndpoint::VERSION_KEY => '0.0.1',
+					'urlReconcile' => self::STRING_PROPERTY,
+				],
+			] )
+		);
+
+		$this->assertInstanceOf( LocalizedHttpException::class, $exception );
+		$this->assertSame( 'wikibasereconcileedit-editendpoint-invalid-type-property-must-be-url',
+			$exception->getMessageValue()->getKey() );
+	}
+
+	public function testUnspecifiedEntityInputVersion(): void {
+		/** @var LocalizedHttpException $exception */
+		$exception = $this->executeHandlerAndGetHttpException(
+			$this->newHandler(),
+			$this->newRequest( [
+				'entity' => [
+					'statements' => [
+						[
+							'property' => self::URL_PROPERTY,
+							'value' => 'http://example.com/',
+						],
+					],
+				],
+				'reconcile' => [
+					EditEndpoint::VERSION_KEY => '0.0.1',
+					'urlReconcile' => self::URL_PROPERTY,
+				],
+			] )
+		);
+
+		$this->assertInstanceOf( LocalizedHttpException::class, $exception );
+		$this->assertSame( 'wikibasereconcileedit-editendpoint-unspecified-entity-input-version',
+			$exception->getMessageValue()->getKey() );
+	}
+
+	public function testUnsupportedEntityVersion(): void {
+		/** @var LocalizedHttpException $exception */
+		$exception = $this->executeHandlerAndGetHttpException(
+			$this->newHandler(),
+			$this->newRequest( [
+				'entity' => [
+					EditEndpoint::VERSION_KEY => '0.0.1/potato',
+					'statements' => [
+						[
+							'property' => self::URL_PROPERTY,
+							'value' => 'http://example.com/',
+						],
+					],
+				],
+				'reconcile' => [
+					EditEndpoint::VERSION_KEY => '0.0.1',
+					'urlReconcile' => self::URL_PROPERTY,
+				],
+			] )
+		);
+
+		$this->assertInstanceOf( LocalizedHttpException::class, $exception );
+		$this->assertSame( 'wikibasereconcileedit-editendpoint-invalid-entity-input-version',
+			$exception->getMessageValue()->getKey() );
+	}
+
+	public function testUnsupportedQualifiers(): void {
+		/** @var LocalizedHttpException $exception */
+		$exception = $this->executeHandlerAndGetHttpException(
+			$this->newHandler(),
+			$this->newRequest( [
+				'entity' => [
+					EditEndpoint::VERSION_KEY => '0.0.1/full',
+					'type' => 'item',
+					'claims' => [
+						self::URL_PROPERTY => [
+							[
+								'mainsnak' => [
+									'snaktype' => 'value',
+									'property' => self::URL_PROPERTY,
+									'datavalue' => [
+										'value' => 'http://example.com/',
+										'type' => 'string'
+									],
+									'datatype' => 'url'
+								],
+								'type' => 'statement',
+								'rank' => 'normal',
+								'qualifiers' => [
+									self::STRING_PROPERTY => [
+										[
+											'snaktype' => 'value',
+											'property' => self::STRING_PROPERTY,
+											'datavalue' => [
+												'value' => 'potato',
+												'type' => 'string'
+											],
+											'datatype' => 'string'
+										]
+									]
+								]
+							]
+						],
+					],
+				],
+				'reconcile' => [
+					EditEndpoint::VERSION_KEY => '0.0.1',
+					'urlReconcile' => self::URL_PROPERTY,
+				],
+			] )
+		);
+
+		$this->assertInstanceOf( LocalizedHttpException::class, $exception );
+		$this->assertSame( 'wikibasereconcileedit-editendpoint-qualifiers-references-not-supported',
+			$exception->getMessageValue()->getKey() );
+	}
+
+	public function testUnsupportedReferences(): void {
+		/** @var LocalizedHttpException $exception */
+		$exception = $this->executeHandlerAndGetHttpException(
+			$this->newHandler(),
+			$this->newRequest( [
+				'entity' => [
+					EditEndpoint::VERSION_KEY => '0.0.1/full',
+					'type' => 'item',
+					'claims' => [
+						self::URL_PROPERTY => [
+							[
+								'mainsnak' => [
+									'snaktype' => 'value',
+									'property' => self::URL_PROPERTY,
+									'datavalue' => [
+										'value' => 'http://example.com/',
+										'type' => 'string'
+									],
+									'datatype' => 'url'
+								],
+								'type' => 'statement',
+								'rank' => 'normal',
+								'references' => [
+									[
+										'snaks' => [
+											self::STRING_PROPERTY => [
+												[
+													'snaktype' => 'value',
+													'property' => self::STRING_PROPERTY,
+													'datavalue' => [
+														'value' => 'potato',
+														'type' => 'string'
+													],
+													'datatype' => 'external-id'
+												]
+											]
+										]
+									]
+								]
+							]
+						],
+					],
+				],
+				'reconcile' => [
+					EditEndpoint::VERSION_KEY => '0.0.1',
+					'urlReconcile' => self::URL_PROPERTY,
+				],
+			] )
+		);
+
+		$this->assertInstanceOf( LocalizedHttpException::class, $exception );
+		$this->assertSame( 'wikibasereconcileedit-editendpoint-qualifiers-references-not-supported',
+			$exception->getMessageValue()->getKey() );
+	}
+
+	public function testReconciliationPropertyMissingInStatements(): void {
+		/** @var LocalizedHttpException $exception */
+		$exception = $this->executeHandlerAndGetHttpException(
+			$this->newHandler(),
+			$this->newRequest( [
+				'entity' => [
+					EditEndpoint::VERSION_KEY => '0.0.1/minimal',
+					'statements' => [
+						[
+							'property' => self::URL_PROPERTY_NOT_RECONCILED,
+							'value' => 'http://example.com/',
+						],
+					],
+				],
+				'reconcile' => [
+					EditEndpoint::VERSION_KEY => '0.0.1',
+					'urlReconcile' => self::URL_PROPERTY,
+				],
+			] )
+		);
+
+		$this->assertInstanceOf( LocalizedHttpException::class, $exception );
+		$this->assertSame( 'wikibasereconcileedit-editendpoint-reconciliation-property-missing-in-statements',
+			$exception->getMessageValue()->getKey() );
+	}
+
+	public function testInvalidSnakTypeValue(): void {
+		/** @var LocalizedHttpException $exception */
+		$exception = $this->executeHandlerAndGetHttpException(
+			$this->newHandler(),
+			$this->newRequest( [
+				'entity' => [
+					EditEndpoint::VERSION_KEY => '0.0.1/full',
+					'type' => 'item',
+					'claims' => [
+						self::URL_PROPERTY => [
+							[
+								'mainsnak' => [
+									'snaktype' => 'somevalue',
+									'property' => self::URL_PROPERTY,
+									'datatype' => 'url'
+								],
+								'type' => 'statement',
+								'rank' => 'normal',
+							]
+						],
+					],
+				],
+				'reconcile' => [
+					EditEndpoint::VERSION_KEY => '0.0.1',
+					'urlReconcile' => self::URL_PROPERTY,
+				],
+			] )
+		);
+
+		$this->assertInstanceOf( LocalizedHttpException::class, $exception );
+		$this->assertSame( 'wikibasereconcileedit-editendpoint-invalid-reconciliation-statement-type',
 			$exception->getMessageValue()->getKey() );
 	}
 
