@@ -5,6 +5,7 @@ namespace MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\Request;
 use MediaWiki\Rest\LocalizedHttpException;
 use MediaWiki\Rest\RequestInterface;
 use Wikibase\DataModel\Entity\PropertyId;
+use Wikibase\DataModel\Services\Lookup\PropertyDataTypeLookup;
 use Wikimedia\Message\MessageValue;
 
 /**
@@ -15,6 +16,15 @@ class EditRequestParser {
 	public const VERSION_KEY = "wikibasereconcileedit-version";
 
 	private const SUPPORTED_RECONCILE_VERSIONS = [ '0.0.1' ];
+
+	/** @var PropertyDataTypeLookup */
+	private $propertyDataTypeLookup;
+
+	public function __construct(
+		PropertyDataTypeLookup $propertyDataTypeLookup
+	) {
+		$this->propertyDataTypeLookup = $propertyDataTypeLookup;
+	}
 
 	public function parseRequestInterface( RequestInterface $request ): EditRequest {
 		$reconcile = json_decode(
@@ -51,6 +61,15 @@ class EditRequestParser {
 			);
 		}
 		$reconcilePropertyId = new PropertyId( $reconcile['urlReconcile'] );
+
+		$datatype = $this->propertyDataTypeLookup->getDataTypeIdForProperty( $reconcilePropertyId );
+		if ( $datatype !== 'url' ) {
+			throw new LocalizedHttpException(
+				MessageValue::new( 'wikibasereconcileedit-editendpoint-invalid-type-property-must-be-url' )
+					->textParams( 'urlReconcile', $reconcilePropertyId->getSerialization(), $datatype ),
+				400
+			);
+		}
 
 		$entity = json_decode(
 			$request->getPostParams()['entity'],

@@ -15,7 +15,11 @@ use Wikibase\Repo\WikibaseRepo;
 return [
 
 	'WikibaseReconcileEdit.EditRequestParser' => function ( MediaWikiServices $services ): EditRequestParser {
-		return new EditRequestParser();
+		$repo = WikibaseRepo::getDefaultInstance();
+
+		return new EditRequestParser(
+			$repo->getPropertyDataTypeLookup()
+		);
 	},
 
 	'WikibaseReconcileEdit.ExternalLinks' => function ( MediaWikiServices $services ): ExternalLinks {

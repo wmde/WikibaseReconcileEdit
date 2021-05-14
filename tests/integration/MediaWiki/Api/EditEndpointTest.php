@@ -16,7 +16,6 @@ use Wikibase\DataModel\Entity\Item;
 use Wikibase\DataModel\Entity\ItemId;
 use Wikibase\DataModel\Entity\Property;
 use Wikibase\DataModel\Entity\PropertyId;
-use Wikibase\DataModel\Services\Lookup\PropertyDataTypeLookupException;
 use Wikibase\DataModel\Snak\PropertyValueSnak;
 use Wikibase\Repo\WikibaseRepo;
 
@@ -62,8 +61,7 @@ class EditEndpointTest extends \MediaWikiIntegrationTestCase {
 		$propertyDataTypeLookup = WikibaseRepo::getDefaultInstance()->getPropertyDataTypeLookup();
 		return new EditEndpoint(
 			$repo->newEditEntityFactory(),
-			$propertyDataTypeLookup,
-			WikibaseReconcileEditServices::getEditRequestParser(),
+			new EditRequestParser( $propertyDataTypeLookup ),
 			WikibaseReconcileEditServices::getFullWikibaseItemInput(),
 			new MinimalItemInput(
 				$propertyDataTypeLookup,
@@ -118,23 +116,6 @@ class EditEndpointTest extends \MediaWikiIntegrationTestCase {
 		$snak = $snaks[0];
 		$this->assertInstanceOf( PropertyValueSnak::class, $snak );
 		$this->assertSame( 'http://example.com/', $snak->getDataValue()->getValue() );
-	}
-
-	public function testExecuteNoPropertyFound() {
-		$reconcilePayload = [
-			'urlReconcile' => self::MISSING_PROPERTY,
-			EditRequestParser::VERSION_KEY => '0.0.1'
-		];
-
-		$request = $this->newRequest( [
-			'entity' => [],
-			'reconcile' => $reconcilePayload,
-		] );
-
-		$handler = $this->newHandler();
-
-		$this->expectException( PropertyDataTypeLookupException::class );
-		$this->executeHandlerAndGetBodyData( $handler, $request );
 	}
 
 	public function getRequestByStatements( array $statements ): RequestInterface {
@@ -296,32 +277,6 @@ class EditEndpointTest extends \MediaWikiIntegrationTestCase {
 			}
 
 		}
-	}
-
-	public function testPropertyTypeMustBeURL(): void {
-		/** @var LocalizedHttpException $exception */
-		$exception = $this->executeHandlerAndGetHttpException(
-			$this->newHandler(),
-			$this->newRequest( [
-				'entity' => [
-					EditEndpoint::VERSION_KEY => '0.0.1/minimal',
-					'statements' => [
-						[
-							'property' => self::STRING_PROPERTY,
-							'value' => 'http://example.com/',
-						],
-					],
-				],
-				'reconcile' => [
-					EditRequestParser::VERSION_KEY => '0.0.1',
-					'urlReconcile' => self::STRING_PROPERTY,
-				],
-			] )
-		);
-
-		$this->assertInstanceOf( LocalizedHttpException::class, $exception );
-		$this->assertSame( 'wikibasereconcileedit-editendpoint-invalid-type-property-must-be-url',
-			$exception->getMessageValue()->getKey() );
 	}
 
 	public function testUnspecifiedEntityInputVersion(): void {

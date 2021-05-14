@@ -15,6 +15,10 @@ class EditRequest {
 	/** @var array|null */
 	private $entity;
 
+	/**
+	 * @param PropertyId $reconcilePropertyId Must have the datatype "url".
+	 * @param array|null $entity
+	 */
 	public function __construct( PropertyId $reconcilePropertyId, ?array $entity ) {
 		$this->reconcilePropertyId = $reconcilePropertyId;
 		$this->entity = $entity;
@@ -22,6 +26,8 @@ class EditRequest {
 
 	/**
 	 * The property ID that should be used for reconciliation.
+	 *
+	 * The property is guaranteed to have the datatype "url".
 	 */
 	public function reconcilePropertyId(): PropertyId {
 		return $this->reconcilePropertyId;

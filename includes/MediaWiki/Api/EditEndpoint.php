@@ -11,7 +11,6 @@ use MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\Request\EditRequestParse
 use MediaWiki\Rest\LocalizedHttpException;
 use MediaWiki\Rest\SimpleHandler;
 use Status;
-use Wikibase\DataModel\Services\Lookup\PropertyDataTypeLookup;
 use Wikibase\DataModel\Snak\PropertyValueSnak;
 use Wikibase\Lib\Store\EntityRevision;
 use Wikibase\Repo\EditEntity\MediawikiEditEntityFactory;
@@ -25,9 +24,6 @@ class EditEndpoint extends SimpleHandler {
 
 	/** @var MediawikiEditEntityFactory */
 	private $editEntityFactory;
-
-	/** @var PropertyDataTypeLookup */
-	private $propertyDataTypeLookup;
 
 	/** @var EditRequestParser */
 	private $editRequestParser;
@@ -46,7 +42,6 @@ class EditEndpoint extends SimpleHandler {
 
 	public function __construct(
 		MediawikiEditEntityFactory $editEntityFactory,
-		PropertyDataTypeLookup $propertyDataTypeLookup,
 		EditRequestParser $editRequestParser,
 		FullWikibaseItemInput $fullWikibaseItemInput,
 		MinimalItemInput $minimalItemInput,
@@ -54,7 +49,6 @@ class EditEndpoint extends SimpleHandler {
 		SimplePutStrategy $simplePutStrategy
 	) {
 		$this->editEntityFactory = $editEntityFactory;
-		$this->propertyDataTypeLookup = $propertyDataTypeLookup;
 		$this->editRequestParser = $editRequestParser;
 		$this->reconciliationService = $reconciliationService;
 		$this->fullWikibaseItemInput = $fullWikibaseItemInput;
@@ -73,7 +67,6 @@ class EditEndpoint extends SimpleHandler {
 
 		return new self(
 			$repo->newEditEntityFactory(),
-			$repo->getPropertyDataTypeLookup(),
 			$editRequestParser,
 			$fullWikibaseItemInput,
 			$minimalItemInput,
@@ -87,15 +80,6 @@ class EditEndpoint extends SimpleHandler {
 		$request = $this->editRequestParser->parseRequestInterface( $this->getRequest() );
 
 		$reconcileUrlProperty = $request->reconcilePropertyId();
-		// For now this property must be of URL type
-		$datatypeReconcileProperty = $this->propertyDataTypeLookup->getDataTypeIdForProperty( $reconcileUrlProperty );
-		if ( $datatypeReconcileProperty !== 'url' ) {
-			throw new LocalizedHttpException(
-				MessageValue::new( 'wikibasereconcileedit-editendpoint-invalid-type-property-must-be-url' )
-				->textParams( 'urlReconcile', $reconcileUrlProperty->getSerialization(), $datatypeReconcileProperty ),
-				400
-			);
-		}
 
 		// Get Item from input
 		if ( !array_key_exists( self::VERSION_KEY, $request->entity() ) ) {
