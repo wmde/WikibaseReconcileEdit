@@ -33,7 +33,8 @@ return [
 
 		return new MinimalItemInput(
 			$repo->getPropertyDataTypeLookup(),
-			$repo->getValueParserFactory()
+			$repo->getValueParserFactory(),
+			WikibaseReconcileEditServices::getReconciliationService( $services )
 		);
 	},
 

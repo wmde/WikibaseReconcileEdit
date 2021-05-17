@@ -10,6 +10,7 @@ use MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\ReconciliationService;
 use MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\Request\UrlInputEditRequest;
 use MediaWiki\Rest\LocalizedHttpException;
 use MediaWiki\Rest\SimpleHandler;
+use Status;
 use Wikibase\DataModel\Entity\PropertyId;
 use Wikibase\DataModel\Services\Lookup\PropertyDataTypeLookup;
 use Wikibase\DataModel\Snak\PropertyValueSnak;
@@ -133,8 +134,12 @@ class EditEndpoint extends SimpleHandler {
 		$inputEntityVersion = $request->entity()[self::VERSION_KEY];
 		if ( $inputEntityVersion === '0.0.1/full' ) {
 			$inputEntity = $this->fullWikibaseItemInput->getItem( $request );
+			$otherItems = [];
 		} elseif ( $inputEntityVersion === '0.0.1/minimal' ) {
-			$inputEntity = $this->minimalItemInput->getItem( $request );
+			[ $inputEntity, $otherItems ] = $this->minimalItemInput->getItem(
+				$request,
+				$reconcileUrlProperty
+			);
 		} else {
 			throw new LocalizedHttpException(
 				MessageValue::new( 'wikibasereconcileedit-editendpoint-invalid-entity-input-version' )
@@ -184,19 +189,55 @@ class EditEndpoint extends SimpleHandler {
 
 		// And make the edit
 		$toSave = $this->simplePutStrategy->apply( $reconciliationItem->getItem(), $inputEntity );
+		$saveStatus = Status::newGood();
+
+		foreach ( $otherItems as $otherItem ) {
+			// don't need to save this again
+			if ( $otherItem->getRevision() ) {
+				continue;
+			}
+
+			// The base item references itself through a statement
+			// It will be saved at a later stage so no need to do it here
+			if ( $otherItem->getItem() === $toSave ) {
+				continue;
+			}
+
+			$otherItemEdit = $this->editEntityFactory->newEditEntity(
+				// TODO use a real user
+				\User::newSystemUser( 'WikibaseReconcileEditReconciliator' ),
+				$otherItem->getItem()->getId(),
+				false
+			);
+
+			$saveStatus->merge( $otherItemEdit->attemptSave(
+				$otherItem->getItem(),
+				'Reconciliation Edit',
+				EDIT_NEW,
+				// TODO actually do a token check?
+				false
+			), true );
+			if ( !$saveStatus->isOK() ) {
+				break;
+			}
+		}
+
 		$editEntity = $this->editEntityFactory->newEditEntity(
 			// TODO use a real user
 			\User::newSystemUser( 'WikibaseReconcileEditReconciliator' ),
 			$toSave->getId(),
 			$reconciliationItem->getRevision()
 		);
-		$saveStatus = $editEntity->attemptSave(
-			$toSave,
-			'Reconciliation Edit',
-			$reconciliationItem->getRevision() ? null : EDIT_NEW,
-			// TODO actually do a token check?
-			false
-		);
+
+		if ( $saveStatus->isOK() ) {
+			$saveStatus->merge( $editEntity->attemptSave(
+				$toSave,
+				'Reconciliation Edit',
+				$reconciliationItem->getRevision() ? null : EDIT_NEW,
+				// TODO actually do a token check?
+				false
+			), true );
+		}
 
 		// Make some sort of response
 		$response = [

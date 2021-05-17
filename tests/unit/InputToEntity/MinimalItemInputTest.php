@@ -3,11 +3,13 @@
 namespace MediaWiki\Extension\WikibaseReconcileEdit\Tests\Unit\InputToEntity;
 
 use MediaWiki\Extension\WikibaseReconcileEdit\InputToEntity\MinimalItemInput;
+use MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\ReconciliationService;
 use MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\Request\EditRequest;
 use MediaWiki\Extension\WikibaseReconcileEdit\Wikibase\FluidItem;
 use ValueParsers\StringParser;
 use Wikibase\DataModel\Entity\EntityId;
 use Wikibase\DataModel\Entity\Item;
+use Wikibase\DataModel\Entity\PropertyId;
 use Wikibase\DataModel\Services\Lookup\PropertyDataTypeLookup;
 use Wikibase\Repo\ValueParserFactory;
 
@@ -82,21 +84,36 @@ class MinimalItemInputTest extends \MediaWikiUnitTestCase {
 	 * @dataProvider provideTestGetItem
 	 */
 	public function testGetItem( array $requestEntity, Item $expected ) {
-		$sut = new MinimalItemInput( $this->mockPropertyDataTypeLookup(), $this->mockValueParserFactory() );
+		$sut = new MinimalItemInput(
+			$this->mockPropertyDataTypeLookup(),
+			$this->mockValueParserFactory(),
+			$this->mockReconciliationService()
+		);
 		$req = $this->createMock( EditRequest::class );
 		$req->method( 'entity' )
 			->willReturn( $requestEntity );
+
+		$prop = new PropertyId( 'P23' );
+
 		$req->method( 'reconcile' )
 			->willReturn( [
 				'wikibasereconcileedit-version' => '0.0.1',
-				'urlReconcile' => 'P23',
+				'urlReconcile' => $prop->serialize(),
 			] );
-		$new = $sut->getItem( $req );
+
+		$newItems = $sut->getItem( $req, $prop );
+		$new = $newItems[0];
+
 		$this->assertTrue(
 			$new->equals( $expected ),
 			'Expected:' . PHP_EOL . var_export( $expected, true ) . PHP_EOL . PHP_EOL .
 			'Actual:' . PHP_EOL . var_export( $new, true )
 		);
+	}
+
+	private function mockReconciliationService() {
+		$mock = $this->createMock( ReconciliationService::class );
+		return $mock;
 	}
 
 }

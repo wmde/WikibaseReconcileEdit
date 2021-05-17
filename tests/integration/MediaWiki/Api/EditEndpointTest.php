@@ -62,7 +62,8 @@ class EditEndpointTest extends \MediaWikiIntegrationTestCase {
 			WikibaseReconcileEditServices::getFullWikibaseItemInput(),
 			new MinimalItemInput(
 				$propertyDataTypeLookup,
-				$repo->getValueParserFactory()
+				$repo->getValueParserFactory(),
+				WikibaseReconcileEditServices::getReconciliationService()
 			),
 			WikibaseReconcileEditServices::getReconciliationService(),
 			WikibaseReconcileEditServices::getSimplePutStrategy()
