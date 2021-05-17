@@ -2,7 +2,6 @@
 
 namespace MediaWiki\Extension\WikibaseReconcileEdit\InputToEntity;
 
-use DataValues\DataValue;
 use MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\ReconciliationItem;
 use MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\ReconciliationService;
 use ValueParsers\ParserOptions;
@@ -122,9 +121,6 @@ class MinimalItemInput {
 		// TODO add specific options?
 		$parser = $this->valueParserFactory->newParser( $name, new ParserOptions );
 		$parseResult = $parser->parse( $value );
-		if ( !$parseResult instanceof DataValue ) {
-			die( 'Failed to parse statement value' );
-		}
 		return [ $parseResult, [] ];
 	}
 
