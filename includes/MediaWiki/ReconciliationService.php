@@ -2,6 +2,7 @@
 
 namespace MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki;
 
+use DataValues\StringValue;
 use TitleFactory;
 use Wikibase\DataModel\Entity\Item;
 use Wikibase\DataModel\Entity\ItemId;
@@ -30,6 +31,16 @@ class ReconciliationService {
 
 	/** @var TitleFactory */
 	private $titleFactory;
+
+	/**
+	 * Per-request cache for reconciled items
+	 *
+	 * Example:
+	 *  [ 'P1' => [ 'http://reconciled-url' => ReconciliationItem ] ]
+	 *
+	 * @var ReconciliationItem[][]
+	 */
+	private $reconciliationItems = [];
 
 	public function __construct(
 		EntityIdLookup $entityIdLookup,
@@ -74,10 +85,16 @@ class ReconciliationService {
 		PropertyID $reconcileUrlProperty,
 		string $reconciliationUrl
 	) : ReconciliationItem {
+		// return the same item if we already reconciled it
+		$propertyId = $reconcileUrlProperty->getSerialization();
+		if ( array_key_exists( $propertyId, $this->reconciliationItems )
+			 && array_key_exists( $reconciliationUrl, $this->reconciliationItems[$propertyId] ) ) {
+			return $this->reconciliationItems[$propertyId][$reconciliationUrl];
+		}
+
 		// Find Items that use the URL
-		$itemIdsThatReferenceTheUrl = $this->getItemIdsFromPageIds(
-			$this->externalLinks->pageIdsContainingUrl( $reconciliationUrl )
-		);
+		$externalLinkIds = $this->externalLinks->pageIdsContainingUrl( $reconciliationUrl );
+		$itemIdsThatReferenceTheUrl = $this->getItemIdsFromPageIds( $externalLinkIds );
 
 		// Find Items that match the URL and Property ID
 		$itemsThatReferenceTheUrlInCorrectStatement = [];
@@ -108,15 +125,25 @@ class ReconciliationService {
 			die( 'Matched multiple Items during reconciliation :(' );
 		}
 
+		$reconciliationItem = null;
+
 		// Get our base
 		if ( count( $itemsThatReferenceTheUrlInCorrectStatement ) === 1 ) {
-			return $itemsThatReferenceTheUrlInCorrectStatement[0];
+			$reconciliationItem = $itemsThatReferenceTheUrlInCorrectStatement[0];
 		} else {
 			$base = new Item();
 			// XXX: this is a bit evil, but needed to work around the fact we want to mint statement guids
 			$base->setId( ItemId::newFromNumber( $this->idGenerator->getNewId( 'wikibase-item' ) ) );
-			return new ReconciliationItem( $base, false );
+			$reconciliationItem = new ReconciliationItem( $base, false );
+
+			// if this is a new item, we need to put the reconciliation statement in it
+			$reconciliationItem->getItem()->getStatements()->addNewStatement(
+				new PropertyValueSnak( $reconcileUrlProperty, new StringValue( $reconciliationUrl ) )
+			);
 		}
+
+		$this->reconciliationItems[$propertyId][$reconciliationUrl] = $reconciliationItem;
+		return $reconciliationItem;
 	}
 
 }

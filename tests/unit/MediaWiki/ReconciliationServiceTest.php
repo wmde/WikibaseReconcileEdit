@@ -4,6 +4,7 @@ namespace MediaWiki\Extension\WikibaseReconcileEdit\Tests\Unit\MediaWiki;
 
 use DataValues\StringValue;
 use MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\ExternalLinks;
+use MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\ReconciliationItem;
 use MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\ReconciliationService;
 use Title;
 use TitleFactory;
@@ -17,6 +18,7 @@ use Wikibase\Lib\Store\EntityIdLookup;
 use Wikibase\Lib\Store\EntityRevision;
 use Wikibase\Lib\Store\EntityRevisionLookup;
 use Wikibase\Repo\Store\IdGenerator;
+use Wikimedia\TestingAccessWrapper;
 
 /**
  * @covers \MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\ReconciliationService
@@ -24,7 +26,18 @@ use Wikibase\Repo\Store\IdGenerator;
 class ReconciliationServiceTest extends \MediaWikiUnitTestCase {
 
 	public function testNoExternalLinksFound() {
+		$propertyId = new PropertyId( 'P1' );
+		$reconcileUrl = "http://www.something-nice";
+
 		$expectedItem = new Item( new ItemId( 'Q10' ) );
+		$expectedItem->setStatements( new StatementList(
+			new Statement(
+				new PropertyValueSnak(
+					$propertyId,
+					new StringValue( $reconcileUrl )
+				)
+			)
+		) );
 
 		$titleFactory = $this->createMock( TitleFactory::class );
 		$titleFactory->method( 'newFromIDs' )
@@ -57,9 +70,6 @@ class ReconciliationServiceTest extends \MediaWikiUnitTestCase {
 			$externalLinks,
 			$titleFactory
 		);
-
-		$propertyId = new PropertyId( 'P1' );
-		$reconcileUrl = "http://www.something-nice";
 
 		$reconcileItem = $service->getOrCreateItemByStatementUrl( $propertyId, $reconcileUrl );
 
@@ -111,6 +121,28 @@ class ReconciliationServiceTest extends \MediaWikiUnitTestCase {
 			'itemRevision' => 1234,
 			'expectedRevision' => false,
 		];
+
+		$existingItemId = new ItemId( 'Q1' );
+		yield 'matches on already reconciled item' => [
+			$p1,
+			$someUrl,
+			$existingItemId,
+			new StatementList(
+				new Statement(
+					new PropertyValueSnak(
+						$p1,
+						new StringValue( $someUrl )
+					)
+				)
+			),
+			'itemRevision' => 1234,
+			'expectedRevision' => 5678,
+			'alreadyReconciledItems' => [
+				$p1->serialize() => [
+					$someUrl => new ReconciliationItem( new Item( $existingItemId ), 5678 )
+				]
+			]
+		];
 	}
 
 	/**
@@ -121,8 +153,9 @@ class ReconciliationServiceTest extends \MediaWikiUnitTestCase {
 	 * @param ItemId $itemId
 	 * @param StatementList $itemStatements
 	 * @param int $itemRevision revision ID returned by the entity revision lookup
-	 * @param int|false $expectedRevision expected revision ID returned by the reconciliation service
-	 * (either $itemRevision or false)
+	 * @param int|false $expectedRevision revision ID returned by the service (either $itemRevision or false)
+	 * @param array $alreadyReconciledItems
+	 *
 	 */
 	public function testGetItemByStatementUrlFoundSomething(
 		PropertyId $reconcilePropertyId,
@@ -130,7 +163,8 @@ class ReconciliationServiceTest extends \MediaWikiUnitTestCase {
 		ItemId $itemId,
 		StatementList $itemStatements,
 		int $itemRevision,
-		$expectedRevision
+		$expectedRevision,
+		$alreadyReconciledItems = []
 	) {
 		$newItemIDNumeric = 10;
 		$newItemID = new ItemId( 'Q' . $newItemIDNumeric );
@@ -180,7 +214,10 @@ class ReconciliationServiceTest extends \MediaWikiUnitTestCase {
 			$titleFactory
 		);
 
-		$reconcileItem = $service->getOrCreateItemByStatementUrl( $reconcilePropertyId, $reconcileUrl );
+		$wrapper = TestingAccessWrapper::newFromObject( $service );
+		$wrapper->reconciliationItems = $alreadyReconciledItems;
+
+		$reconcileItem = $wrapper->getOrCreateItemByStatementUrl( $reconcilePropertyId, $reconcileUrl );
 
 		$this->assertEquals( $expectedRevision ? $itemId : $newItemID, $reconcileItem->getItem()->getId() );
 		$this->assertEquals( $expectedRevision, $reconcileItem->getRevision() );
