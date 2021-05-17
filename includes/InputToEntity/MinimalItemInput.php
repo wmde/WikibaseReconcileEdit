@@ -2,6 +2,7 @@
 
 namespace MediaWiki\Extension\WikibaseReconcileEdit\InputToEntity;
 
+use MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\ReconciliationException;
 use MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\ReconciliationItem;
 use MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\ReconciliationService;
 use ValueParsers\ParserOptions;
@@ -12,6 +13,7 @@ use Wikibase\DataModel\Services\Lookup\PropertyDataTypeLookup;
 use Wikibase\DataModel\SiteLink;
 use Wikibase\DataModel\Snak\PropertyValueSnak;
 use Wikibase\Repo\ValueParserFactory;
+use Wikimedia\Message\MessageValue;
 
 class MinimalItemInput {
 
@@ -76,11 +78,18 @@ class MinimalItemInput {
 
 		if ( array_key_exists( 'statements', $inputEntity ) ) {
 			foreach ( $inputEntity['statements'] as $statementDetails ) {
-				if (
-					!array_key_exists( 'property', $statementDetails ) ||
-					!array_key_exists( 'value', $statementDetails )
-				) {
-					die( 'statements must have property and value keys' );
+				if ( !array_key_exists( 'property', $statementDetails ) ) {
+					throw new ReconciliationException(
+						MessageValue::new(
+							'wikibasereconcileedit-minimaliteminput-required-keys' )
+							->textParams( 'property' )
+					);
+				} elseif ( !array_key_exists( 'value', $statementDetails ) ) {
+					throw new ReconciliationException(
+						MessageValue::new(
+							'wikibasereconcileedit-minimaliteminput-required-keys' )
+							->textParams( 'value' )
+					);
 				}
 				$propertyId = new PropertyId( $statementDetails['property'] );
 				[ $dataValue, $reconciliationItems ] = $this->getDataValue(

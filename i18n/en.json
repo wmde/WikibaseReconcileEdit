@@ -15,5 +15,6 @@
 	"wikibasereconcileedit-editendpoint-qualifiers-references-not-supported": "Qualifiers and References are not currently supported",
 	"wikibasereconcileedit-editendpoint-reconciliation-property-missing-in-statements": "Entity must have at least one statement for the reconciliation Property",
 	"wikibasereconcileedit-editendpoint-invalid-reconciliation-statement-type": "Reconciliation statement must contain a value",
-	"wikibasereconcileedit-reconciliationservice-matched-multiple-items": "The reconciliation is ambiguous; matched {{PLURAL:$2|item|$2 items}}: $1"
+	"wikibasereconcileedit-reconciliationservice-matched-multiple-items": "The reconciliation is ambiguous; matched {{PLURAL:$2|item|$2 items}}: $1",
+	"wikibasereconcileedit-minimaliteminput-required-keys": "Statements missing '$1' key"
 }
