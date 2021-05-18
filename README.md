@@ -104,3 +104,23 @@ Edit payload `0.0.1/full` should look like this:
 ```
 
 **Note: that you do not need to provide statement GUIDs or any hashes.**
+
+## Javascript Api testing
+
+Copy [.api-testing.config.json.template](.api-testing.config.json.template) to `.api-testing.config.json` and fill out required parameters. 
+
+Run the tests
+
+```sh
+npm run api-testing 
+```
+
+Lint the tests
+```sh
+npm run api-testing-lint 
+```
+
+Fix the linting issues
+```sh
+npm run api-testing-lint-fix 
+```
