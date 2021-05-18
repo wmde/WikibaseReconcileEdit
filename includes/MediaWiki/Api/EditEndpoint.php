@@ -164,7 +164,8 @@ class EditEndpoint extends SimpleHandler {
 			$response['entityId'] = $entityRevision->getEntity()->getId()->getSerialization();
 			$response['revisionId'] = $entityRevision->getRevisionId();
 		}
-		return json_encode( $response );
+
+		return $response;
 	}
 
 	public function needsWriteAccess() {

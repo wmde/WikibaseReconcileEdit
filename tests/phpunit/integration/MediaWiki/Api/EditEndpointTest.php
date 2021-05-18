@@ -104,7 +104,6 @@ class EditEndpointTest extends \MediaWikiIntegrationTestCase {
 				],
 			] )
 		);
-		$response = json_decode( $response['value'], true );
 		$this->assertTrue( $response['success'] );
 
 		$itemId = new ItemId( $response['entityId'] );
@@ -234,7 +233,6 @@ class EditEndpointTest extends \MediaWikiIntegrationTestCase {
 		for ( $requestIndex = 0; $requestIndex < count( $requests ); ++$requestIndex ) {
 			$request = $this->getRequestByStatements( $requests[$requestIndex] );
 			$response = $this->executeHandlerAndGetBodyData( $this->newHandler(), $request );
-			$response = json_decode( $response['value'], true );
 			$this->assertTrue( $response['success'] );
 			$itemId = new ItemId( $response['entityId'] );
 
