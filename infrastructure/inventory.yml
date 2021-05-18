@@ -1,0 +1,14 @@
+test_systems:
+  hosts:
+    wb-reconcile.wikidata-dev.eqiad1.wikimedia.cloud:
+      SCHEME: "https"
+      SERVER_NAME: "wikibase-reconcile-testing.wmcloud.org"
+      PORT: ""
+
+  vars:
+    ansible_python_interpreter: "/usr/bin/python3"
+    PROJECT_NAME: "WikibaseReconcileEdit"
+    PROJECT_DIR: "/opt/{{ PROJECT_NAME }}"
+    SCRIPTS_DIR: "{{ PROJECT_DIR }}/scripts"
+    LOG_DIR: "{{ PROJECT_DIR }}/log"
+    MW_PATH: "{{ PROJECT_DIR }}/src"

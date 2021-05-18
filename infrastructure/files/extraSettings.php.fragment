@@ -1,0 +1,30 @@
+# Disable Compression
+$wgDisableOutputCompression = true;
+
+# configure short URLs (article path should be set by install.php)
+$wgArticlePath = "/wiki/$1";
+
+## Wikibase
+require_once "$IP/extensions/Wikibase/repo/Wikibase.php";
+require_once "$IP/extensions/Wikibase/repo/ExampleSettings.php";
+require_once "$IP/extensions/Wikibase/client/WikibaseClient.php";
+require_once "$IP/extensions/Wikibase/client/ExampleSettings.php";
+
+## WikibaseReconcileEdit
+wfLoadExtension( 'WikibaseReconcileEdit' );
+
+## CLDR
+wfLoadExtension( 'cldr' );
+
+## ULS
+wfLoadExtension( 'UniversalLanguageSelector' );
+
+## OAuth
+wfLoadExtension( 'OAuth' );
+
+# enable debugging
+$wgDebugComments = true;
+
+# disable anonymous editing and registration (crude anti-spam measure)
+$wgGroupPermissions['*']['edit'] = false;
+$wgGroupPermissions['*']['createaccount'] = false;
