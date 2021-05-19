@@ -4,6 +4,7 @@ namespace MediaWiki\Extension\WikibaseReconcileEdit\Tests\Integration\Mediawiki;
 
 use LinkFilter;
 use MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\ExternalLinks;
+use Wikimedia\Assert\InvariantException;
 use Wikimedia\Rdbms\LoadBalancerSingle;
 
 /**
@@ -93,6 +94,14 @@ class ExternalLinksTest extends \MediaWikiIntegrationTestCase {
 		$result = $externalLinks->pageIdsContainingUrl( $url );
 
 		$this->assertSame( [], $result );
+	}
+
+	public function testGetSingleIndex() {
+		$url = 'whatever';
+		$externalLinks = $this->newExternalLinks();
+
+		$this->expectException( InvariantException::class );
+		$result = $externalLinks->pageIdsContainingUrl( $url );
 	}
 
 }
