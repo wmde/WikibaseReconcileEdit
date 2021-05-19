@@ -18,7 +18,7 @@ services:
             - DB_SERVER=mysql.svc:3306
             - MW_ADMIN_NAME=admin
             - MW_ADMIN_PASS=secret-password
-            - MW_WG_SECRET_KEY=secretkey
+            - MW_WG_SECRET_KEY=secret-key
             - DB_USER=root
             - DB_PASS=root
             - DB_NAME=test_db_wiki

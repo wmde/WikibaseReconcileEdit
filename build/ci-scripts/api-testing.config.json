@@ -5,8 +5,5 @@
 		"name": "admin",
 		"password": "secret-password"
 	},
-	"secret_key": "abcdef",
-	"extra_parameters": {
-		"xdebug_session": "PHPSTORM"
-	}
+	"secret_key": "secret-key"
 }
