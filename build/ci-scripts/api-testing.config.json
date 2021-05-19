@@ -1,0 +1,12 @@
+{
+	"base_uri": "http://localhost:8484/w/",
+	"main_page": "Main_Page",
+	"root_user": {
+		"name": "admin",
+		"password": "secret-password"
+	},
+	"secret_key": "abcdef",
+	"extra_parameters": {
+		"xdebug_session": "PHPSTORM"
+	}
+}
