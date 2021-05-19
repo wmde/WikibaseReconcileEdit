@@ -16,5 +16,6 @@
 	"wikibasereconcileedit-editendpoint-reconciliation-property-missing-in-statements": "Error returned by the API if the “entity” request parameter doesn't contain a statement that uses the reconciliation property",
 	"wikibasereconcileedit-editendpoint-invalid-reconciliation-statement-type": "Error returned by the API if the “entity” request parameter if the reconciliation statement's mainsnak is not of type value",
 	"wikibasereconcileedit-reconciliationservice-matched-multiple-items": "Error returned by the API if the reconciliation request matches multiple items.\n\nParameters:\n* $1 – the matched items (comma-separated list)\n* $2 – the number of matched items",
-	"wikibasereconcileedit-minimaliteminput-required-keys": "Error returned by the API if the minimal item input statements parameter is missing a certain key.\n\nParameters:\n $1 - the missing key"
+	"wikibasereconcileedit-minimaliteminput-required-keys": "Error returned by the API if the minimal item input statements parameter is missing a certain key.\n\nParameters:\n $1 - the missing key",
+	"wikibasereconcileedit-fullwikibaseiteminput-unsupported-type": "Error returned by the API if the full wikibase item input's type parameter is not supported.\n\nParameters:\n* $1 – the supported types (comma-separated list)\n* $2 – the number of supported types"
 }

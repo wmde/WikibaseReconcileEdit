@@ -3,7 +3,9 @@
 namespace MediaWiki\Extension\WikibaseReconcileEdit\InputToEntity;
 
 use Deserializers\Deserializer;
+use MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\ReconciliationException;
 use Wikibase\DataModel\Entity\Item;
+use Wikimedia\Message\MessageValue;
 
 class FullWikibaseItemInput {
 
@@ -20,10 +22,14 @@ class FullWikibaseItemInput {
 	}
 
 	public function getItem( array $inputEntity ) : Item {
-		if ( !array_key_exists( 'type', $inputEntity ) || $inputEntity['type'] !== 'item' ) {
-			die( 'Only supported entity type is \'item\'' );
+		$supportedTypes = [ 'item' ];
+		if ( !array_key_exists( 'type', $inputEntity ) || !in_array( $inputEntity['type'], $supportedTypes ) ) {
+			throw new ReconciliationException(
+				MessageValue::new( 'wikibasereconcileedit-fullwikibaseiteminput-unsupported-type' )
+					->textListParams( $supportedTypes )
+					->numParams( count( $supportedTypes ) )
+			);
 		}
-
 		return $this->deserializer->deserialize( $inputEntity );
 	}
 
