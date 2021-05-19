@@ -3,6 +3,7 @@
 namespace MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki;
 
 use LinkFilter;
+use Wikimedia\Assert\Assert;
 use Wikimedia\Rdbms\ILoadBalancer;
 
 /**
@@ -29,7 +30,7 @@ class ExternalLinks {
 			'el_from',
 			[
 				'el_to' => $url,
-				'el_index' => $this->getSingleIndexOrDie( $url ),
+				'el_index' => $this->getSingleIndexOrThrowException( $url ),
 			],
 			__METHOD__
 		);
@@ -39,11 +40,11 @@ class ExternalLinks {
 	 * @param string $url
 	 * @return string the el_index value
 	 */
-	private function getSingleIndexOrDie( string $url ) : string {
+	private function getSingleIndexOrThrowException( string $url ) : string {
 		$indexes = LinkFilter::makeIndexes( $url );
-		if ( count( $indexes ) !== 1 ) {
-			die( 'Unexpected issue with LinkFilter return' );
-		}
+
+		Assert::invariant( count( $indexes ) === 1, 'Unexpected issue with LinkFilter return' );
+
 		return $indexes[0];
 	}
 
