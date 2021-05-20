@@ -7,12 +7,18 @@ use MediaWiki\Extension\WikibaseReconcileEdit\InputToEntity\FullWikibaseItemInpu
 use MediaWiki\Extension\WikibaseReconcileEdit\InputToEntity\MinimalItemInput;
 use MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\Request\EditRequestParser;
 use MediaWiki\MediaWikiServices;
+use MediaWiki\OAuthClient\Client;
 use Psr\Container\ContainerInterface;
 
 class WikibaseReconcileEditServices {
 
 	private function __construct() {
 		// should not be instantiated
+	}
+
+	public static function getOAuthClient( ContainerInterface $services = null ): Client {
+		return ( $services ?: MediaWikiServices::getInstance() )
+			->get( 'WikibaseReconcileEdit.OAuthClient' );
 	}
 
 	public static function getEditRequestParser( ContainerInterface $services = null ): EditRequestParser {

@@ -8,6 +8,9 @@ use MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\ReconciliationService;
 use MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\Request\EditRequestParser;
 use MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\WikibaseReconcileEditServices;
 use MediaWiki\MediaWikiServices;
+use MediaWiki\OAuthClient\Client;
+use MediaWiki\OAuthClient\ClientConfig;
+use MediaWiki\OAuthClient\Consumer;
 use Wikibase\DataModel\Services\Statement\GuidGenerator;
 use Wikibase\Repo\WikibaseRepo;
 
@@ -65,6 +68,18 @@ return [
 		return new SimplePutStrategy(
 			new GuidGenerator()
 		);
+	},
+
+	'WikibaseReconcileEdit.OAuthClient' => static function ( MediaWikiServices $services ): Client {
+		$configOption = [
+			'key' => 'key',
+			'secret' => 'secret',
+		];
+
+		$authUrl = wfExpandUrl( wfAppendQuery( wfScript(), 'title=Special:OAuth' ) );
+		$conf = new ClientConfig( $authUrl );
+		$conf->setConsumer(new Consumer( $configOption['key'], $configOption['secret'] ));
+		return new Client( $conf );
 	},
 
 ];

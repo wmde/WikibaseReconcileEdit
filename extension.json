@@ -4,7 +4,10 @@
 	"license-name": "GPL-2.0-or-later",
 	"type": "other",
 	"requires": {
-		"MediaWiki": ">= 1.35.0"
+		"MediaWiki": ">= 1.35.0",
+		"extensions": {
+			"WikibaseRepository": "*"
+		}
 	},
 	"AutoloadNamespaces": {
 		"MediaWiki\\Extension\\WikibaseReconcileEdit\\": "includes/"
@@ -23,7 +26,8 @@
 			"services": [
 				"WikibaseReconcileEdit.EditRequestParser",
 				"WikibaseReconcileEdit.ReconciliationService",
-				"WikibaseReconcileEdit.SimplePutStrategy"
+				"WikibaseReconcileEdit.SimplePutStrategy",
+				"WikibaseReconcileEdit.OAuthClient"
 			]
 		}
 	],

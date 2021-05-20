@@ -16,5 +16,8 @@
 			"phpcs -p -s",
 			"minus-x check ."
 		]
+	},
+	"require": {
+		"mediawiki/oauthclient": "^1.1"
 	}
 }

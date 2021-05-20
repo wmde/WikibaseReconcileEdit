@@ -7,6 +7,7 @@ use MediaWiki\Extension\WikibaseReconcileEdit\EditStrategy\SimplePutStrategy;
 use MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\ReconciliationException;
 use MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\ReconciliationService;
 use MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\Request\EditRequestParser;
+use MediaWiki\OAuthClient\Client;
 use MediaWiki\Rest\LocalizedHttpException;
 use MediaWiki\Rest\SimpleHandler;
 use Status;
@@ -31,22 +32,28 @@ class EditEndpoint extends SimpleHandler {
 	/** @var SimplePutStrategy */
 	private $simplePutStrategy;
 
+	/** @var Client */
+	private $oauthClient;
+
 	public function __construct(
 		MediawikiEditEntityFactory $editEntityFactory,
 		EditRequestParser $editRequestParser,
 		ReconciliationService $reconciliationService,
-		SimplePutStrategy $simplePutStrategy
+		SimplePutStrategy $simplePutStrategy,
+		Client $oauthClient
 	) {
 		$this->editEntityFactory = $editEntityFactory;
 		$this->editRequestParser = $editRequestParser;
 		$this->reconciliationService = $reconciliationService;
 		$this->simplePutStrategy = $simplePutStrategy;
+		$this->oauthClient = $oauthClient;
 	}
 
 	public static function factory(
 		EditRequestParser $editRequestParser,
 		ReconciliationService $reconciliationService,
-		SimplePutStrategy $simplePutStrategy
+		SimplePutStrategy $simplePutStrategy,
+		Client $oauthClient
 	): self {
 		$repo = WikibaseRepo::getDefaultInstance();
 
@@ -54,7 +61,8 @@ class EditEndpoint extends SimpleHandler {
 			$repo->newEditEntityFactory(),
 			$editRequestParser,
 			$reconciliationService,
-			$simplePutStrategy
+			$simplePutStrategy,
+			$oauthClient
 		);
 	}
 
