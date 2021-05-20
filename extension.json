@@ -9,6 +9,10 @@
 	"AutoloadNamespaces": {
 		"MediaWiki\\Extension\\WikibaseReconcileEdit\\": "includes/"
 	},
+	"TestAutoloadNamespaces": {
+		"MediaWiki\\Extension\\WikibaseReconcileEdit\\Tests\\Integration\\": "tests/phpunit/integration/",
+		"MediaWiki\\Extension\\WikibaseReconcileEdit\\Tests\\Unit\\": "tests/phpunit/unit/"
+	},
 	"MessagesDirs": {
 		"WikibaseReconcileEdit": [
 			"i18n"
