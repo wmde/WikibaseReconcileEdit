@@ -1,6 +1,6 @@
 <?php
 
-namespace MediaWiki\Extension\WikibaseReconcileEdit\Tests\Unit\EditStrategy;
+namespace MediaWiki\Extension\WikibaseReconcileEdit\Tests\Integration\Mediawiki;
 
 use LinkFilter;
 use MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\ExternalLinks;

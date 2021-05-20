@@ -1,6 +1,6 @@
 <?php
 
-namespace MediaWiki\Extension\WikibaseReconcileEdit\Test\MediaWiki\Api;
+namespace MediaWiki\Extension\WikibaseReconcileEdit\Tests\Integration\MediaWiki\Api;
 
 use MediaWiki\Extension\WikibaseReconcileEdit\InputToEntity\MinimalItemInput;
 use MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\Api\EditEndpoint;
