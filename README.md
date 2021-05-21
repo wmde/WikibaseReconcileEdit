@@ -10,7 +10,6 @@ This code is currently **work in progress** and some things are thus **known to 
 * Anything to do with references, qualifiers
 * Statement ranks and sitelink badges may have an undetermined behavior
 * Editing always has a fixed user and summary currently, and token validation etc does not happen
-* All API errors are pretty hard / not in a JSON format currently
 * Not fully tested, so there could be other bugs...
 
 ## /wikibase-reconcile-edit/v0/edit (Editing API)
