@@ -7,6 +7,9 @@ use MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\ReconciliationException;
 use Wikibase\DataModel\Entity\Item;
 use Wikimedia\Message\MessageValue;
 
+/**
+ * @license GPL-2.0-or-later
+ */
 class FullWikibaseItemInput {
 
 	/**

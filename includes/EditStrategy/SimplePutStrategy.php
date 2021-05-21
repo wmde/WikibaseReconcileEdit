@@ -8,6 +8,9 @@ use Wikibase\DataModel\SiteLinkList;
 use Wikibase\DataModel\Snak\PropertyValueSnak;
 use Wikibase\DataModel\Statement\StatementList;
 
+/**
+ * @license GPL-2.0-or-later
+ */
 class SimplePutStrategy {
 
 	/**

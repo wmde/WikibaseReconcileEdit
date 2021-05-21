@@ -23,6 +23,7 @@ use Wikimedia\TestingAccessWrapper;
 
 /**
  * @covers \MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\ReconciliationService
+ * @license GPL-2.0-or-later
  */
 class ReconciliationServiceTest extends \MediaWikiUnitTestCase {
 

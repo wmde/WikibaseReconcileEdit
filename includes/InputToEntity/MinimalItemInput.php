@@ -15,6 +15,9 @@ use Wikibase\DataModel\Snak\PropertyValueSnak;
 use Wikibase\Repo\ValueParserFactory;
 use Wikimedia\Message\MessageValue;
 
+/**
+ * @license GPL-2.0-or-later
+ */
 class MinimalItemInput {
 
 	/**

@@ -9,6 +9,9 @@ use MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\Request\EditRequestParse
 use MediaWiki\MediaWikiServices;
 use Psr\Container\ContainerInterface;
 
+/**
+ * @license GPL-2.0-or-later
+ */
 class WikibaseReconcileEditServices {
 
 	private function __construct() {

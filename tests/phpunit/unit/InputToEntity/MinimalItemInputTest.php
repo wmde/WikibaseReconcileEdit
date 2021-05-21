@@ -15,6 +15,7 @@ use Wikibase\Repo\ValueParserFactory;
 
 /**
  * @covers \MediaWiki\Extension\WikibaseReconcileEdit\InputToEntity\MinimalItemInput
+ * @license GPL-2.0-or-later
  */
 class MinimalItemInputTest extends \MediaWikiUnitTestCase {
 

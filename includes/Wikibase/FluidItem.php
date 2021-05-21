@@ -9,6 +9,9 @@ use Wikibase\DataModel\Entity\PropertyId;
 use Wikibase\DataModel\SiteLink;
 use Wikibase\DataModel\Snak\PropertyValueSnak;
 
+/**
+ * @license GPL-2.0-or-later
+ */
 class FluidItem {
 
 	/**
