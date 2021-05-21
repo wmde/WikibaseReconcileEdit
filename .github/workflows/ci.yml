@@ -23,6 +23,22 @@ jobs:
               run: |
                   npm install
                   npm run api-testing-lint
+    api-testing:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v2
+            -   name: Run API-tests
+                run: |
+                    bash ./build/ci-scripts/run-api-tests.sh
+
+            - name: Archive docker test artifacts
+              uses: actions/upload-artifact@v2
+              if: always()
+              with:
+                  name: TestArtifacts
+                  path: |
+                      build/ci-scripts/log
     ci:
         runs-on: ubuntu-latest
         strategy:
@@ -76,3 +92,4 @@ jobs:
               run: |
                   cd ..
                   php mediawiki/tests/phpunit/phpunit.php mediawiki/extensions/WikibaseReconcileEdit/tests/phpunit/integration
+

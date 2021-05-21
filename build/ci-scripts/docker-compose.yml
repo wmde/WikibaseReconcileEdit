@@ -1,0 +1,43 @@
+# Wikibase for api-testing releases
+version: '3'
+
+services:
+    wikibase:
+        image: wikibase/wikibase:1.35.2-wmde.1
+        restart: unless-stopped
+        volumes:
+            - ../../../WikibaseReconcileEdit:/var/www/html/extensions/WikibaseReconcileEdit
+            - ../../../WikibaseReconcileEdit/build/ci-scripts/LocalSettings.api-testing.php:/var/www/html/LocalSettings.d/LocalSettings.api-testing.php
+        ports:
+            - "8484:80"
+        networks:
+            default:
+                aliases:
+                    - wikibase.svc
+        environment:
+            - DB_SERVER=mysql.svc:3306
+            - MW_ADMIN_NAME=admin
+            - MW_ADMIN_PASS=secret-password
+            - MW_WG_SECRET_KEY=secret-key
+            - DB_USER=root
+            - DB_PASS=root
+            - DB_NAME=test_db_wiki
+            - MW_ADMIN_EMAIL=admin@wikimedia.de
+    mysql:
+        image: mariadb:10.3
+        restart: unless-stopped
+        volumes:
+            - mediawiki-mysql-data:/var/lib/mysql
+        environment:
+            MYSQL_DATABASE: test_db_wiki
+            MYSQL_USER: root
+            MYSQL_PASSWORD: root
+            MYSQL_ROOT_PASSWORD: root
+        networks:
+            default:
+                aliases:
+                    - mysql.svc
+
+volumes:
+    LocalSettings:
+    mediawiki-mysql-data:
