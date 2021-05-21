@@ -12,6 +12,7 @@ use Wikimedia\Rdbms\LoadBalancerSingle;
  * @covers MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\ExternalLinks
  * @group Database
  * @group WikibaseReconcileEdit
+ * @license GPL-2.0-or-later
  */
 class ExternalLinksTest extends \MediaWikiIntegrationTestCase {
 

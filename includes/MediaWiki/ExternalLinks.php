@@ -9,6 +9,7 @@ use Wikimedia\Rdbms\ILoadBalancer;
 /**
  * Interface for the externallinks MediaWiki table.
  * There are no useful abstraction in MediaWiki for accessing this table, this we need to create our own.
+ * @license GPL-2.0-or-later
  */
 class ExternalLinks {
 

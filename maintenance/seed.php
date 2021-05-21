@@ -21,6 +21,9 @@ if ( getenv( 'MW_INSTALL_PATH' ) ) {
 	require_once __DIR__ . '/../../../maintenance/Maintenance.php';
 }
 
+/**
+ * @license GPL-2.0-or-later
+ */
 class Seed extends \Maintenance {
 	public function execute() {
 		$store = WikibaseRepo::getDefaultInstance()->getEntityStore();

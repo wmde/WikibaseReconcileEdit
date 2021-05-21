@@ -15,6 +15,7 @@ use Wikimedia\Message\MessageValue;
 
 /**
  * Service for reconciling items based on url statements
+ * @license GPL-2.0-or-later
  */
 class ReconciliationService {
 

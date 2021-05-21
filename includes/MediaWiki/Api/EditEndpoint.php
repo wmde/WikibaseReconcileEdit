@@ -17,6 +17,9 @@ use Wikibase\Repo\WikibaseRepo;
 use Wikimedia\Message\MessageValue;
 use Wikimedia\ParamValidator\ParamValidator;
 
+/**
+ * @license GPL-2.0-or-later
+ */
 class EditEndpoint extends SimpleHandler {
 
 	/** @var MediawikiEditEntityFactory */

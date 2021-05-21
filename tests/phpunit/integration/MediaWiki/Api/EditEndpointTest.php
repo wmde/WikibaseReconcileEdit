@@ -22,6 +22,7 @@ use Wikibase\Repo\WikibaseRepo;
 /**
  * @covers MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\Api\EditEndpoint
  * @group Database
+ * @license GPL-2.0-or-later
  */
 class EditEndpointTest extends \MediaWikiIntegrationTestCase {
 

@@ -10,6 +10,7 @@ use Wikibase\DataModel\Services\Statement\GuidGenerator;
 
 /**
  * @covers \MediaWiki\Extension\WikibaseReconcileEdit\EditStrategy\SimplePutStrategy
+ * @license GPL-2.0-or-later
  */
 class SimplePutStrategyTest extends \MediaWikiUnitTestCase {
 

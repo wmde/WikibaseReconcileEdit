@@ -10,6 +10,7 @@ use ReflectionClass;
 
 /**
  * @covers \MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\WikibaseReconcileEditServices
+ * @license GPL-2.0-or-later
  */
 class WikibaseReconcileEditServicesTest extends TestCase {
 

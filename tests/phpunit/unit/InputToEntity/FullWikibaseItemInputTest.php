@@ -8,6 +8,7 @@ use MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\ReconciliationException;
 
 /**
  * @covers \MediaWiki\Extension\WikibaseReconcileEdit\InputToEntity\FullWikibaseItemInput
+ * @license GPL-2.0-or-later
  */
 class FullWikibaseItemInputTest extends \MediaWikiUnitTestCase {
 
