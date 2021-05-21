@@ -13,7 +13,7 @@
 		],
 		"test": [
 			"parallel-lint . --exclude vendor --exclude node_modules",
-			"phpcs -p -s  --ignore='tests/api-testing'",
+			"phpcs -p -s",
 			"minus-x check ."
 		]
 	}
