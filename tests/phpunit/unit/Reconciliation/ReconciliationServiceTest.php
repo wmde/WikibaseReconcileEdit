@@ -1,12 +1,12 @@
 <?php
 
-namespace MediaWiki\Extension\WikibaseReconcileEdit\Tests\Unit\MediaWiki;
+namespace MediaWiki\Extension\WikibaseReconcileEdit\Tests\Unit\Reconciliation;
 
 use DataValues\StringValue;
 use MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\ExternalLinks;
-use MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\ReconciliationException;
-use MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\ReconciliationItem;
-use MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\ReconciliationService;
+use MediaWiki\Extension\WikibaseReconcileEdit\Reconciliation\ReconciliationItem;
+use MediaWiki\Extension\WikibaseReconcileEdit\Reconciliation\ReconciliationService;
+use MediaWiki\Extension\WikibaseReconcileEdit\ReconciliationException;
 use Title;
 use TitleFactory;
 use Wikibase\DataModel\Entity\Item;
@@ -22,7 +22,7 @@ use Wikibase\Repo\Store\IdGenerator;
 use Wikimedia\TestingAccessWrapper;
 
 /**
- * @covers \MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\ReconciliationService
+ * @covers \MediaWiki\Extension\WikibaseReconcileEdit\Reconciliation\ReconciliationService
  * @license GPL-2.0-or-later
  */
 class ReconciliationServiceTest extends \MediaWikiUnitTestCase {

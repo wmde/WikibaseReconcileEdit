@@ -2,9 +2,9 @@
 
 namespace MediaWiki\Extension\WikibaseReconcileEdit\InputToEntity;
 
-use MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\ReconciliationException;
-use MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\ReconciliationItem;
-use MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\ReconciliationService;
+use MediaWiki\Extension\WikibaseReconcileEdit\Reconciliation\ReconciliationItem;
+use MediaWiki\Extension\WikibaseReconcileEdit\Reconciliation\ReconciliationService;
+use MediaWiki\Extension\WikibaseReconcileEdit\ReconciliationException;
 use ValueParsers\ParserOptions;
 use Wikibase\DataModel\Entity\EntityIdValue;
 use Wikibase\DataModel\Entity\Item;

@@ -1,6 +1,6 @@
 <?php
 
-namespace MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki;
+namespace MediaWiki\Extension\WikibaseReconcileEdit\Reconciliation;
 
 use Wikibase\DataModel\Entity\Item;
 

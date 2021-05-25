@@ -1,6 +1,6 @@
 <?php
 
-namespace MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki;
+namespace MediaWiki\Extension\WikibaseReconcileEdit;
 
 use Exception;
 use Wikimedia\Message\MessageValue;

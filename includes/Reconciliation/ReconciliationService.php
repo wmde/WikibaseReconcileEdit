@@ -1,8 +1,10 @@
 <?php
 
-namespace MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki;
+namespace MediaWiki\Extension\WikibaseReconcileEdit\Reconciliation;
 
 use DataValues\StringValue;
+use MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\ExternalLinks;
+use MediaWiki\Extension\WikibaseReconcileEdit\ReconciliationException;
 use TitleFactory;
 use Wikibase\DataModel\Entity\Item;
 use Wikibase\DataModel\Entity\ItemId;

@@ -6,6 +6,7 @@ use MediaWiki\Extension\WikibaseReconcileEdit\EditStrategy\SimplePutStrategy;
 use MediaWiki\Extension\WikibaseReconcileEdit\InputToEntity\FullWikibaseItemInput;
 use MediaWiki\Extension\WikibaseReconcileEdit\InputToEntity\MinimalItemInput;
 use MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\Request\EditRequestParser;
+use MediaWiki\Extension\WikibaseReconcileEdit\Reconciliation\ReconciliationService;
 use MediaWiki\MediaWikiServices;
 use Psr\Container\ContainerInterface;
 

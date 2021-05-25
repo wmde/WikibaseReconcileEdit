@@ -4,7 +4,7 @@ namespace MediaWiki\Extension\WikibaseReconcileEdit\Tests\Unit\InputToEntity;
 
 use Deserializers\Deserializer;
 use MediaWiki\Extension\WikibaseReconcileEdit\InputToEntity\FullWikibaseItemInput;
-use MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\ReconciliationException;
+use MediaWiki\Extension\WikibaseReconcileEdit\ReconciliationException;
 
 /**
  * @covers \MediaWiki\Extension\WikibaseReconcileEdit\InputToEntity\FullWikibaseItemInput

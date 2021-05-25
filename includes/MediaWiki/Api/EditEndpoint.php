@@ -4,9 +4,9 @@ namespace MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\Api;
 
 use DataValues\StringValue;
 use MediaWiki\Extension\WikibaseReconcileEdit\EditStrategy\SimplePutStrategy;
-use MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\ReconciliationException;
-use MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\ReconciliationService;
 use MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\Request\EditRequestParser;
+use MediaWiki\Extension\WikibaseReconcileEdit\Reconciliation\ReconciliationService;
+use MediaWiki\Extension\WikibaseReconcileEdit\ReconciliationException;
 use MediaWiki\Rest\LocalizedHttpException;
 use MediaWiki\Rest\SimpleHandler;
 use Status;
