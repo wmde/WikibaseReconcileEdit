@@ -2,7 +2,7 @@
 
 namespace MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\Request;
 
-use MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\ReconciliationItem;
+use MediaWiki\Extension\WikibaseReconcileEdit\Reconciliation\ReconciliationItem;
 use Wikibase\DataModel\Entity\Item;
 use Wikibase\DataModel\Entity\PropertyId;
 

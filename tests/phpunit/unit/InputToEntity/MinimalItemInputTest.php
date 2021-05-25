@@ -3,8 +3,8 @@
 namespace MediaWiki\Extension\WikibaseReconcileEdit\Tests\Unit\InputToEntity;
 
 use MediaWiki\Extension\WikibaseReconcileEdit\InputToEntity\MinimalItemInput;
-use MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\ReconciliationException;
-use MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\ReconciliationService;
+use MediaWiki\Extension\WikibaseReconcileEdit\Reconciliation\ReconciliationService;
+use MediaWiki\Extension\WikibaseReconcileEdit\ReconciliationException;
 use MediaWiki\Extension\WikibaseReconcileEdit\Wikibase\FluidItem;
 use ValueParsers\StringParser;
 use Wikibase\DataModel\Entity\EntityId;

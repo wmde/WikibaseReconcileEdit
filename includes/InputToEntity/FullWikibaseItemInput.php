@@ -3,7 +3,7 @@
 namespace MediaWiki\Extension\WikibaseReconcileEdit\InputToEntity;
 
 use Deserializers\Deserializer;
-use MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\ReconciliationException;
+use MediaWiki\Extension\WikibaseReconcileEdit\ReconciliationException;
 use Wikibase\DataModel\Entity\Item;
 use Wikimedia\Message\MessageValue;
 

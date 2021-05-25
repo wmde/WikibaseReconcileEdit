@@ -5,8 +5,8 @@ namespace MediaWiki\Extension\WikibaseReconcileEdit\Tests\Unit\MediaWiki\Request
 use Deserializers\Deserializer;
 use MediaWiki\Extension\WikibaseReconcileEdit\InputToEntity\FullWikibaseItemInput;
 use MediaWiki\Extension\WikibaseReconcileEdit\InputToEntity\MinimalItemInput;
-use MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\ReconciliationService;
 use MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\Request\EditRequestParser;
+use MediaWiki\Extension\WikibaseReconcileEdit\Reconciliation\ReconciliationService;
 use MediaWiki\Extension\WikibaseReconcileEdit\Wikibase\FluidItem;
 use MediaWiki\Rest\LocalizedHttpException;
 use MediaWiki\Rest\RequestData;
