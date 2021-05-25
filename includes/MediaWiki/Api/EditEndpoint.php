@@ -2,19 +2,15 @@
 
 namespace MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\Api;
 
-use DataValues\StringValue;
-use MediaWiki\Extension\WikibaseReconcileEdit\EditStrategy\SimplePutStrategy;
 use MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\Request\EditRequestParser;
-use MediaWiki\Extension\WikibaseReconcileEdit\Reconciliation\ReconciliationService;
+use MediaWiki\Extension\WikibaseReconcileEdit\Reconciliation\ItemReconciler;
 use MediaWiki\Extension\WikibaseReconcileEdit\ReconciliationException;
 use MediaWiki\Rest\LocalizedHttpException;
 use MediaWiki\Rest\SimpleHandler;
 use Status;
-use Wikibase\DataModel\Snak\PropertyValueSnak;
 use Wikibase\Lib\Store\EntityRevision;
 use Wikibase\Repo\EditEntity\MediawikiEditEntityFactory;
 use Wikibase\Repo\WikibaseRepo;
-use Wikimedia\Message\MessageValue;
 use Wikimedia\ParamValidator\ParamValidator;
 
 /**
@@ -28,36 +24,29 @@ class EditEndpoint extends SimpleHandler {
 	/** @var EditRequestParser */
 	private $editRequestParser;
 
-	/** @var ReconciliationService */
-	private $reconciliationService;
-
-	/** @var SimplePutStrategy */
-	private $simplePutStrategy;
+	/** @var ItemReconciler */
+	private $itemReconciler;
 
 	public function __construct(
 		MediawikiEditEntityFactory $editEntityFactory,
 		EditRequestParser $editRequestParser,
-		ReconciliationService $reconciliationService,
-		SimplePutStrategy $simplePutStrategy
+		ItemReconciler $itemReconciler
 	) {
 		$this->editEntityFactory = $editEntityFactory;
 		$this->editRequestParser = $editRequestParser;
-		$this->reconciliationService = $reconciliationService;
-		$this->simplePutStrategy = $simplePutStrategy;
+		$this->itemReconciler = $itemReconciler;
 	}
 
 	public static function factory(
 		EditRequestParser $editRequestParser,
-		ReconciliationService $reconciliationService,
-		SimplePutStrategy $simplePutStrategy
+		ItemReconciler $itemReconciler
 	): self {
 		$repo = WikibaseRepo::getDefaultInstance();
 
 		return new self(
 			$repo->newEditEntityFactory(),
 			$editRequestParser,
-			$reconciliationService,
-			$simplePutStrategy
+			$itemReconciler
 		);
 	}
 
@@ -73,49 +62,18 @@ class EditEndpoint extends SimpleHandler {
 		$inputEntity = $request->entity();
 		$otherItems = $request->otherItems();
 
-		// Validate Entity
-		// Don't support references, qualifiers
-		foreach ( $inputEntity->getStatements()->toArray() as $statement ) {
-			if ( $statement->getQualifiers()->count() !== 0 || $statement->getReferences()->count() !== 0 ) {
-				throw new LocalizedHttpException(
-					MessageValue::new( 'wikibasereconcileedit-editendpoint-qualifiers-references-not-supported' ),
-					400
-				);
-			}
-		}
-		// Check for our reconciliation value
-		$reconciliationStatements = $inputEntity->getStatements()->getByPropertyId( $reconcileUrlProperty );
-		if ( $reconciliationStatements->count() !== 1 ) {
-			throw new LocalizedHttpException(
-				MessageValue::new( 'wikibasereconcileedit-editendpoint-reconciliation-property-missing-in-statements' ),
-				400
-			);
-		}
-		$reconciliationStatement = $reconciliationStatements->toArray()[0];
-		if ( !$reconciliationStatement->getMainSnak() instanceof PropertyValueSnak ) {
-			throw new LocalizedHttpException(
-				MessageValue::new( 'wikibasereconcileedit-editendpoint-invalid-reconciliation-statement-type' ),
-				400
-			);
-		}
-
-		/** @var PropertyValueSnak $reconciliationMainSnak */
-		$reconciliationMainSnak = $reconciliationStatement->getMainSnak();
-		/** @var StringValue $reconciliationDataValue */
-		$reconciliationDataValue = $reconciliationMainSnak->getDataValue();
-		$reconciliationUrl = $reconciliationDataValue->getValue();
-
+		// Reconcile the item
 		try {
-			$reconciliationServiceItem = $this->reconciliationService->getOrCreateItemByStatementUrl(
-				$reconcileUrlProperty,
-				$reconciliationUrl
+			$reconciledItem = $this->itemReconciler->reconcileItem(
+				$inputEntity,
+				$reconcileUrlProperty
 			);
 		} catch ( ReconciliationException $rex ) {
 			throw new LocalizedHttpException( $rex->getMessageValue(), 400 );
 		}
 
 		// And make the edit
-		$toSave = $this->simplePutStrategy->apply( $reconciliationServiceItem->getItem(), $inputEntity );
+		$toSave = $reconciledItem->getItem();
 		$saveStatus = Status::newGood();
 
 		foreach ( $otherItems as $otherItem ) {
@@ -153,14 +111,14 @@ class EditEndpoint extends SimpleHandler {
 			// TODO use a real user
 			\User::newSystemUser( 'WikibaseReconcileEditReconciliator' ),
 			$toSave->getId(),
-			$reconciliationServiceItem->getRevision()
+			$reconciledItem->getBaseRevisionId()
 		);
 
 		if ( $saveStatus->isOK() ) {
 			$saveStatus->merge( $editEntity->attemptSave(
 				$toSave,
 				'Reconciliation Edit',
-				$reconciliationServiceItem->getRevision() ? null : EDIT_NEW,
+				$reconciledItem->isNew() ? EDIT_NEW : EDIT_UPDATE,
 				// TODO actually do a token check?
 				false
 			), true );

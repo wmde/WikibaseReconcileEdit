@@ -6,6 +6,7 @@ use MediaWiki\Extension\WikibaseReconcileEdit\InputToEntity\MinimalItemInput;
 use MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\ExternalLinks;
 use MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\Request\EditRequestParser;
 use MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\WikibaseReconcileEditServices;
+use MediaWiki\Extension\WikibaseReconcileEdit\Reconciliation\ItemReconciler;
 use MediaWiki\Extension\WikibaseReconcileEdit\Reconciliation\ReconciliationService;
 use MediaWiki\MediaWikiServices;
 use Wikibase\DataModel\Services\Statement\GuidGenerator;
@@ -36,6 +37,13 @@ return [
 		return new FullWikibaseItemInput(
 			$repo->getBaseDataModelDeserializerFactory()
 				->newEntityDeserializer()
+		);
+	},
+
+	'WikibaseReconcileEdit.ItemReconciler' => function ( MediaWikiServices $services ): ItemReconciler {
+		return new ItemReconciler(
+			WikibaseReconcileEditServices::getReconciliationService( $services ),
+			WikibaseReconcileEditServices::getSimplePutStrategy( $services )
 		);
 	},
 
