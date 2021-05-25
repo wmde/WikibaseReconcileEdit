@@ -9,6 +9,7 @@ use TitleFactory;
 use Wikibase\DataModel\Entity\Item;
 use Wikibase\DataModel\Entity\ItemId;
 use Wikibase\DataModel\Entity\PropertyId;
+use Wikibase\DataModel\Services\Statement\GuidGenerator;
 use Wikibase\DataModel\Snak\PropertyValueSnak;
 use Wikibase\Lib\Store\EntityIdLookup;
 use Wikibase\Lib\Store\EntityRevisionLookup;
@@ -36,6 +37,9 @@ class ReconciliationService {
 	/** @var TitleFactory */
 	private $titleFactory;
 
+	/** @var GuidGenerator */
+	private $guidGenerator;
+
 	/**
 	 * Per-request cache for previously returned results
 	 *
@@ -51,13 +55,15 @@ class ReconciliationService {
 		EntityRevisionLookup $entityRevisionLookup,
 		IdGenerator $idGenerator,
 		ExternalLinks $externalLinks,
-		TitleFactory $titleFactory
+		TitleFactory $titleFactory,
+		GuidGenerator $guidGenerator
 	) {
 		$this->entityIdLookup = $entityIdLookup;
 		$this->entityRevisionLookup = $entityRevisionLookup;
 		$this->idGenerator = $idGenerator;
 		$this->externalLinks = $externalLinks;
 		$this->titleFactory = $titleFactory;
+		$this->guidGenerator = $guidGenerator;
 	}
 
 	/**
@@ -150,7 +156,10 @@ class ReconciliationService {
 
 			// if this is a new item, we need to put the reconciliation statement in it
 			$reconciliationServiceItem->getItem()->getStatements()->addNewStatement(
-				new PropertyValueSnak( $reconcileUrlProperty, new StringValue( $reconciliationUrl ) )
+				new PropertyValueSnak( $reconcileUrlProperty, new StringValue( $reconciliationUrl ) ),
+				null,
+				null,
+				$this->guidGenerator->newGuid( $base->getId() )
 			);
 		}
 

@@ -9,9 +9,11 @@ use MediaWiki\Extension\WikibaseReconcileEdit\Reconciliation\ReconciliationServi
 use MediaWiki\Extension\WikibaseReconcileEdit\ReconciliationException;
 use Title;
 use TitleFactory;
+use Wikibase\DataModel\Entity\EntityId;
 use Wikibase\DataModel\Entity\Item;
 use Wikibase\DataModel\Entity\ItemId;
 use Wikibase\DataModel\Entity\PropertyId;
+use Wikibase\DataModel\Services\Statement\GuidGenerator;
 use Wikibase\DataModel\Snak\PropertyValueSnak;
 use Wikibase\DataModel\Statement\Statement;
 use Wikibase\DataModel\Statement\StatementList;
@@ -30,16 +32,6 @@ class ReconciliationServiceTest extends \MediaWikiUnitTestCase {
 	public function testNoExternalLinksFound() {
 		$propertyId = new PropertyId( 'P1' );
 		$reconcileUrl = "http://www.something-nice";
-
-		$expectedItem = new Item( new ItemId( 'Q10' ) );
-		$expectedItem->setStatements( new StatementList(
-			new Statement(
-				new PropertyValueSnak(
-					$propertyId,
-					new StringValue( $reconcileUrl )
-				)
-			)
-		) );
 
 		$titleFactory = $this->createMock( TitleFactory::class );
 		$titleFactory->method( 'newFromIDs' )
@@ -65,15 +57,37 @@ class ReconciliationServiceTest extends \MediaWikiUnitTestCase {
 			->method( 'pageIdsContainingUrl' )
 			->willReturn( [] );
 
+		$guidGenerator = $this->createMock( GuidGenerator::class );
+		$guidGenerator->method( 'newGuid' )
+			->willReturnCallback( static function ( EntityId $entityId ) {
+				return $entityId->getSerialization() . '$00000000-0000-0000-0000-000000000000';
+			} );
+
 		$service = new ReconciliationService(
 			$entityIdLookup,
 			$entityRevisionLookup,
 			$idGenerator,
 			$externalLinks,
-			$titleFactory
+			$titleFactory,
+			$guidGenerator,
 		);
 
 		$reconciliationServiceItem = $service->getOrCreateItemByStatementUrl( $propertyId, $reconcileUrl );
+
+		$itemId = new ItemId( 'Q10' );
+
+		$expectedItem = new Item( $itemId );
+		$expectedItem->setStatements( new StatementList(
+			new Statement(
+				new PropertyValueSnak(
+					$propertyId,
+					new StringValue( $reconcileUrl )
+				),
+				null,
+				null,
+				$guidGenerator->newGuid( $itemId )
+			)
+		) );
 
 		$this->assertEquals( $expectedItem, $reconciliationServiceItem->getItem() );
 		$this->assertFalse( $reconciliationServiceItem->getRevision() );
@@ -208,12 +222,19 @@ class ReconciliationServiceTest extends \MediaWikiUnitTestCase {
 				->method( 'getNewId' );
 		}
 
+		$guidGenerator = $this->createMock( GuidGenerator::class );
+		$guidGenerator->method( 'newGuid' )
+			->willReturnCallback( static function ( EntityId $entityId ) {
+				return $entityId->getSerialization() . '$00000000-0000-0000-0000-000000000000';
+			} );
+
 		$service = new ReconciliationService(
 			$entityIdLookup,
 			$entityRevisionLookup,
 			$idGenerator,
 			$externalLinks,
-			$titleFactory
+			$titleFactory,
+			$guidGenerator
 		);
 
 		$wrapper = TestingAccessWrapper::newFromObject( $service );
@@ -275,12 +296,15 @@ class ReconciliationServiceTest extends \MediaWikiUnitTestCase {
 			->method( 'pageIdsContainingUrl' )
 			->willReturn( [ $pageId0, $pageId1 ] );
 
+		$guidGenerator = $this->createMock( GuidGenerator::class );
+
 		$service = new ReconciliationService(
 			$entityIdLookup,
 			$entityRevisionLookup,
 			$idGenerator,
 			$externalLinks,
-			$titleFactory
+			$titleFactory,
+			$guidGenerator
 		);
 
 		try {
