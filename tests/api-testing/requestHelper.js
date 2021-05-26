@@ -67,7 +67,7 @@ const assertRequestStatements = async function (
 	}
 };
 
-const getRequestPayload = function ( requestStatements, reconciliationPropertyId ) {
+const getRequestPayload = function ( requestStatements, reconciliationPropertyId, token ) {
 	const entity = {
 		'wikibasereconcileedit-version': '0.0.1/minimal',
 		statements: requestStatements
@@ -79,8 +79,9 @@ const getRequestPayload = function ( requestStatements, reconciliationPropertyId
 	};
 
 	return {
-		reconcile: JSON.stringify( reconcile ),
-		entity: JSON.stringify( entity )
+		reconcile: reconcile,
+		entity: entity,
+		token: token
 	};
 };
 
