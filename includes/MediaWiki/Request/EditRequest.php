@@ -17,22 +17,28 @@ class EditRequest {
 	/** @var Item */
 	private $entity;
 
+	/** @var string */
+	private $token;
+
 	/** @var ReconciliationServiceItem[] */
 	private $otherItems;
 
 	/**
 	 * @param PropertyId $reconcilePropertyId Must have the datatype "url".
 	 * @param Item $entity
+	 * @param string $token
 	 * @param ReconciliationServiceItem[] $otherItems Other items that need to be created,
 	 * since their URLs were referenced in $entity but they did not exist yet.
 	 */
 	public function __construct(
 		PropertyId $reconcilePropertyId,
 		Item $entity,
+		string $token,
 		array $otherItems = []
 	) {
 		$this->reconcilePropertyId = $reconcilePropertyId;
 		$this->entity = $entity;
+		$this->token = $token;
 		$this->otherItems = $otherItems;
 	}
 
@@ -47,6 +53,10 @@ class EditRequest {
 
 	public function entity(): Item {
 		return $this->entity;
+	}
+
+	public function token(): string {
+		return $this->token;
 	}
 
 	/**

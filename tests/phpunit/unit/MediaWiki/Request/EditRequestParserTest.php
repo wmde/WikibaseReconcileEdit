@@ -9,7 +9,6 @@ use MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\Request\EditRequestParse
 use MediaWiki\Extension\WikibaseReconcileEdit\Reconciliation\ReconciliationService;
 use MediaWiki\Extension\WikibaseReconcileEdit\Wikibase\FluidItem;
 use MediaWiki\Rest\LocalizedHttpException;
-use MediaWiki\Rest\RequestData;
 use PHPUnit\Framework\TestCase;
 use ValueParsers\StringParser;
 use Wikibase\DataModel\Entity\PropertyId;
@@ -90,8 +89,8 @@ class EditRequestParserTest extends TestCase {
 	}
 
 	public function testParseRequestInterface_good(): void {
-		$request = new RequestData( [ 'postParams' => [
-			'entity' => json_encode( [
+		$request = [
+			'entity' => [
 				EditRequestParser::VERSION_KEY => '0.0.1/minimal',
 				'statements' => [
 					[
@@ -99,15 +98,17 @@ class EditRequestParserTest extends TestCase {
 						'value' => 'http://example.com/',
 					],
 				],
-			] ),
-			'reconcile' => json_encode( [
+			],
+			'reconcile' => [
 				EditRequestParser::VERSION_KEY => '0.0.1',
 				'urlReconcile' => self::URL_PROPERTY,
-			] ),
-		] ] );
+			],
+			'token' => 'asdf',
+		];
+
 		$requestParser = $this->getEditRequestParser();
 
-		$editRequest = $requestParser->parseRequestInterface( $request );
+		$editRequest = $requestParser->parseRequestBody( $request );
 
 		$this->assertEquals(
 			FluidItem::init()
@@ -119,17 +120,21 @@ class EditRequestParserTest extends TestCase {
 			new PropertyId( self::URL_PROPERTY ),
 			$editRequest->reconcilePropertyId()
 		);
+		$this->assertEquals(
+			'asdf',
+			$editRequest->token()
+		);
 	}
 
 	public function testParseRequestInterface_unspecifiedEntityVersion(): void {
-		$request = new RequestData( [ 'postParams' => [
-			'entity' => json_encode( [] ),
-			'reconcile' => json_encode( self::VALID_RECONCILE_PAYLOAD ),
-		] ] );
+		$request = [
+			'entity' => [],
+			'reconcile' => self::VALID_RECONCILE_PAYLOAD,
+		];
 		$requestParser = $this->getEditRequestParser();
 
 		try {
-			$requestParser->parseRequestInterface( $request );
+			$requestParser->parseRequestBody( $request );
 			$this->fail( 'expected LocalizedHttpException to be thrown' );
 		} catch ( LocalizedHttpException $e ) {
 			$this->assertSame( 'wikibasereconcileedit-editendpoint-unspecified-entity-input-version',
@@ -141,14 +146,14 @@ class EditRequestParserTest extends TestCase {
 	public function testParseRequestInterface_unsupportedEntityVersion(
 		string $entityVersion
 	): void {
-		$request = new RequestData( [ 'postParams' => [
-			'entity' => json_encode( [ EditRequestParser::VERSION_KEY => $entityVersion ] ),
-			'reconcile' => json_encode( self::VALID_RECONCILE_PAYLOAD ),
-		] ] );
+		$request = [
+			'entity' => [ EditRequestParser::VERSION_KEY => $entityVersion ],
+			'reconcile' => self::VALID_RECONCILE_PAYLOAD,
+		];
 		$requestParser = $this->getEditRequestParser();
 
 		try {
-			$requestParser->parseRequestInterface( $request );
+			$requestParser->parseRequestBody( $request );
 			$this->fail( 'expected LocalizedHttpException to be thrown' );
 		} catch ( LocalizedHttpException $e ) {
 			$this->assertSame( 'wikibasereconcileedit-editendpoint-invalid-entity-input-version',
@@ -163,26 +168,25 @@ class EditRequestParserTest extends TestCase {
 	}
 
 	/** @dataProvider provideInvalidReconcileJson */
-	public function testParseRequestInterface_invalidReconcileJson( string $reconcile ): void {
-		$request = new RequestData( [ 'postParams' => [
-			'entity' => json_encode( self::VALID_ENTITY_PAYLOAD ),
+	public function testParseRequestBody_invalidReconcileParameter( $reconcile ): void {
+		$request = [
+			'entity' => self::VALID_ENTITY_PAYLOAD,
 			'reconcile' => $reconcile,
-		] ] );
+		];
 		$requestParser = $this->getEditRequestParser();
 
 		try {
-			$requestParser->parseRequestInterface( $request );
+			$requestParser->parseRequestBody( $request );
 			$this->fail( 'expected LocalizedHttpException to be thrown' );
 		} catch ( LocalizedHttpException $e ) {
-			$this->assertSame( 'wikibasereconcileedit-editendpoint-invalid-reconcile-json',
+			$this->assertSame( 'wikibasereconcileedit-editendpoint-invalid-reconcile-parameter',
 				$e->getMessageValue()->getKey() );
 		}
 	}
 
 	public function provideInvalidReconcileJson(): iterable {
-		yield 'JSON syntax error' => [ '{' ];
-		yield 'number' => [ '1' ];
-		yield 'string' => [ '""' ];
+		yield 'number' => [ 1 ];
+		yield 'string' => [ 'asdf' ];
 		yield 'null' => [ 'null' ];
 	}
 
@@ -190,18 +194,16 @@ class EditRequestParserTest extends TestCase {
 	public function testParseRequestInterface_unsupportedReconcileVersion(
 		?string $reconcileVersion
 	): void {
-		$request = new RequestData( [ 'postParams' => [
-			'entity' => json_encode( self::VALID_ENTITY_PAYLOAD ),
-			'reconcile' => json_encode(
-				$reconcileVersion !== null
+		$request = [
+			'entity' => self::VALID_ENTITY_PAYLOAD,
+			'reconcile' => $reconcileVersion !== null
 					? [ EditRequestParser::VERSION_KEY => $reconcileVersion ]
 					: []
-			),
-		] ] );
+		];
 		$requestParser = $this->getEditRequestParser();
 
 		try {
-			$requestParser->parseRequestInterface( $request );
+			$requestParser->parseRequestBody( $request );
 			$this->fail( 'expected LocalizedHttpException to be thrown' );
 		} catch ( LocalizedHttpException $e ) {
 			$this->assertSame( 'wikibasereconcileedit-editendpoint-unsupported-reconcile-version',
@@ -216,18 +218,16 @@ class EditRequestParserTest extends TestCase {
 
 	/** @dataProvider provideInvalidPropertyId */
 	public function testParseRequestInterface_invalidPropertyId( ?string $propertyId ): void {
-		$request = new RequestData( [ 'postParams' => [
-			'entity' => json_encode( self::VALID_ENTITY_PAYLOAD ),
-			'reconcile' => json_encode(
-				$propertyId !== null
+		$request = [
+			'entity' => self::VALID_ENTITY_PAYLOAD,
+			'reconcile' => $propertyId !== null
 					? [ EditRequestParser::VERSION_KEY => '0.0.1', 'reconcileUrl' => $propertyId ]
 					: [ EditRequestParser::VERSION_KEY => '0.0.1' ]
-			),
-		] ] );
+		];
 		$requestParser = $this->getEditRequestParser();
 
 		try {
-			$requestParser->parseRequestInterface( $request );
+			$requestParser->parseRequestBody( $request );
 			$this->fail( 'expected LocalizedHttpException to be thrown' );
 		} catch ( LocalizedHttpException $e ) {
 			$this->assertSame( 'wikibasereconcileedit-editendpoint-invalid-reconcile-propertyid',
@@ -244,17 +244,17 @@ class EditRequestParserTest extends TestCase {
 	}
 
 	public function testParseRequestInterface_invalidDataType(): void {
-		$request = new RequestData( [ 'postParams' => [
-			'entity' => json_encode( self::VALID_ENTITY_PAYLOAD ),
-			'reconcile' => json_encode( [
+		$request = [
+			'entity' => self::VALID_ENTITY_PAYLOAD,
+			'reconcile' => [
 				EditRequestParser::VERSION_KEY => '0.0.1',
 				'urlReconcile' => self::STRING_PROPERTY,
-			] ),
-		] ] );
+			]
+		];
 		$requestParser = $this->getEditRequestParser();
 
 		try {
-			$requestParser->parseRequestInterface( $request );
+			$requestParser->parseRequestBody( $request );
 			$this->fail( 'expected LocalizedHttpException to be thrown' );
 		} catch ( LocalizedHttpException $e ) {
 			$this->assertSame( 'wikibasereconcileedit-editendpoint-invalid-type-property-must-be-url',
@@ -263,17 +263,17 @@ class EditRequestParserTest extends TestCase {
 	}
 
 	public function testParseRequestInterface_missingProperty(): void {
-		$request = new RequestData( [ 'postParams' => [
-			'entity' => json_encode( self::VALID_ENTITY_PAYLOAD ),
-			'reconcile' => json_encode( [
+		$request = [
+			'entity' => self::VALID_ENTITY_PAYLOAD,
+			'reconcile' => [
 				EditRequestParser::VERSION_KEY => '0.0.1',
 				'urlReconcile' => self::MISSING_PROPERTY,
-			] ),
-		] ] );
+			],
+		];
 		$requestParser = $this->getEditRequestParser();
 
 		$this->expectException( PropertyDataTypeLookupException::class );
-		$requestParser->parseRequestInterface( $request );
+		$requestParser->parseRequestBody( $request );
 	}
 
 }

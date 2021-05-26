@@ -6,7 +6,7 @@
 		]
 	},
 	"wikibasereconcileedit-desc": "{{desc|name=WikibaseReconcileEdit}}",
-	"wikibasereconcileedit-editendpoint-invalid-reconcile-json": "Error returned by the API if the “reconcile” request parameter is invalid.",
+	"wikibasereconcileedit-editendpoint-invalid-reconcile-parameter": "Error returned by the API if the “reconcile” request parameter is invalid.",
 	"wikibasereconcileedit-editendpoint-unsupported-reconcile-version": "Error returned by the API if the “reconcile” request parameter specifies an unsupported version.\n\nParameters:\n* $1 – the supported versions (comma-separated list)\n* $2 – the number of supported versions",
 	"wikibasereconcileedit-editendpoint-invalid-reconcile-propertyid": "Error returned by the API if the “reconcile” request parameter contains no valid field to specify the property ID to reconcile on.\n\nParameters:\n* $1 – the version of the request parameter, e.g. 0.0.1\n* $2 – the name of the field, e.g. urlReconcile",
 	"wikibasereconcileedit-editendpoint-invalid-type-property-must-be-url": "Error returned by the API if the “reconcile” request propertyId parameter is not of type URL.\n\nParameters:\n* $1 – the name of the property, e.g. P123\n* $2 – the name of the field, e.g. urlReconcile.\n* $3 – the datatype of the provided reconcile property, e.g. string",
@@ -15,7 +15,11 @@
 	"wikibasereconcileedit-editendpoint-qualifiers-references-not-supported": "Error returned by the API if the “entity” request parameter specifies qualifiers and/or references. They are not yet supported.",
 	"wikibasereconcileedit-editendpoint-reconciliation-property-missing-in-statements": "Error returned by the API if the “entity” request parameter doesn't contain a statement that uses the reconciliation property",
 	"wikibasereconcileedit-editendpoint-invalid-reconciliation-statement-type": "Error returned by the API if the “entity” request parameter if the reconciliation statement's mainsnak is not of type value",
+	"wikibasereconcileedit-editendpoint-invalid-request-body": "Error returned by the API if the JSON request body is invalid or empty.",
+	"wikibasereconcileedit-editendpoint-invalid-content-type": "Error returned by the API if the request content type is invalid.\n\nParameters:\n* $1 – the expected content type",
 	"wikibasereconcileedit-reconciliationservice-matched-multiple-items": "Error returned by the API if the reconciliation request matches multiple items.\n\nParameters:\n* $1 – the matched items (comma-separated list)\n* $2 – the number of matched items",
 	"wikibasereconcileedit-minimaliteminput-required-keys": "Error returned by the API if the minimal item input statements parameter is missing a certain key.\n\nParameters:\n $1 - the missing key",
-	"wikibasereconcileedit-fullwikibaseiteminput-unsupported-type": "Error returned by the API if the full wikibase item input's type parameter is not supported.\n\nParameters:\n* $1 – the supported types (comma-separated list)\n* $2 – the number of supported types"
+	"wikibasereconcileedit-fullwikibaseiteminput-unsupported-type": "Error returned by the API if the full wikibase item input's type parameter is not supported.\n\nParameters:\n* $1 – the supported types (comma-separated list)\n* $2 – the number of supported types",
+	"wikibasereconcileedit-unauthorized-access": "Error returned by the API if not authorized access"
+
 }

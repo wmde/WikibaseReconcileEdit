@@ -11,6 +11,7 @@ use MediaWiki\MediaWikiServices;
 use MediaWiki\Rest\RequestData;
 use MediaWiki\Rest\RequestInterface;
 use MediaWiki\Tests\Rest\Handler\HandlerTestTrait;
+use User;
 use Wikibase\DataModel\Entity\EntityIdValue;
 use Wikibase\DataModel\Entity\Item;
 use Wikibase\DataModel\Entity\ItemId;
@@ -33,6 +34,7 @@ class EditEndpointTest extends \MediaWikiIntegrationTestCase {
 	private const ITEM_PROPERTY = 'P3';
 	private const URL_PROPERTY_NOT_RECONCILED = 'P15';
 	private const MISSING_PROPERTY = 'P1000';
+	private $defaultTestUser;
 
 	protected function setUp(): void {
 		parent::setUp();
@@ -45,6 +47,8 @@ class EditEndpointTest extends \MediaWikiIntegrationTestCase {
 		$this->setupProperty( self::STRING_PROPERTY, 'string' );
 		$this->setupProperty( self::ITEM_PROPERTY, 'wikibase-item' );
 		$this->setupProperty( self::URL_PROPERTY_NOT_RECONCILED, 'url' );
+
+		$this->defaultTestUser = $this->getTestSysop()->getUser();
 	}
 
 	private function setupProperty( string $propertyId, $propertyType ): void {
@@ -56,7 +60,7 @@ class EditEndpointTest extends \MediaWikiIntegrationTestCase {
 		)->getEntity()->getId();
 	}
 
-	private function newHandler() {
+	private function newHandler( User $user = null ) {
 		$repo = WikibaseRepo::getDefaultInstance();
 		$reconciliationService = WikibaseReconcileEditServices::getReconciliationService();
 		$propertyDataTypeLookup = WikibaseRepo::getDefaultInstance()->getPropertyDataTypeLookup();
@@ -74,13 +78,16 @@ class EditEndpointTest extends \MediaWikiIntegrationTestCase {
 			new ItemReconciler(
 				$reconciliationService,
 				WikibaseReconcileEditServices::getSimplePutStrategy()
-			)
+			),
+			$user !== null ? $user : $this->defaultTestUser
 		);
 	}
 
-	private function newRequest( array $params ): RequestInterface {
+	private function newRequest( array $params, User $user = null ): RequestInterface {
+		$params['token'] = $user !== null ? $user->getEditToken() : $this->defaultTestUser->getEditToken();
+
 		return new RequestData( [
-			'postParams' => array_map( 'json_encode', $params ),
+			'bodyContents' => json_encode( $params ),
 			'headers' => [
 				'Content-Type' => 'application/json',
 			],

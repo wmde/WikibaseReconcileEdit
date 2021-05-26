@@ -7,10 +7,14 @@ use MediaWiki\Extension\WikibaseReconcileEdit\Reconciliation\ItemReconciler;
 use MediaWiki\Extension\WikibaseReconcileEdit\ReconciliationException;
 use MediaWiki\Rest\LocalizedHttpException;
 use MediaWiki\Rest\SimpleHandler;
+use MediaWiki\Rest\Validator\JsonBodyValidator;
+use RequestContext;
 use Status;
+use User;
 use Wikibase\Lib\Store\EntityRevision;
 use Wikibase\Repo\EditEntity\MediawikiEditEntityFactory;
 use Wikibase\Repo\WikibaseRepo;
+use Wikimedia\Message\MessageValue;
 use Wikimedia\ParamValidator\ParamValidator;
 
 /**
@@ -27,14 +31,19 @@ class EditEndpoint extends SimpleHandler {
 	/** @var ItemReconciler */
 	private $itemReconciler;
 
+	/** @var User */
+	private $user;
+
 	public function __construct(
 		MediawikiEditEntityFactory $editEntityFactory,
 		EditRequestParser $editRequestParser,
-		ItemReconciler $itemReconciler
+		ItemReconciler $itemReconciler,
+		User $user
 	) {
 		$this->editEntityFactory = $editEntityFactory;
 		$this->editRequestParser = $editRequestParser;
 		$this->itemReconciler = $itemReconciler;
+		$this->user = $user;
 	}
 
 	public static function factory(
@@ -46,14 +55,32 @@ class EditEndpoint extends SimpleHandler {
 		return new self(
 			$repo->newEditEntityFactory(),
 			$editRequestParser,
-			$itemReconciler
+			$itemReconciler,
+			// @TODO Inject this, when there is a good way to do that
+			RequestContext::getMain()->getUser()
 		);
 	}
 
 	public function run() {
-		// Get the request
+		// Rest Validator returns null if submitted as form
+		$requestBody = $this->getValidatedBody();
+		if ( $requestBody === null ) {
+			throw new LocalizedHttpException(
+				MessageValue::new( 'wikibasereconcileedit-editendpoint-invalid-request-body' ),
+				415
+			);
+		}
+
+		if ( !$this->user->isRegistered() || !$this->user->matchEditToken( $requestBody['token'] ) ) {
+			throw new LocalizedHttpException(
+				MessageValue::new( 'wikibasereconcileedit-unauthorized-access' ),
+				403
+			);
+		}
+
+		// Parse the request body
 		try {
-			$request = $this->editRequestParser->parseRequestInterface( $this->getRequest() );
+			$request = $this->editRequestParser->parseRequestBody( $requestBody );
 		} catch ( ReconciliationException $rex ) {
 			throw new LocalizedHttpException( $rex->getMessageValue(), 400 );
 		}
@@ -89,8 +116,7 @@ class EditEndpoint extends SimpleHandler {
 			}
 
 			$otherItemEdit = $this->editEntityFactory->newEditEntity(
-				// TODO use a real user
-				\User::newSystemUser( 'WikibaseReconcileEditReconciliator' ),
+				$this->user,
 				$otherItem->getItem()->getId(),
 				false
 			);
@@ -99,8 +125,7 @@ class EditEndpoint extends SimpleHandler {
 				$otherItem->getItem(),
 				'Reconciliation Edit',
 				EDIT_NEW,
-				// TODO actually do a token check?
-				false
+				$request->token()
 			), true );
 			if ( !$saveStatus->isOK() ) {
 				break;
@@ -108,8 +133,7 @@ class EditEndpoint extends SimpleHandler {
 		}
 
 		$editEntity = $this->editEntityFactory->newEditEntity(
-			// TODO use a real user
-			\User::newSystemUser( 'WikibaseReconcileEditReconciliator' ),
+			$this->user,
 			$toSave->getId(),
 			$reconciledItem->getBaseRevisionId()
 		);
@@ -119,8 +143,7 @@ class EditEndpoint extends SimpleHandler {
 				$toSave,
 				'Reconciliation Edit',
 				$reconciledItem->isNew() ? EDIT_NEW : EDIT_UPDATE,
-				// TODO actually do a token check?
-				false
+				$request->token()
 			), true );
 		}
 
@@ -143,19 +166,28 @@ class EditEndpoint extends SimpleHandler {
 	}
 
 	/**
-	 * {@inheritDoc}
-	 * @return array
+	 * @inheritDoc
 	 */
-	public function getParamSettings() {
-		return [
+	public function getBodyValidator( $contentType ) {
+		if ( $contentType !== 'application/json' ) {
+			throw new LocalizedHttpException(
+				MessageValue::new( 'wikibasereconcileedit-editendpoint-invalid-content-type' )
+					->textParams( 'application/json' ),
+				415
+			);
+		}
+
+		return new JsonBodyValidator( [
 			'entity' => [
-				self::PARAM_SOURCE => 'post',
 				ParamValidator::PARAM_REQUIRED => true,
 			],
 			'reconcile' => [
-				self::PARAM_SOURCE => 'post',
 				ParamValidator::PARAM_REQUIRED => true,
 			],
-		];
+			'token' => [
+				ParamValidator::PARAM_TYPE => 'string',
+				ParamValidator::PARAM_REQUIRED => true,
+			],
+		] );
 	}
 }

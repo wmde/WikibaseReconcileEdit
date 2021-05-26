@@ -5,7 +5,6 @@ namespace MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\Request;
 use MediaWiki\Extension\WikibaseReconcileEdit\InputToEntity\FullWikibaseItemInput;
 use MediaWiki\Extension\WikibaseReconcileEdit\InputToEntity\MinimalItemInput;
 use MediaWiki\Rest\LocalizedHttpException;
-use MediaWiki\Rest\RequestInterface;
 use Wikibase\DataModel\Entity\PropertyId;
 use Wikibase\DataModel\Services\Lookup\PropertyDataTypeLookup;
 use Wikimedia\Message\MessageValue;
@@ -39,14 +38,12 @@ class EditRequestParser {
 		$this->minimalItemInput = $minimalItemInput;
 	}
 
-	public function parseRequestInterface( RequestInterface $request ): EditRequest {
-		$reconcile = json_decode(
-			$request->getPostParams()['reconcile'],
-			true
-		);
+	public function parseRequestBody( array $requestBody ): EditRequest {
+		$reconcile = $requestBody['reconcile'];
+
 		if ( !is_array( $reconcile ) ) {
 			throw new LocalizedHttpException(
-				MessageValue::new( 'wikibasereconcileedit-editendpoint-invalid-reconcile-json' ),
+				MessageValue::new( 'wikibasereconcileedit-editendpoint-invalid-reconcile-parameter' ),
 				400
 			);
 		}
@@ -84,13 +81,9 @@ class EditRequestParser {
 			);
 		}
 
-		$entity = json_decode(
-			$request->getPostParams()['entity'],
-			true
-		) ?: null;
+		$entity = $requestBody['entity'] ?: null;
 
 		if (
-			// TODO separate error message for invalid entity JSON?
 			!is_array( $entity ) ||
 			!array_key_exists( self::VERSION_KEY, $entity )
 		) {
@@ -118,7 +111,8 @@ class EditRequestParser {
 		return new EditRequest(
 			$reconcilePropertyId,
 			$inputEntity,
-			$otherItems
+			$requestBody['token'],
+			$otherItems,
 		);
 	}
 
