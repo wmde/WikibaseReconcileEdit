@@ -9,7 +9,7 @@ use Wikibase\DataModel\Entity\Item;
  * @see ReconciliationService
  * @license GPL-2.0-or-later
  */
-class ReconciliationItem {
+class ReconciliationServiceItem {
 
 	/** @var Item */
 	private $item;

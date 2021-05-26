@@ -4,8 +4,8 @@ namespace MediaWiki\Extension\WikibaseReconcileEdit\Tests\Unit\Reconciliation;
 
 use DataValues\StringValue;
 use MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\ExternalLinks;
-use MediaWiki\Extension\WikibaseReconcileEdit\Reconciliation\ReconciliationItem;
 use MediaWiki\Extension\WikibaseReconcileEdit\Reconciliation\ReconciliationService;
+use MediaWiki\Extension\WikibaseReconcileEdit\Reconciliation\ReconciliationServiceItem;
 use MediaWiki\Extension\WikibaseReconcileEdit\ReconciliationException;
 use Title;
 use TitleFactory;
@@ -73,10 +73,10 @@ class ReconciliationServiceTest extends \MediaWikiUnitTestCase {
 			$titleFactory
 		);
 
-		$reconcileItem = $service->getOrCreateItemByStatementUrl( $propertyId, $reconcileUrl );
+		$reconciliationServiceItem = $service->getOrCreateItemByStatementUrl( $propertyId, $reconcileUrl );
 
-		$this->assertEquals( $expectedItem, $reconcileItem->getItem() );
-		$this->assertFalse( $reconcileItem->getRevision() );
+		$this->assertEquals( $expectedItem, $reconciliationServiceItem->getItem() );
+		$this->assertFalse( $reconciliationServiceItem->getRevision() );
 	}
 
 	public function reconciliationProvider() {
@@ -139,9 +139,9 @@ class ReconciliationServiceTest extends \MediaWikiUnitTestCase {
 			),
 			'itemRevision' => 1234,
 			'expectedRevision' => 5678,
-			'alreadyReconciledItems' => [
+			'previousResults' => [
 				$p1->serialize() => [
-					$someUrl => new ReconciliationItem( new Item( $existingItemId ), 5678 )
+					$someUrl => new ReconciliationServiceItem( new Item( $existingItemId ), 5678 )
 				]
 			]
 		];
@@ -156,8 +156,8 @@ class ReconciliationServiceTest extends \MediaWikiUnitTestCase {
 	 * @param StatementList $itemStatements
 	 * @param int $itemRevision revision ID returned by the entity revision lookup
 	 * @param int|false $expectedRevision revision ID returned by the service (either $itemRevision or false)
-	 * @param array $alreadyReconciledItems
-	 *
+	 * @param ReconciliationServiceItem[][] $previousResults results that the service
+	 * is supposed to have returned previously
 	 */
 	public function testGetItemByStatementUrlFoundSomething(
 		PropertyId $reconcilePropertyId,
@@ -166,7 +166,7 @@ class ReconciliationServiceTest extends \MediaWikiUnitTestCase {
 		StatementList $itemStatements,
 		int $itemRevision,
 		$expectedRevision,
-		$alreadyReconciledItems = []
+		array $previousResults = []
 	) {
 		$newItemIDNumeric = 10;
 		$newItemID = new ItemId( 'Q' . $newItemIDNumeric );
@@ -217,12 +217,12 @@ class ReconciliationServiceTest extends \MediaWikiUnitTestCase {
 		);
 
 		$wrapper = TestingAccessWrapper::newFromObject( $service );
-		$wrapper->reconciliationItems = $alreadyReconciledItems;
+		$wrapper->items = $previousResults;
 
-		$reconcileItem = $wrapper->getOrCreateItemByStatementUrl( $reconcilePropertyId, $reconcileUrl );
+		$reconciliationServiceItem = $wrapper->getOrCreateItemByStatementUrl( $reconcilePropertyId, $reconcileUrl );
 
-		$this->assertEquals( $expectedRevision ? $itemId : $newItemID, $reconcileItem->getItem()->getId() );
-		$this->assertEquals( $expectedRevision, $reconcileItem->getRevision() );
+		$this->assertEquals( $expectedRevision ? $itemId : $newItemID, $reconciliationServiceItem->getItem()->getId() );
+		$this->assertEquals( $expectedRevision, $reconciliationServiceItem->getRevision() );
 	}
 
 	public function testMatchedMultipleItems() {
