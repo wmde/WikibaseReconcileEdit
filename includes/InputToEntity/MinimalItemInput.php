@@ -2,8 +2,8 @@
 
 namespace MediaWiki\Extension\WikibaseReconcileEdit\InputToEntity;
 
-use MediaWiki\Extension\WikibaseReconcileEdit\Reconciliation\ReconciliationItem;
 use MediaWiki\Extension\WikibaseReconcileEdit\Reconciliation\ReconciliationService;
+use MediaWiki\Extension\WikibaseReconcileEdit\Reconciliation\ReconciliationServiceItem;
 use MediaWiki\Extension\WikibaseReconcileEdit\ReconciliationException;
 use ValueParsers\ParserOptions;
 use Wikibase\DataModel\Entity\EntityIdValue;
@@ -48,7 +48,7 @@ class MinimalItemInput {
 	/**
 	 * @param array $inputEntity
 	 * @param PropertyId $reconcileUrlProperty
-	 * @return array( Item, ReconciliationItem[] )
+	 * @return array( Item, ReconciliationServiceItem[] )
 	 */
 	public function getItem( array $inputEntity, PropertyId $reconcileUrlProperty ) : array {
 		$item = new Item();
@@ -95,7 +95,7 @@ class MinimalItemInput {
 					);
 				}
 				$propertyId = new PropertyId( $statementDetails['property'] );
-				[ $dataValue, $reconciliationItems ] = $this->getDataValue(
+				[ $dataValue, $reconciliationServiceItems ] = $this->getDataValue(
 					$propertyId,
 					$statementDetails['value'],
 					$reconcileUrlProperty
@@ -103,8 +103,8 @@ class MinimalItemInput {
 				$item->getStatements()->addNewStatement(
 					new PropertyValueSnak( $propertyId, $dataValue )
 				);
-				foreach ( $reconciliationItems as $otherItem ) {
-					/** @var ReconciliationItem $otherItem */
+				foreach ( $reconciliationServiceItems as $otherItem ) {
+					/** @var ReconciliationServiceItem $otherItem */
 					$otherItems[$otherItem->getItem()->getId()->getSerialization()] = $otherItem;
 				}
 			}
@@ -116,7 +116,7 @@ class MinimalItemInput {
 	/**
 	 * @param PropertyId $id
 	 * @param string $value
-	 * @return array( DataValue, ReconciliationItem[] )
+	 * @return array( DataValue, ReconciliationServiceItem[] )
 	 */
 	private function getDataValue(
 		PropertyId $id,
@@ -125,10 +125,10 @@ class MinimalItemInput {
 	) : array {
 		$name = $this->propertyDataTypeLookup->getDataTypeIdForProperty( $id );
 		if ( $name === 'wikibase-item' && wfParseUrl( $value ) !== false ) {
-			$reconciliationItem = $this->reconciliationService
+			$item = $this->reconciliationService
 				->getOrCreateItemByStatementUrl( $reconcileUrlProperty, $value );
 
-			return [ new EntityIdValue( $reconciliationItem->getItem()->getId() ), [ $reconciliationItem ] ];
+			return [ new EntityIdValue( $item->getItem()->getId() ), [ $item ] ];
 		}
 		// TODO add specific options?
 		$parser = $this->valueParserFactory->newParser( $name, new ParserOptions );

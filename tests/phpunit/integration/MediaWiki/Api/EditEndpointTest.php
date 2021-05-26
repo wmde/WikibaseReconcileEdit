@@ -242,7 +242,7 @@ class EditEndpointTest extends \MediaWikiIntegrationTestCase {
 			$this->assertInstanceOf( Item::class, $item );
 
 			// this needs to be reset in-order for the per-request "cache" to clear
-			// @see ReconciliationService::$reconciliationItems
+			// @see ReconciliationService::$items
 			MediaWikiServices::getInstance()->resetServiceForTesting( 'WikibaseReconcileEdit.ReconciliationService' );
 
 			$expectedRequestItems = $expectedItems[$requestIndex];

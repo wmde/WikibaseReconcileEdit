@@ -37,14 +37,14 @@ class ReconciliationService {
 	private $titleFactory;
 
 	/**
-	 * Per-request cache for reconciled items
+	 * Per-request cache for previously returned results
 	 *
 	 * Example:
-	 *  [ 'P1' => [ 'http://reconciled-url' => ReconciliationItem ] ]
+	 *  [ 'P1' => [ 'http://reconciled-url' => ReconciliationServiceItem ] ]
 	 *
-	 * @var ReconciliationItem[][]
+	 * @var ReconciliationServiceItem[][]
 	 */
-	private $reconciliationItems = [];
+	private $items = [];
 
 	public function __construct(
 		EntityIdLookup $entityIdLookup,
@@ -82,19 +82,19 @@ class ReconciliationService {
 	 *
 	 * @param PropertyId $reconcileUrlProperty
 	 * @param string $reconciliationUrl
-	 * @return ReconciliationItem
+	 * @return ReconciliationServiceItem
 	 * @throws ReconciliationException
 	 * @throws \Wikibase\Lib\Store\StorageException
 	 */
 	public function getOrCreateItemByStatementUrl(
 		PropertyID $reconcileUrlProperty,
 		string $reconciliationUrl
-	) : ReconciliationItem {
+	) : ReconciliationServiceItem {
 		// return the same item if we already reconciled it
 		$propertyId = $reconcileUrlProperty->getSerialization();
-		if ( array_key_exists( $propertyId, $this->reconciliationItems )
-			 && array_key_exists( $reconciliationUrl, $this->reconciliationItems[$propertyId] ) ) {
-			return $this->reconciliationItems[$propertyId][$reconciliationUrl];
+		if ( array_key_exists( $propertyId, $this->items )
+			 && array_key_exists( $reconciliationUrl, $this->items[$propertyId] ) ) {
+			return $this->items[$propertyId][$reconciliationUrl];
 		}
 
 		// Find Items that use the URL
@@ -118,7 +118,7 @@ class ReconciliationService {
 
 				$urlOfStatement = $mainSnak->getDataValue()->getValue();
 				if ( $urlOfStatement === $reconciliationUrl ) {
-					$itemsThatReferenceTheUrlInCorrectStatement[] = new ReconciliationItem(
+					$itemsThatReferenceTheUrlInCorrectStatement[] = new ReconciliationServiceItem(
 						$item,
 						$entityRevision->getRevisionId()
 					);
@@ -137,25 +137,25 @@ class ReconciliationService {
 			);
 		}
 
-		$reconciliationItem = null;
+		$reconciliationServiceItem = null;
 
 		// Get our base
 		if ( count( $itemsThatReferenceTheUrlInCorrectStatement ) === 1 ) {
-			$reconciliationItem = $itemsThatReferenceTheUrlInCorrectStatement[0];
+			$reconciliationServiceItem = $itemsThatReferenceTheUrlInCorrectStatement[0];
 		} else {
 			$base = new Item();
 			// XXX: this is a bit evil, but needed to work around the fact we want to mint statement guids
 			$base->setId( ItemId::newFromNumber( $this->idGenerator->getNewId( 'wikibase-item' ) ) );
-			$reconciliationItem = new ReconciliationItem( $base, false );
+			$reconciliationServiceItem = new ReconciliationServiceItem( $base, false );
 
 			// if this is a new item, we need to put the reconciliation statement in it
-			$reconciliationItem->getItem()->getStatements()->addNewStatement(
+			$reconciliationServiceItem->getItem()->getStatements()->addNewStatement(
 				new PropertyValueSnak( $reconcileUrlProperty, new StringValue( $reconciliationUrl ) )
 			);
 		}
 
-		$this->reconciliationItems[$propertyId][$reconciliationUrl] = $reconciliationItem;
-		return $reconciliationItem;
+		$this->items[$propertyId][$reconciliationUrl] = $reconciliationServiceItem;
+		return $reconciliationServiceItem;
 	}
 
 }

@@ -2,7 +2,7 @@
 
 namespace MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\Request;
 
-use MediaWiki\Extension\WikibaseReconcileEdit\Reconciliation\ReconciliationItem;
+use MediaWiki\Extension\WikibaseReconcileEdit\Reconciliation\ReconciliationServiceItem;
 use Wikibase\DataModel\Entity\Item;
 use Wikibase\DataModel\Entity\PropertyId;
 
@@ -17,13 +17,13 @@ class EditRequest {
 	/** @var Item */
 	private $entity;
 
-	/** @var ReconciliationItem[] */
+	/** @var ReconciliationServiceItem[] */
 	private $otherItems;
 
 	/**
 	 * @param PropertyId $reconcilePropertyId Must have the datatype "url".
 	 * @param Item $entity
-	 * @param ReconciliationItem[] $otherItems Other items that need to be created,
+	 * @param ReconciliationServiceItem[] $otherItems Other items that need to be created,
 	 * since their URLs were referenced in $entity but they did not exist yet.
 	 */
 	public function __construct(
@@ -50,7 +50,7 @@ class EditRequest {
 	}
 
 	/**
-	 * @return ReconciliationItem[]
+	 * @return ReconciliationServiceItem[]
 	 */
 	public function otherItems(): array {
 		return $this->otherItems;

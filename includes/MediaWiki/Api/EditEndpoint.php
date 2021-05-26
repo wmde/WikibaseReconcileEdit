@@ -106,7 +106,7 @@ class EditEndpoint extends SimpleHandler {
 		$reconciliationUrl = $reconciliationDataValue->getValue();
 
 		try {
-			$reconciliationItem = $this->reconciliationService->getOrCreateItemByStatementUrl(
+			$reconciliationServiceItem = $this->reconciliationService->getOrCreateItemByStatementUrl(
 				$reconcileUrlProperty,
 				$reconciliationUrl
 			);
@@ -115,7 +115,7 @@ class EditEndpoint extends SimpleHandler {
 		}
 
 		// And make the edit
-		$toSave = $this->simplePutStrategy->apply( $reconciliationItem->getItem(), $inputEntity );
+		$toSave = $this->simplePutStrategy->apply( $reconciliationServiceItem->getItem(), $inputEntity );
 		$saveStatus = Status::newGood();
 
 		foreach ( $otherItems as $otherItem ) {
@@ -153,14 +153,14 @@ class EditEndpoint extends SimpleHandler {
 			// TODO use a real user
 			\User::newSystemUser( 'WikibaseReconcileEditReconciliator' ),
 			$toSave->getId(),
-			$reconciliationItem->getRevision()
+			$reconciliationServiceItem->getRevision()
 		);
 
 		if ( $saveStatus->isOK() ) {
 			$saveStatus->merge( $editEntity->attemptSave(
 				$toSave,
 				'Reconciliation Edit',
-				$reconciliationItem->getRevision() ? null : EDIT_NEW,
+				$reconciliationServiceItem->getRevision() ? null : EDIT_NEW,
 				// TODO actually do a token check?
 				false
 			), true );
