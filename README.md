@@ -104,6 +104,17 @@ Edit payload `0.0.1/full` should look like this:
 
 **Note: that you do not need to provide statement GUIDs or any hashes.**
 
+## Authentication
+
+In order to make requests they need to be authenticated and with an [edit token](https://www.mediawiki.org/wiki/Manual:Edit_token) supplied in the request payload.
+Authentication can either be done by using the [action api](https://www.mediawiki.org/wiki/API:Login) or OAuth.
+
+OAuth requires the [OAuth Extension](https://www.mediawiki.org/wiki/Extension:OAuth) to be installed and a OAuth consumer created via the `wiki/Special:OAuthConsumerRegistration/propose` page.
+
+Follow the instructions [here](https://www.mediawiki.org/wiki/OAuth/Owner-only_consumers) on how to create a OAuth owner-only consumer.
+
+For an example on how to request a edit token and make an authenticated request using OAuth see the [example python script](example/oauth/main.py).
+
 ## Javascript Api testing
 
 Copy [.api-testing.config.json.template](.api-testing.config.json.template) to `.api-testing.config.json` and fill out required parameters. 
