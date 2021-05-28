@@ -31,12 +31,8 @@ class MinimalItemInputTest extends \MediaWikiUnitTestCase {
 
 	private function mockPropertyLabelResolver(): PropertyLabelResolver {
 		$mock = $this->createMock( PropertyLabelResolver::class );
-		$mock->method( 'getPropertyIdsForLabels' )
-			->willReturnCallback( function ( array $labels ) {
-				return array_map( function ( $label ) {
-					return [ $label => new PropertyId( $label ) ];
-				}, $labels );
-			} );
+		$mock->expects( $this->never() )
+			->method( 'getPropertyIdsForLabels' );
 		return $mock;
 	}
 
