@@ -9,7 +9,7 @@ This code is currently **work in progress** and some things are thus **known to 
 * 0.0.1/minimal statement value parsing options (such as language), could lead to "interesting" things
 * Anything to do with references, qualifiers
 * Statement ranks and sitelink badges may have an undetermined behavior
-* Editing always has a fixed user and summary currently, and token validation etc does not happen
+* The property lookup by name feature is not working yet with Federated Properties. [See below](#property-lookup-by-name).
 * Not fully tested, so there could be other bugs...
 
 ## /wikibase-reconcile-edit/v0/edit (Editing API)
@@ -62,6 +62,63 @@ Inspired by but not necessarily the same as a minimal format used in maxlath/wik
     ]
 }
 ```
+
+##### Property lookup by name
+
+The API supports request where the `property` parameter either is specified by its PropertyId or the english label of that property. 
+This means that the following payloads would work, given that `P23` has a label named `identifier`.
+
+```js
+{
+   "wikibasereconcileedit-version": "0.0.1/minimal",
+    "statements": [
+        {
+            "property": "identifier", // P23
+            "value": "https://github.com/addshore/test3"
+        }
+    ]
+}
+```
+
+**Note: This functionality is currently not supported when using [federated properties](https://doc.wikimedia.org/Wikibase/master/php/md_docs_components_repo-federated-properties.html)**
+
+##### Statement reconciliation
+
+Statements on the item to reconcile of type `wikibase-item` also support reconciliation against other items. 
+
+This means the following payloads would generate the following results. 
+
+```js
+const reconcile = {
+    "wikibasereconcileedit-version":"0.0.1",
+    "urlReconcile": "P23"
+}
+const entity = {
+   "wikibasereconcileedit-version": "0.0.1/minimal",
+    "statements": [
+        {
+            "property": "P23",
+            "value": "https://github.com/addshore/test3"
+        },
+        {
+            "property": "P12",
+            "value": "https://github.com/addshore/test4"
+        }
+    ]
+}
+
+const payload = {
+    reconcile: reconcile,
+    entity: entity
+}
+```
+
+In this example `P12` is of type `wikibase-item`. 
+`P23` would reconcile against the item with a statement value set to `https://github.com/addshore/test3`. 
+The second statement of the entity would make the API look for an item with the reconciliation property `P23` set to `https://github.com/addshore/test4`. 
+
+If no existing item was found, it would get created and be saved with a `P23` statement having the value `https://github.com/addshore/test4`
+
 
 #### Full 0.0.1/full
 
