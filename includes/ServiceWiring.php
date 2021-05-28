@@ -9,7 +9,11 @@ use MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\WikibaseReconcileEditSer
 use MediaWiki\Extension\WikibaseReconcileEdit\Reconciliation\ItemReconciler;
 use MediaWiki\Extension\WikibaseReconcileEdit\Reconciliation\ReconciliationService;
 use MediaWiki\MediaWikiServices;
+use Wikibase\DataModel\Entity\Property;
 use Wikibase\DataModel\Services\Statement\GuidGenerator;
+use Wikibase\Lib\Store\Sql\Terms\CachedDatabasePropertyLabelResolver;
+use Wikibase\Lib\Store\Sql\Terms\DatabaseTermInLangIdsResolver;
+use Wikibase\Lib\Store\Sql\Terms\DatabaseTypeIdsStore;
 use Wikibase\Repo\WikibaseRepo;
 
 /** @phpcs-require-sorted-array */
@@ -53,7 +57,52 @@ return [
 		return new MinimalItemInput(
 			$repo->getPropertyDataTypeLookup(),
 			$repo->getValueParserFactory(),
-			WikibaseReconcileEditServices::getReconciliationService( $services )
+			WikibaseReconcileEditServices::getReconciliationService( $services ),
+			WikibaseReconcileEditServices::getPropertyLabelResolver( $services ),
+		);
+	},
+
+	'WikibaseReconcileEdit.PropertyLabelResolver' => function ( MediaWikiServices $services ):
+		CachedDatabasePropertyLabelResolver {
+		$repo = WikibaseRepo::getDefaultInstance();
+		$settings = $repo->getSettings();
+
+		$languageCode = $services->getContentLanguage()->getCode();
+		$cacheKeyPrefix = $settings->getSetting( 'sharedCacheKeyPrefix' );
+		$cacheType = $settings->getSetting( 'sharedCacheType' );
+		$cacheDuration = $settings->getSetting( 'sharedCacheDuration' );
+		$cache = ObjectCache::getInstance( $cacheType );
+
+		// Cache key needs to be language specific
+		$cacheKey = $cacheKeyPrefix . ':TermPropertyLabelResolver' . '/' . $languageCode;
+		$entitySource = $repo->getEntitySourceDefinitions()->getSourceForEntityType(
+			Property::ENTITY_TYPE
+		);
+		$loadBalancer = $services->getDBLoadBalancerFactory()->getMainLB(
+			$entitySource->getDatabaseName()
+		);
+
+		$wanObjectCache = $services->getMainWANObjectCache();
+
+		$typeIdsStore = new DatabaseTypeIdsStore(
+			$loadBalancer,
+			$wanObjectCache,
+			$entitySource->getDatabaseName()
+		);
+
+		$databaseTermIdsResolver = new DatabaseTermInLangIdsResolver(
+			$typeIdsStore,
+			$typeIdsStore,
+			$loadBalancer,
+			$entitySource->getDatabaseName()
+		);
+
+		return new CachedDatabasePropertyLabelResolver(
+			$languageCode,
+			$databaseTermIdsResolver,
+			$cache,
+			$cacheDuration,
+			$cacheKey
 		);
 	},
 

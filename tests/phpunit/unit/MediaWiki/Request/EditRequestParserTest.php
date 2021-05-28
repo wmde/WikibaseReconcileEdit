@@ -15,6 +15,7 @@ use Wikibase\DataModel\Entity\PropertyId;
 use Wikibase\DataModel\Services\Lookup\InMemoryDataTypeLookup;
 use Wikibase\DataModel\Services\Lookup\PropertyDataTypeLookup;
 use Wikibase\DataModel\Services\Lookup\PropertyDataTypeLookupException;
+use Wikibase\DataModel\Services\Term\PropertyLabelResolver;
 use Wikibase\Repo\ValueParserFactory;
 
 /**
@@ -51,6 +52,13 @@ class EditRequestParserTest extends TestCase {
 		'urlReconcile' => self::URL_PROPERTY,
 	];
 
+	private function mockPropertyLabelResolver(): PropertyLabelResolver {
+		$mock = $this->createMock( PropertyLabelResolver::class );
+		$mock->expects( $this->never() )
+			->method( 'getPropertyIdsForLabels' );
+		return $mock;
+	}
+
 	private function getEditRequestParser(): EditRequestParser {
 		$propertyDataTypeLookup = $this->getPropertyDataTypeLookup();
 		$itemDeserializer = $this->createMock( Deserializer::class );
@@ -68,7 +76,8 @@ class EditRequestParserTest extends TestCase {
 						return new StringParser();
 					},
 				] ),
-				$reconciliationService
+				$reconciliationService,
+				$this->mockPropertyLabelResolver()
 			)
 		);
 	}

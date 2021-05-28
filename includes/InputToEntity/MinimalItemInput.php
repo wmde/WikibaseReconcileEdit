@@ -10,6 +10,7 @@ use Wikibase\DataModel\Entity\EntityIdValue;
 use Wikibase\DataModel\Entity\Item;
 use Wikibase\DataModel\Entity\PropertyId;
 use Wikibase\DataModel\Services\Lookup\PropertyDataTypeLookup;
+use Wikibase\DataModel\Services\Term\PropertyLabelResolver;
 use Wikibase\DataModel\SiteLink;
 use Wikibase\DataModel\Snak\PropertyValueSnak;
 use Wikibase\Repo\ValueParserFactory;
@@ -35,14 +36,21 @@ class MinimalItemInput {
 	 */
 	private $reconciliationService;
 
+	/**
+	 * @var PropertyLabelResolver
+	 */
+	private $propertyLabelResolver;
+
 	public function __construct(
 		PropertyDataTypeLookup $propertyDataTypeLookup,
 		ValueParserFactory $valueParserFactory,
-		ReconciliationService $reconciliationService
+		ReconciliationService $reconciliationService,
+		PropertyLabelResolver $propertyLabelResolver
 	) {
 		$this->propertyDataTypeLookup = $propertyDataTypeLookup;
 		$this->valueParserFactory = $valueParserFactory;
 		$this->reconciliationService = $reconciliationService;
+		$this->propertyLabelResolver = $propertyLabelResolver;
 	}
 
 	/**
@@ -94,7 +102,7 @@ class MinimalItemInput {
 							->textParams( 'value' )
 					);
 				}
-				$propertyId = new PropertyId( $statementDetails['property'] );
+				$propertyId = $this->getPropertyId( $statementDetails['property'] );
 				[ $dataValue, $reconciliationServiceItems ] = $this->getDataValue(
 					$propertyId,
 					$statementDetails['value'],
@@ -111,6 +119,37 @@ class MinimalItemInput {
 		}
 
 		return [ $item, array_values( $otherItems ) ];
+	}
+
+	/**
+	 * @param string $propertyId
+	 * @return PropertyId
+	 */
+	public function getPropertyId( string $propertyId ): PropertyId {
+		try {
+			return new PropertyId( $propertyId );
+		} catch ( \InvalidArgumentException $exception ) {
+			return $this->getPropertyIdByLabel( $propertyId );
+		}
+	}
+
+	/**
+	 * @param string $label
+	 * @return PropertyId
+	 * @throws ReconciliationException
+	 */
+	public function getPropertyIdByLabel( string $label ): PropertyId {
+		$entityIds = $this->propertyLabelResolver->getPropertyIdsForLabels( [ $label ] );
+
+		if ( empty( $entityIds ) ) {
+			throw new ReconciliationException(
+				MessageValue::new( 'wikibasereconcileedit-editendpoint-property-not-found' )
+				->textParams( $label ) );
+		}
+
+		/** @var PropertyId $propertyId */
+		$propertyId = $entityIds[ $label ];
+		return $propertyId;
 	}
 
 	/**

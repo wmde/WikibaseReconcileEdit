@@ -11,6 +11,7 @@ use Wikibase\DataModel\Entity\EntityId;
 use Wikibase\DataModel\Entity\Item;
 use Wikibase\DataModel\Entity\PropertyId;
 use Wikibase\DataModel\Services\Lookup\PropertyDataTypeLookup;
+use Wikibase\DataModel\Services\Term\PropertyLabelResolver;
 use Wikibase\Repo\ValueParserFactory;
 
 /**
@@ -25,6 +26,13 @@ class MinimalItemInputTest extends \MediaWikiUnitTestCase {
 			->willReturnCallback( function ( EntityId $id ) {
 				return $id->getSerialization() . '-data-type';
 			} );
+		return $mock;
+	}
+
+	private function mockPropertyLabelResolver(): PropertyLabelResolver {
+		$mock = $this->createMock( PropertyLabelResolver::class );
+		$mock->expects( $this->never() )
+			->method( 'getPropertyIdsForLabels' );
 		return $mock;
 	}
 
@@ -88,7 +96,8 @@ class MinimalItemInputTest extends \MediaWikiUnitTestCase {
 		$sut = new MinimalItemInput(
 			$this->mockPropertyDataTypeLookup(),
 			$this->mockValueParserFactory(),
-			$this->mockReconciliationService()
+			$this->mockReconciliationService(),
+			$this->mockPropertyLabelResolver()
 		);
 
 		$prop = new PropertyId( 'P23' );
@@ -120,7 +129,8 @@ class MinimalItemInputTest extends \MediaWikiUnitTestCase {
 		$sut = new MinimalItemInput(
 			$this->mockPropertyDataTypeLookup(),
 			$this->mockValueParserFactory(),
-			$this->mockReconciliationService()
+			$this->mockReconciliationService(),
+			$this->mockPropertyLabelResolver(),
 		);
 
 		$prop = new PropertyId( 'P23' );
@@ -143,10 +153,11 @@ class MinimalItemInputTest extends \MediaWikiUnitTestCase {
 				],
 			],
 		];
-		$sut = $sut = new MinimalItemInput(
+		$sut = new MinimalItemInput(
 			$this->mockPropertyDataTypeLookup(),
 			$this->mockValueParserFactory(),
-			$this->mockReconciliationService()
+			$this->mockReconciliationService(),
+			$this->mockPropertyLabelResolver(),
 		);
 
 		$prop = new PropertyId( 'P23' );
@@ -160,4 +171,58 @@ class MinimalItemInputTest extends \MediaWikiUnitTestCase {
 		}
 	}
 
+	public function testGetPropertyByPropertyID() {
+		$sut = new MinimalItemInput(
+			$this->mockPropertyDataTypeLookup(),
+			$this->mockValueParserFactory(),
+			$this->mockReconciliationService(),
+			$this->mockPropertyLabelResolver(),
+		);
+
+		$prop = new PropertyId( 'P23' );
+
+		$this->assertEquals( $prop, $sut->getPropertyId( 'P23' ) );
+	}
+
+	public function testGetPropertyIdByLabelNothingFound() {
+		$exceptionMessageKey = 'wikibasereconcileedit-editendpoint-property-not-found';
+		$propertyIdsArray = [];
+		$propByLabel = 'im-a-label';
+		$propertyLabelResolver = $this->createMock( PropertyLabelResolver::class );
+		$propertyLabelResolver->method( 'getPropertyIdsForLabels' )
+			->willReturn( $propertyIdsArray );
+
+		$sut = new MinimalItemInput(
+			$this->mockPropertyDataTypeLookup(),
+			$this->mockValueParserFactory(),
+			$this->mockReconciliationService(),
+			$propertyLabelResolver,
+		);
+
+		try{
+			$sut->getPropertyId( $propByLabel );
+			$this->fail( 'expected ReconciliationException to be thrown' );
+		} catch ( ReconciliationException $rex ) {
+			$this->assertSame( $exceptionMessageKey, $rex->getMessageValue()->getKey() );
+		}
+	}
+
+	public function testGetPropertyIdByLabel() {
+		$propByLabel = 'im-a-label';
+		$expectedPropertyID = new PropertyId( 'P1234' );
+		$propertyLabelResolver = $this->createMock( PropertyLabelResolver::class );
+		$propertyLabelResolver->method( 'getPropertyIdsForLabels' )
+			->with( [ $propByLabel ] )
+			->willReturn( [ $propByLabel => $expectedPropertyID ] );
+
+		$sut = new MinimalItemInput(
+			$this->mockPropertyDataTypeLookup(),
+			$this->mockValueParserFactory(),
+			$this->mockReconciliationService(),
+			$propertyLabelResolver,
+		);
+
+		$new = $sut->getPropertyId( $propByLabel );
+		$this->assertEquals( $expectedPropertyID, $new );
+	}
 }

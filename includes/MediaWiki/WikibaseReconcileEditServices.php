@@ -10,6 +10,7 @@ use MediaWiki\Extension\WikibaseReconcileEdit\Reconciliation\ItemReconciler;
 use MediaWiki\Extension\WikibaseReconcileEdit\Reconciliation\ReconciliationService;
 use MediaWiki\MediaWikiServices;
 use Psr\Container\ContainerInterface;
+use Wikibase\DataModel\Services\Term\PropertyLabelResolver;
 
 /**
  * @license GPL-2.0-or-later
@@ -43,6 +44,11 @@ class WikibaseReconcileEditServices {
 	public static function getMinimalItemInput( ContainerInterface $services = null ): MinimalItemInput {
 		return ( $services ?: MediaWikiServices::getInstance() )
 			->get( 'WikibaseReconcileEdit.MinimalItemInput' );
+	}
+
+	public static function getPropertyLabelResolver( ContainerInterface $services = null ): PropertyLabelResolver {
+		return ( $services ?: MediaWikiServices::getInstance() )
+			->get( 'WikibaseReconcileEdit.PropertyLabelResolver' );
 	}
 
 	public static function getReconciliationService( ContainerInterface $services = null ): ReconciliationService {

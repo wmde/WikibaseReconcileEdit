@@ -9,6 +9,7 @@
 	"wikibasereconcileedit-editendpoint-invalid-reconcile-parameter": "Error returned by the API if the “reconcile” request parameter is invalid.",
 	"wikibasereconcileedit-editendpoint-unsupported-reconcile-version": "Error returned by the API if the “reconcile” request parameter specifies an unsupported version.\n\nParameters:\n* $1 – the supported versions (comma-separated list)\n* $2 – the number of supported versions",
 	"wikibasereconcileedit-editendpoint-invalid-reconcile-propertyid": "Error returned by the API if the “reconcile” request parameter contains no valid field to specify the property ID to reconcile on.\n\nParameters:\n* $1 – the version of the request parameter, e.g. 0.0.1\n* $2 – the name of the field, e.g. urlReconcile",
+	"wikibasereconcileedit-editendpoint-property-not-found": "Error returned when a property was not found by its label",
 	"wikibasereconcileedit-editendpoint-invalid-type-property-must-be-url": "Error returned by the API if the “reconcile” request propertyId parameter is not of type URL.\n\nParameters:\n* $1 – the name of the property, e.g. P123\n* $2 – the name of the field, e.g. urlReconcile.\n* $3 – the datatype of the provided reconcile property, e.g. string",
 	"wikibasereconcileedit-editendpoint-unspecified-entity-input-version": "Error returned by the API if the “entity” request parameter contains no version field in the entity input",
 	"wikibasereconcileedit-editendpoint-invalid-entity-input-version": "Error returned by the API if the “entity” request parameter specifies an unsupported version.\n\nParameters:\n* $1 is the specified (unsupported) version, $2 the supported versions, and $3 the number of supported versions\n",
@@ -21,5 +22,4 @@
 	"wikibasereconcileedit-minimaliteminput-required-keys": "Error returned by the API if the minimal item input statements parameter is missing a certain key.\n\nParameters:\n $1 - the missing key",
 	"wikibasereconcileedit-fullwikibaseiteminput-unsupported-type": "Error returned by the API if the full wikibase item input's type parameter is not supported.\n\nParameters:\n* $1 – the supported types (comma-separated list)\n* $2 – the number of supported types",
 	"wikibasereconcileedit-unauthorized-access": "Error returned by the API if not authorized access"
-
 }
