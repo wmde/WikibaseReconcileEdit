@@ -157,7 +157,7 @@ class MinimalItemInputTest extends \MediaWikiUnitTestCase {
 				],
 			],
 		];
-		$sut = $sut = new MinimalItemInput(
+		$sut = new MinimalItemInput(
 			$this->mockPropertyDataTypeLookup(),
 			$this->mockValueParserFactory(),
 			$this->mockReconciliationService(),
@@ -176,7 +176,7 @@ class MinimalItemInputTest extends \MediaWikiUnitTestCase {
 	}
 
 	public function testGetPropertyByPropertyID() {
-		$sut = $sut = new MinimalItemInput(
+		$sut = new MinimalItemInput(
 			$this->mockPropertyDataTypeLookup(),
 			$this->mockValueParserFactory(),
 			$this->mockReconciliationService(),
@@ -196,7 +196,7 @@ class MinimalItemInputTest extends \MediaWikiUnitTestCase {
 		$propertyLabelResolver->method( 'getPropertyIdsForLabels' )
 			->willReturn( $propertyIdsArray );
 
-		$sut = $sut = new MinimalItemInput(
+		$sut = new MinimalItemInput(
 			$this->mockPropertyDataTypeLookup(),
 			$this->mockValueParserFactory(),
 			$this->mockReconciliationService(),
@@ -219,7 +219,7 @@ class MinimalItemInputTest extends \MediaWikiUnitTestCase {
 			->with( [ $propByLabel ] )
 			->willReturn( [ $propByLabel => $expectedPropertyID ] );
 
-		$sut = $sut = new MinimalItemInput(
+		$sut = new MinimalItemInput(
 			$this->mockPropertyDataTypeLookup(),
 			$this->mockValueParserFactory(),
 			$this->mockReconciliationService(),
