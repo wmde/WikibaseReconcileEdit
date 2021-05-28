@@ -57,9 +57,12 @@ class EditEndpoint extends SimpleHandler {
 		ItemReconciler $itemReconciler
 	): self {
 		$repo = WikibaseRepo::getDefaultInstance();
+		$editEntityFactory = method_exists( $repo, 'getEditEntityFactory' )
+			? $repo->getEditEntityFactory() // 1.36+
+			: $repo->newEditEntityFactory(); // 1.35
 
 		return new self(
-			$repo->newEditEntityFactory(),
+			$editEntityFactory,
 			$editRequestParser,
 			$itemReconciler,
 			// @TODO Inject this, when there is a good way to do that

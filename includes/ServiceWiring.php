@@ -109,11 +109,14 @@ return [
 	'WikibaseReconcileEdit.ReconciliationService' => function ( MediaWikiServices $services ): ReconciliationService {
 		$repo = WikibaseRepo::getDefaultInstance();
 		$guidGenerator = new GuidGenerator();
+		$idGenerator = method_exists( $repo, 'getIdGenerator' )
+			? $repo->getIdGenerator() // 1.36+
+			: $repo->newIdGenerator(); // 1.35
 
 		return new ReconciliationService(
 			$repo->getEntityIdLookup(),
 			$repo->getEntityRevisionLookup(),
-			$repo->newIdGenerator(),
+			$idGenerator,
 			WikibaseReconcileEditServices::getExternalLinks( $services ),
 			$services->getTitleFactory(),
 			$guidGenerator,

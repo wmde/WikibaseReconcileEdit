@@ -72,8 +72,11 @@ class EditEndpointTest extends \MediaWikiIntegrationTestCase {
 		$repo = WikibaseRepo::getDefaultInstance();
 		$reconciliationService = WikibaseReconcileEditServices::getReconciliationService();
 		$propertyDataTypeLookup = WikibaseRepo::getDefaultInstance()->getPropertyDataTypeLookup();
+		$editEntityFactory = method_exists( $repo, 'getEditEntityFactory' )
+			? $repo->getEditEntityFactory() // 1.36+
+			: $repo->newEditEntityFactory(); // 1.35
 		return new EditEndpoint(
-			$repo->newEditEntityFactory(),
+			$editEntityFactory,
 			new EditRequestParser(
 				$propertyDataTypeLookup,
 				WikibaseReconcileEditServices::getFullWikibaseItemInput(),
