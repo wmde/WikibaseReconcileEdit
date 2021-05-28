@@ -50,7 +50,13 @@ jobs:
                           DBTYPE: mysql
                           LANG: en
                           WB: both
-                      php-versions: '7.3.26'
+                      php-version: '7.3.26'
+                    - env:
+                          MW_BRANCH: REL1_36
+                          DBTYPE: mysql
+                          LANG: en
+                          WB: both
+                      php-version: '7.3.26'
         steps:
             - name: Checkout
               uses: actions/checkout@v2
@@ -63,13 +69,13 @@ jobs:
             - name: Setup PHP
               uses: shivammathur/setup-php@v2
               with:
-                  php-version: ${{ matrix.php-versions }}
+                  php-version: ${{ matrix.php-version }}
                   extensions: pdo_sqlite, mysqlnd
             - name: Cache Composer cache
               uses: actions/cache@v2
               with:
                   path: $HOME/.composer/cache
-                  key: composer-cache-php${{ matrix.php-versions }}
+                  key: composer-cache-php${{ matrix.php-version }}
             - name: install.sh
               env: ${{ matrix.env }}
               run: |
