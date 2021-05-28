@@ -8,17 +8,19 @@ describe( 'POST /edit', () => {
 	const basePath = 'rest.php/wikibase-reconcile-edit/v0';
 	let actionAgent, client;
 
+	const reconciliationPropertyLabel = 'identifier';
+	const namePropertyLabel = 'name';
+	const billOfMaterialsPropertyLabel = 'bill of materials';
+
 	let reconciliationPropertyId, billOfMaterialsPropertyId, namePropertyId;
 
 	before( async () => {
 		actionAgent = await action.alice();
 		client = clientFactory.getRESTClient( basePath, actionAgent );
 
-		// needs to maintain a list of what properties map to what "datatype"
-		// could use PropertyLabelResolver to go around knowing the P numbers
-		reconciliationPropertyId = await requestHelper.getOrCreateProperty( 'url', 'identifier' );
-		namePropertyId = await requestHelper.getOrCreateProperty( 'string', 'name' );
-		billOfMaterialsPropertyId = await requestHelper.getOrCreateProperty( 'wikibase-item', 'bill of material' );
+		reconciliationPropertyId = await requestHelper.getOrCreateProperty( 'url', reconciliationPropertyLabel );
+		namePropertyId = await requestHelper.getOrCreateProperty( 'string', namePropertyLabel );
+		billOfMaterialsPropertyId = await requestHelper.getOrCreateProperty( 'wikibase-item', billOfMaterialsPropertyLabel );
 
 	} );
 
@@ -151,6 +153,60 @@ describe( 'POST /edit', () => {
 
 		await requestHelper.assertRequestStatements(
 			requestStatements,
+			claims,
+			reconciliationPropertyId
+		);
+
+	} );
+
+	it( 'Should lookup properties through label names', async () => {
+		const actualPropertyIds = [
+			reconciliationPropertyId,
+			namePropertyId,
+			billOfMaterialsPropertyId
+		];
+
+		const requestStatements = [
+			{
+				property: reconciliationPropertyLabel,
+				value: 'https://gitlab.com/OSEGermany/ohlbroom/'
+			},
+			{
+				property: namePropertyLabel,
+				value: 'OHLBROOM'
+			},
+			{
+				property: billOfMaterialsPropertyLabel,
+				value: 'https://gitlab.com/OSEGermany/ohbroom/sBoM.csv'
+			}
+		];
+
+		const params = requestHelper.getRequestPayload(
+			requestStatements,
+			reconciliationPropertyId,
+			await actionAgent.token()
+		);
+		const { status, body } = await client.post(
+			'/edit',
+			params
+		);
+
+		assert.equal( status, 200 );
+		assert.nestedProperty( body, 'entityId' );
+
+		const entityId = body.entityId;
+		const resultingObject = await axios.get( wbk.getEntities( entityId ) );
+		const claims = resultingObject.data.entities[ entityId ].claims;
+
+		const expectedRequestStatementsWithIds = requestStatements.map( ( element, index ) => {
+			return {
+				property: actualPropertyIds[ index ],
+				value: element.value
+			};
+		} );
+
+		await requestHelper.assertRequestStatements(
+			expectedRequestStatementsWithIds,
 			claims,
 			reconciliationPropertyId
 		);

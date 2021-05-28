@@ -31,6 +31,9 @@ class EditEndpointTest extends \MediaWikiIntegrationTestCase {
 
 	use HandlerTestTrait;
 
+	private const STRING_PROPERTY_LABEL = 'stringProperty';
+	private const ITEM_PROPERTY_LABEL = 'itemProperty';
+
 	private const URL_PROPERTY = 'P1';
 	private const STRING_PROPERTY = 'P2';
 	private const ITEM_PROPERTY = 'P3';
@@ -45,17 +48,20 @@ class EditEndpointTest extends \MediaWikiIntegrationTestCase {
 		$this->tablesUsed[] = 'wb_property_info';
 		$this->tablesUsed[] = 'wb_id_counters';
 
-		$this->setupProperty( self::URL_PROPERTY, 'url' );
-		$this->setupProperty( self::STRING_PROPERTY, 'string' );
-		$this->setupProperty( self::ITEM_PROPERTY, 'wikibase-item' );
-		$this->setupProperty( self::URL_PROPERTY_NOT_RECONCILED, 'url' );
+		$this->setupProperty( self::URL_PROPERTY, 'url', 'identifier' );
+		$this->setupProperty( self::STRING_PROPERTY, 'string', self::STRING_PROPERTY_LABEL );
+		$this->setupProperty( self::ITEM_PROPERTY, 'wikibase-item', self::ITEM_PROPERTY_LABEL );
+		$this->setupProperty( self::URL_PROPERTY_NOT_RECONCILED, 'url', 'urlPropertyNotReconciled' );
 
 		$this->defaultTestUser = $this->getTestSysop()->getUser();
+		$this->setMwGlobals( 'wgLanguageCode', 'en' );
 	}
 
-	private function setupProperty( string $propertyId, $propertyType ): void {
+	private function setupProperty( string $propertyId, string $propertyType, string $label ): void {
+		$prop = new Property( new PropertyId( $propertyId ), null, $propertyType );
+		$prop->setLabel( 'en', $label );
 		WikibaseRepo::getDefaultInstance()->getEntityStore()->saveEntity(
-			new Property( new PropertyId( $propertyId ), null, $propertyType ),
+			$prop,
 			__METHOD__,
 			$this->getTestUser()->getUser(),
 			EDIT_NEW
@@ -74,7 +80,8 @@ class EditEndpointTest extends \MediaWikiIntegrationTestCase {
 				new MinimalItemInput(
 					$propertyDataTypeLookup,
 					$repo->getValueParserFactory(),
-					$reconciliationService
+					$reconciliationService,
+					WikibaseReconcileEditServices::getPropertyLabelResolver()
 				)
 			),
 			new ItemReconciler(
@@ -230,6 +237,30 @@ class EditEndpointTest extends \MediaWikiIntegrationTestCase {
 
 					],
 					'Q2' => [
+						self::URL_PROPERTY => $url . '2',
+					]
+				],
+			]
+		];
+
+		yield 'lookup property names using labels' => [
+			[
+				[
+					// request that should create one item that links to itself and a second item
+					[ 'property' => self::URL_PROPERTY, 'value' => $url . '1', ],
+					[ 'property' => self::STRING_PROPERTY_LABEL, 'value' => 'hello', ],
+					[ 'property' => self::ITEM_PROPERTY_LABEL, 'value' => $url . '2', ],
+				],
+			],
+			// expected results after each request
+			[
+				[
+					'Q2' => [
+						self::URL_PROPERTY => $url . '1',
+						self::STRING_PROPERTY => 'hello',
+						self::ITEM_PROPERTY => new EntityIdValue( new ItemId( 'Q1' ) ),
+					],
+					'Q1' => [
 						self::URL_PROPERTY => $url . '2',
 					]
 				],
