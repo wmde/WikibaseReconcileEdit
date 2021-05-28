@@ -7,6 +7,10 @@
 		<severity>0</severity>
 	</rule>
 
+	<rule ref="MediaWiki.WhiteSpace.SpaceBeforeSingleLineComment.NewLineComment">
+		<severity>0</severity>
+	</rule>
+
 	<rule ref="MediaWiki.Commenting.ClassLevelLicense">
 		<properties>
 			<property name="license" value="GPL-2.0-or-later" />
