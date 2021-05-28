@@ -111,7 +111,6 @@ class EditRequestParser {
 		return new EditRequest(
 			$reconcilePropertyId,
 			$inputEntity,
-			$requestBody['token'],
 			$otherItems,
 		);
 	}

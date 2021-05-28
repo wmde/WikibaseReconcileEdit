@@ -8,8 +8,10 @@ use MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\Request\EditRequestParse
 use MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\WikibaseReconcileEditServices;
 use MediaWiki\Extension\WikibaseReconcileEdit\Reconciliation\ItemReconciler;
 use MediaWiki\MediaWikiServices;
+use MediaWiki\Rest\LocalizedHttpException;
 use MediaWiki\Rest\RequestData;
 use MediaWiki\Rest\RequestInterface;
+use MediaWiki\Session\SessionProviderInterface;
 use MediaWiki\Tests\Rest\Handler\HandlerTestTrait;
 use User;
 use Wikibase\DataModel\Entity\EntityIdValue;
@@ -60,7 +62,7 @@ class EditEndpointTest extends \MediaWikiIntegrationTestCase {
 		)->getEntity()->getId();
 	}
 
-	private function newHandler( User $user = null ) {
+	private function newHandler( User $user = null, SessionProviderInterface $sessionProvider = null ) {
 		$repo = WikibaseRepo::getDefaultInstance();
 		$reconciliationService = WikibaseReconcileEditServices::getReconciliationService();
 		$propertyDataTypeLookup = WikibaseRepo::getDefaultInstance()->getPropertyDataTypeLookup();
@@ -79,7 +81,8 @@ class EditEndpointTest extends \MediaWikiIntegrationTestCase {
 				$reconciliationService,
 				WikibaseReconcileEditServices::getSimplePutStrategy()
 			),
-			$user !== null ? $user : $this->defaultTestUser
+			$user !== null ? $user : $this->defaultTestUser,
+			$sessionProvider !== null ? $sessionProvider : $this->getMockSessionProvider( false )
 		);
 	}
 
@@ -289,6 +292,67 @@ class EditEndpointTest extends \MediaWikiIntegrationTestCase {
 		}
 	}
 
+	/** @dataProvider provideTokenParameters */
+	public function testTokenParameter( ?string $token, bool $safeAgainstCsrf ): void {
+		$params = [
+			'entity' => 1,
+			'reconcile' => 1,
+		];
+		if ( $token !== null ) {
+			$params['token'] = str_replace(
+				'REAL_TOKEN',
+				$this->defaultTestUser->getEditToken(),
+				$token
+			);
+		}
+		$request = new RequestData( [
+			'bodyContents' => json_encode( $params ),
+			'headers' => [
+				'Content-Type' => 'application/json',
+			],
+			'method' => 'POST',
+		] );
+		$sessionProvider = $this->getMockSessionProvider( $safeAgainstCsrf );
+
+		$handler = $this->newHandler( $this->defaultTestUser, $sessionProvider );
+		/** @var LocalizedHttpException $exception */
+		$exception = $this->executeHandlerAndGetHttpException( $handler, $request );
+
+		$this->assertInstanceOf( LocalizedHttpException::class, $exception );
+		$this->assertSame( 'wikibasereconcileedit-editendpoint-invalid-reconcile-parameter',
+			$exception->getMessageValue()->getKey() );
+	}
+
+	public function provideTokenParameters(): iterable {
+		// REAL_TOKEN will be replaced in the test function
+		// (here in the data provider, $this->defaultTestUser isn’t set yet)
+		yield 'valid token needed' => [ 'REAL_TOKEN', false ];
+		yield 'token not needed' => [ null, true ];
+		yield 'unneeded token ignored' => [ 'FAKE_TOKEN', true ];
+	}
+
+	public function testInvalidTokenParameter(): void {
+		$params = [
+			'entity' => 1,
+			'reconcile' => 1,
+			'token' => 'FAKE_TOKEN',
+		];
+		$request = new RequestData( [
+			'bodyContents' => json_encode( $params ),
+			'headers' => [
+				'Content-Type' => 'application/json',
+			],
+			'method' => 'POST',
+		] );
+
+		/** @var LocalizedHttpException $exception */
+		$exception = $this->executeHandlerAndGetHttpException( $this->newHandler(), $request );
+
+		$this->assertInstanceOf( LocalizedHttpException::class, $exception );
+		$this->assertSame( 'wikibasereconcileedit-unauthorized-access',
+			$exception->getMessageValue()->getKey() );
+	}
+
 	private function countItemsInDatabase(): int {
 		$itemNamespace = WikibaseRepo::getDefaultInstance()
 			->getEntityNamespaceLookup()
@@ -300,6 +364,12 @@ class EditEndpointTest extends \MediaWikiIntegrationTestCase {
 			[ 'page_namespace' => $itemNamespace ],
 			__METHOD__
 		);
+	}
+
+	private function getMockSessionProvider( bool $safeAgainstCSRF ): SessionProviderInterface {
+		$provider = $this->createMock( SessionProviderInterface::class );
+		$provider->method( 'safeAgainstCsrf' )->willReturn( $safeAgainstCSRF );
+		return $provider;
 	}
 
 }

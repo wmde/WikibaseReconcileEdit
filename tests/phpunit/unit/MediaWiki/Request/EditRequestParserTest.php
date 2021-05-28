@@ -103,7 +103,6 @@ class EditRequestParserTest extends TestCase {
 				EditRequestParser::VERSION_KEY => '0.0.1',
 				'urlReconcile' => self::URL_PROPERTY,
 			],
-			'token' => 'asdf',
 		];
 
 		$requestParser = $this->getEditRequestParser();
@@ -119,10 +118,6 @@ class EditRequestParserTest extends TestCase {
 		$this->assertEquals(
 			new PropertyId( self::URL_PROPERTY ),
 			$editRequest->reconcilePropertyId()
-		);
-		$this->assertEquals(
-			'asdf',
-			$editRequest->token()
 		);
 	}
 
