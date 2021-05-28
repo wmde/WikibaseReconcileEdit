@@ -24,8 +24,9 @@ data = {
       },
     ],
   },
-  "token": "",
+  #"token": "" CSRF token to be supplied if not using OAuth
 }
+
 
 # These are displayed ONCE when the owner-only consumer is created
 consumer_key = ''
@@ -36,9 +37,10 @@ access_secret = ''
 
 auth = OAuth1(consumer_key, consumer_secret, access_token, access_secret)
 
-result = requests.get(url='https://wikibase-reconcile-testing.wmcloud.org/w/api.php', params={'action': 'query', 'meta': 'tokens', 'format': 'json'}, auth=auth)
-token = result.json()['query']['tokens']['csrftoken']
-data['token'] = token
+# CSRF token to be supplied if not using OAuth
+#result = requests.get(url='https://wikibase-reconcile-testing.wmcloud.org/w/api.php', params={'action': 'query', 'meta': 'tokens', 'format': 'json'}, auth=auth)
+#token = result.json()['query']['tokens']['csrftoken']
+#data['token'] = token
 
 result = requests.post(url='https://wikibase-reconcile-testing.wmcloud.org/w/rest.php/wikibase-reconcile-edit/v0/edit', json=data, auth=auth)
 pprint(vars(result))

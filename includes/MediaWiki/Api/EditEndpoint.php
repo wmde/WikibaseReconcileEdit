@@ -8,6 +8,7 @@ use MediaWiki\Extension\WikibaseReconcileEdit\ReconciliationException;
 use MediaWiki\Rest\LocalizedHttpException;
 use MediaWiki\Rest\SimpleHandler;
 use MediaWiki\Rest\Validator\JsonBodyValidator;
+use MediaWiki\Session\SessionProviderInterface;
 use RequestContext;
 use Status;
 use User;
@@ -34,16 +35,21 @@ class EditEndpoint extends SimpleHandler {
 	/** @var User */
 	private $user;
 
+	/** @var SessionProviderInterface */
+	private $sessionProvider;
+
 	public function __construct(
 		MediawikiEditEntityFactory $editEntityFactory,
 		EditRequestParser $editRequestParser,
 		ItemReconciler $itemReconciler,
-		User $user
+		User $user,
+		SessionProviderInterface $sessionProvider
 	) {
 		$this->editEntityFactory = $editEntityFactory;
 		$this->editRequestParser = $editRequestParser;
 		$this->itemReconciler = $itemReconciler;
 		$this->user = $user;
+		$this->sessionProvider = $sessionProvider;
 	}
 
 	public static function factory(
@@ -57,13 +63,15 @@ class EditEndpoint extends SimpleHandler {
 			$editRequestParser,
 			$itemReconciler,
 			// @TODO Inject this, when there is a good way to do that
-			RequestContext::getMain()->getUser()
+			RequestContext::getMain()->getUser(),
+			RequestContext::getMain()->getRequest()->getSession()->getProvider()
 		);
 	}
 
 	public function run() {
 		// Rest Validator returns null if submitted as form
 		$requestBody = $this->getValidatedBody();
+
 		if ( $requestBody === null ) {
 			throw new LocalizedHttpException(
 				MessageValue::new( 'wikibasereconcileedit-editendpoint-invalid-request-body' ),
@@ -71,7 +79,9 @@ class EditEndpoint extends SimpleHandler {
 			);
 		}
 
-		if ( !$this->user->isRegistered() || !$this->user->matchEditToken( $requestBody['token'] ) ) {
+		$editToken = $this->getEditToken( $requestBody );
+
+		if ( !$this->user->isRegistered() || !$this->user->matchEditToken( $editToken ) ) {
 			throw new LocalizedHttpException(
 				MessageValue::new( 'wikibasereconcileedit-unauthorized-access' ),
 				403
@@ -125,7 +135,7 @@ class EditEndpoint extends SimpleHandler {
 				$otherItem->getItem(),
 				'Reconciliation Edit',
 				EDIT_NEW,
-				$request->token()
+				$editToken
 			), true );
 			if ( !$saveStatus->isOK() ) {
 				break;
@@ -143,7 +153,7 @@ class EditEndpoint extends SimpleHandler {
 				$toSave,
 				'Reconciliation Edit',
 				$reconciledItem->isNew() ? EDIT_NEW : EDIT_UPDATE,
-				$request->token()
+				$editToken
 			), true );
 		}
 
@@ -163,6 +173,19 @@ class EditEndpoint extends SimpleHandler {
 
 	public function needsWriteAccess() {
 		return true;
+	}
+
+	/**
+	 * Determines the CSRF token to be used when making edits
+	 * @param array $body
+	 * @return string
+	 */
+	protected function getEditToken( array $body ) {
+		if ( $this->sessionProvider->safeAgainstCsrf() ) {
+			return $this->user->getEditToken();
+		} else {
+			return $body['token'] ?? '';
+		}
 	}
 
 	/**
@@ -186,7 +209,7 @@ class EditEndpoint extends SimpleHandler {
 			],
 			'token' => [
 				ParamValidator::PARAM_TYPE => 'string',
-				ParamValidator::PARAM_REQUIRED => true,
+				ParamValidator::PARAM_REQUIRED => false,
 			],
 		] );
 	}
