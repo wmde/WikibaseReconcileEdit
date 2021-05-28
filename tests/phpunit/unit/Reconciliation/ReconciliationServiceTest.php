@@ -195,14 +195,16 @@ class ReconciliationServiceTest extends \MediaWikiUnitTestCase {
 			->with( $reconcileUrl )
 			->willReturn( [ $pageId ] );
 
+		$title = $this->createMock( Title::class );
+
 		$titleFactory = $this->createMock( TitleFactory::class );
 		$titleFactory->method( 'newFromIDs' )
 			->with( [ $pageId ] )
-			->willReturn( [ Title::newFromID( $pageId ) ] );
+			->willReturn( [ $title ] );
 
 		$entityIdLookup = $this->createMock( EntityIdLookup::class );
 		$entityIdLookup->method( 'getEntityIds' )
-			->with( [ Title::newFromID( $pageId ) ] )
+			->with( [ $title ] )
 			->willReturn( [ $itemId ] );
 
 		$entityRevisionLookup = $this->createMock( EntityRevisionLookup::class );
