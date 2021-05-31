@@ -3,7 +3,7 @@
 namespace MediaWiki\Extension\WikibaseReconcileEdit\Tests\Integration\MediaWiki\Api;
 
 use MediaWiki\Extension\WikibaseReconcileEdit\InputToEntity\MinimalItemInput;
-use MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\Api\EditEndpoint;
+use MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\Api\SingleEditEndpoint;
 use MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\Request\EditRequestParser;
 use MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\WikibaseReconcileEditServices;
 use MediaWiki\Extension\WikibaseReconcileEdit\Reconciliation\ItemReconciler;
@@ -23,11 +23,11 @@ use Wikibase\DataModel\Snak\PropertyValueSnak;
 use Wikibase\Repo\WikibaseRepo;
 
 /**
- * @covers MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\Api\EditEndpoint
+ * @covers MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\Api\SingleEditEndpoint
  * @group Database
  * @license GPL-2.0-or-later
  */
-class EditEndpointTest extends \MediaWikiIntegrationTestCase {
+class SingleEditEndpointTest extends \MediaWikiIntegrationTestCase {
 
 	use HandlerTestTrait;
 
@@ -75,7 +75,7 @@ class EditEndpointTest extends \MediaWikiIntegrationTestCase {
 		$editEntityFactory = method_exists( $repo, 'getEditEntityFactory' )
 			? $repo->getEditEntityFactory() // 1.36+
 			: $repo->newEditEntityFactory(); // 1.35
-		return new EditEndpoint(
+		return new SingleEditEndpoint(
 			$editEntityFactory,
 			new EditRequestParser(
 				$propertyDataTypeLookup,

@@ -38,7 +38,7 @@ class EditRequestParser {
 		$this->minimalItemInput = $minimalItemInput;
 	}
 
-	public function parseRequestBody( array $requestBody ): EditRequest {
+	private function parseReconcilePropertyId( array $requestBody ): PropertyId {
 		$reconcile = $requestBody['reconcile'];
 
 		if ( !is_array( $reconcile ) ) {
@@ -81,8 +81,10 @@ class EditRequestParser {
 			);
 		}
 
-		$entity = $requestBody['entity'] ?: null;
+		return $reconcilePropertyId;
+	}
 
+	private function parseEditRequest( $entity, PropertyId $reconcilePropertyId ): EditRequest {
 		if (
 			!is_array( $entity ) ||
 			!array_key_exists( self::VERSION_KEY, $entity )
@@ -113,6 +115,26 @@ class EditRequestParser {
 			$inputEntity,
 			$otherItems,
 		);
+	}
+
+	/** @return EditRequest[] */
+	public function parseBatchRequestBody( array $requestBody ): array {
+		$reconcilePropertyId = $this->parseReconcilePropertyId( $requestBody );
+		$editRequests = [];
+		$entities = $requestBody['entities'];
+
+		foreach ( $entities as $entity ) {
+			$editRequests[] = $this->parseEditRequest( $entity, $reconcilePropertyId );
+		}
+
+		return $editRequests;
+	}
+
+	public function parseRequestBody( array $requestBody ): EditRequest {
+		$reconcilePropertyId = $this->parseReconcilePropertyId( $requestBody );
+		$entity = $requestBody['entity'] ?: null;
+
+		return $this->parseEditRequest( $entity, $reconcilePropertyId );
 	}
 
 }
