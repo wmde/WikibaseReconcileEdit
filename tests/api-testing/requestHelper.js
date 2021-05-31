@@ -45,7 +45,6 @@ const assertRequestStatements = async function (
 ) {
 	for ( let i = 0; i < requestStatements.length; i++ ) {
 		const requestStatement = requestStatements[ i ];
-
 		const firstStatement = claims[ requestStatement.property ][ 0 ];
 		const dataValue = firstStatement.mainsnak.datavalue;
 
@@ -67,12 +66,15 @@ const assertRequestStatements = async function (
 	}
 };
 
-const getRequestPayload = function ( requestStatements, reconciliationPropertyId, token ) {
-	const entity = {
+const getEntityPayload = function ( requestStatements ) {
+	return {
 		'wikibasereconcileedit-version': '0.0.1/minimal',
 		statements: requestStatements
 	};
 
+};
+
+const getBatchRequestPayload = function ( entityStatements, reconciliationPropertyId, token ) {
 	const reconcile = {
 		'wikibasereconcileedit-version': '0.0.1',
 		urlReconcile: reconciliationPropertyId
@@ -80,7 +82,20 @@ const getRequestPayload = function ( requestStatements, reconciliationPropertyId
 
 	return {
 		reconcile: reconcile,
-		entity: entity,
+		entities: entityStatements.map( ( x ) => getEntityPayload( x ) ),
+		token: token
+	};
+};
+
+const getRequestPayload = function ( requestStatements, reconciliationPropertyId, token ) {
+	const reconcile = {
+		'wikibasereconcileedit-version': '0.0.1',
+		urlReconcile: reconciliationPropertyId
+	};
+
+	return {
+		reconcile: reconcile,
+		entity: getEntityPayload( requestStatements ),
 		token: token
 	};
 };
@@ -89,5 +104,6 @@ module.exports = {
 	assertRequestStatements,
 	getRequestPayload,
 	getOrCreateProperty,
-	getStatementValue
+	getStatementValue,
+	getBatchRequestPayload
 };

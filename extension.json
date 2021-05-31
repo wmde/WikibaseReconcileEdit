@@ -25,8 +25,18 @@
 		{
 			"path": "/wikibase-reconcile-edit/v0/edit",
 			"method": "POST",
-			"class": "MediaWiki\\Extension\\WikibaseReconcileEdit\\MediaWiki\\Api\\EditEndpoint",
-			"factory": "MediaWiki\\Extension\\WikibaseReconcileEdit\\MediaWiki\\Api\\EditEndpoint::factory",
+			"class": "MediaWiki\\Extension\\WikibaseReconcileEdit\\MediaWiki\\Api\\SingleEditEndpoint",
+			"factory": "MediaWiki\\Extension\\WikibaseReconcileEdit\\MediaWiki\\Api\\SingleEditEndpoint::factory",
+			"services": [
+				"WikibaseReconcileEdit.EditRequestParser",
+				"WikibaseReconcileEdit.ItemReconciler"
+			]
+		},
+		{
+			"path": "/wikibase-reconcile-edit/v0/batch-edit",
+			"method": "POST",
+			"class": "MediaWiki\\Extension\\WikibaseReconcileEdit\\MediaWiki\\Api\\BatchEditEndpoint",
+			"factory": "MediaWiki\\Extension\\WikibaseReconcileEdit\\MediaWiki\\Api\\BatchEditEndpoint::factory",
 			"services": [
 				"WikibaseReconcileEdit.EditRequestParser",
 				"WikibaseReconcileEdit.ItemReconciler"

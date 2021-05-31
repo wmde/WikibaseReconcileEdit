@@ -280,4 +280,61 @@ class EditRequestParserTest extends TestCase {
 		$requestParser->parseRequestBody( $request );
 	}
 
+	public function testParseBatchRequestBody_good(): void {
+		$request = [
+			'entities' => [
+				[
+					EditRequestParser::VERSION_KEY => '0.0.1/minimal',
+					'statements' => [
+						[
+							'property' => self::URL_PROPERTY,
+							'value' => 'http://example.com/1',
+						],
+					],
+				],
+				[
+					EditRequestParser::VERSION_KEY => '0.0.1/minimal',
+					'statements' => [
+						[
+							'property' => self::URL_PROPERTY,
+							'value' => 'http://example.com/2',
+						],
+					],
+				],
+			],
+			'reconcile' => [
+				EditRequestParser::VERSION_KEY => '0.0.1',
+				'urlReconcile' => self::URL_PROPERTY,
+			],
+		];
+
+		$requestParser = $this->getEditRequestParser();
+
+		$editRequests = $requestParser->parseBatchRequestBody( $request );
+
+		$this->assertCount( 2, $editRequests );
+
+		$this->assertEquals(
+			FluidItem::init()
+				->withStringValue( self::URL_PROPERTY, 'http://example.com/1' )
+				->item(),
+			$editRequests[0]->entity()
+		);
+		$this->assertEquals(
+			new PropertyId( self::URL_PROPERTY ),
+			$editRequests[0]->reconcilePropertyId()
+		);
+
+		$this->assertEquals(
+			FluidItem::init()
+				->withStringValue( self::URL_PROPERTY, 'http://example.com/2' )
+				->item(),
+			$editRequests[1]->entity()
+		);
+		$this->assertEquals(
+			new PropertyId( self::URL_PROPERTY ),
+			$editRequests[1]->reconcilePropertyId()
+		);
+	}
+
 }

@@ -161,6 +161,68 @@ Edit payload `0.0.1/full` should look like this:
 
 **Note: that you do not need to provide statement GUIDs or any hashes.**
 
+## /wikibase-reconcile-edit/v0/batch-edit (Batch editing API)
+
+Provides batch reconciliation of Item edits.
+Batch payload looks very similar to the edit payload but requires an `entities` parameter rather than a single `entity`.
+
+```js
+{
+  "reconcile": {
+    "wikibasereconcileedit-version": "0.0.1",
+    "urlReconcile": "P1"
+  },
+  "entities": [
+    {
+      "wikibasereconcileedit-version": "0.0.1/minimal",
+      "statements": [
+        {
+          "property": "identifier",
+          "value": "https://gitlab.com/OSEGermany/ohloom/1"
+        },
+        {
+          "property": "name",
+          "value": "OHLOOM-1"
+        },
+        {
+          "property": "bill of materials",
+          "value": "https://gitlab.com/OSEGermany/ohbroom/something-something/sBoM.csv"
+        }
+      ]
+    },
+    {
+      "wikibasereconcileedit-version": "0.0.1/minimal",
+      "statements": [
+        {
+          "property": "identifier",
+          "value": "https://gitlab.com/OSEGermany/ohloom/2"
+        },
+        {
+          "property": "name",
+          "value": "OHLOOM-2"
+        },
+        {
+          "property": "bill of materials",
+          "value": "https://gitlab.com/OSEGermany/ohbroom/something-something/sBoM.csv"
+        }
+      ]
+    }
+  ],
+  "token": ""
+}
+```
+
+Example output:
+```js
+{
+  success: true,
+  result: [
+    { entityId: 'Q2', revisionId: 13 },
+    { entityId: 'Q3', revisionId: 14 }
+  ]
+}
+```
+
 ## Authentication
 
 In order to make requests they need to be authenticated and with an [edit token](https://www.mediawiki.org/wiki/Manual:Edit_token) supplied in the request payload.
