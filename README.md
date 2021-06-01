@@ -46,7 +46,7 @@ A couple of different input formats are allowed.
 
 #### Minimal 0.0.1/minimal
 
-Inspired by but not necessarily the same as a minimal format used in maxlath/wikibase-sdk [see here](https://github.com/maxlath/wikibase-cli/blob/master/docs/write_operations.md#batch-mode).
+Inspired by but not necessarily the same as a minimal format used in maxlath/wikibase-edit [see here](https://github.com/maxlath/wikibase-edit/blob/master/docs/how_to.md#edit-entity).
 
 ```js
 {
