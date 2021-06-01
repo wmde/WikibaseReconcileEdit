@@ -3,6 +3,8 @@
 // eslint-disable-next-line node/no-missing-require
 const testConfig = require( '../../.api-testing.config.json' );
 
+const baseUrl = new URL( testConfig.base_uri );
+
 /**
  * This configuration file is required by wikibase-edit & wikibase-sdk
  *
@@ -11,7 +13,8 @@ const testConfig = require( '../../.api-testing.config.json' );
  */
 const generalConfig = {
 	// A Wikibase instance is required
-	instance: new URL( testConfig.base_uri ).origin,
+	instance: baseUrl.origin,
+	wgScriptPath: baseUrl.pathname,
 
 	// One authorization mean is required (unless in anonymous mode, see below)
 	credentials: {
