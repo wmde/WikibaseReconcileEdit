@@ -97,7 +97,7 @@ class EditRequestParserTest extends TestCase {
 		return $propertyDataTypeLookup;
 	}
 
-	public function testParseRequestInterface_good(): void {
+	public function testParseRequestBody_good(): void {
 		$request = [
 			'entity' => [
 				EditRequestParser::VERSION_KEY => '0.0.1/minimal',
@@ -130,7 +130,7 @@ class EditRequestParserTest extends TestCase {
 		);
 	}
 
-	public function testParseRequestInterface_unspecifiedEntityVersion(): void {
+	public function testParseRequestBody_unspecifiedEntityVersion(): void {
 		$request = [
 			'entity' => [],
 			'reconcile' => self::VALID_RECONCILE_PAYLOAD,
@@ -147,7 +147,7 @@ class EditRequestParserTest extends TestCase {
 	}
 
 	/** @dataProvider provideUnsupportedEntityVersion */
-	public function testParseRequestInterface_unsupportedEntityVersion(
+	public function testParseRequestBody_unsupportedEntityVersion(
 		string $entityVersion
 	): void {
 		$request = [
@@ -195,7 +195,7 @@ class EditRequestParserTest extends TestCase {
 	}
 
 	/** @dataProvider provideUnsupportedReconcileVersion */
-	public function testParseRequestInterface_unsupportedReconcileVersion(
+	public function testParseRequestBody_unsupportedReconcileVersion(
 		?string $reconcileVersion
 	): void {
 		$request = [
@@ -221,7 +221,7 @@ class EditRequestParserTest extends TestCase {
 	}
 
 	/** @dataProvider provideInvalidPropertyId */
-	public function testParseRequestInterface_invalidPropertyId( ?string $propertyId ): void {
+	public function testParseRequestBody_invalidPropertyId( ?string $propertyId ): void {
 		$request = [
 			'entity' => self::VALID_ENTITY_PAYLOAD,
 			'reconcile' => $propertyId !== null
@@ -247,7 +247,7 @@ class EditRequestParserTest extends TestCase {
 		yield 'numeric part missing' => [ 'P' ];
 	}
 
-	public function testParseRequestInterface_invalidDataType(): void {
+	public function testParseRequestBody_invalidDataType(): void {
 		$request = [
 			'entity' => self::VALID_ENTITY_PAYLOAD,
 			'reconcile' => [
@@ -266,7 +266,7 @@ class EditRequestParserTest extends TestCase {
 		}
 	}
 
-	public function testParseRequestInterface_missingProperty(): void {
+	public function testParseRequestBody_missingProperty(): void {
 		$request = [
 			'entity' => self::VALID_ENTITY_PAYLOAD,
 			'reconcile' => [
