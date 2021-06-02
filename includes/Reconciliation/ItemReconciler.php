@@ -80,7 +80,7 @@ class ItemReconciler {
 		$toSave = $this->simplePutStrategy->apply( $reconciliationServiceItem->getItem(), $inputItem );
 		return new ReconciledItem(
 			$toSave,
-			$reconciliationServiceItem->getRevision()
+			$reconciliationServiceItem
 		);
 	}
 

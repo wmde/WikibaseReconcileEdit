@@ -114,6 +114,7 @@ abstract class EditEndpoint extends SimpleHandler {
 			}
 
 			$itemIds[] = $otherItem->getItem()->getId();
+			$otherItem->updateFromEntityRevision( $saveStatus->getValue()['revision'] );
 		}
 
 		$editEntity = $this->editEntityFactory->newEditEntity(
@@ -129,6 +130,10 @@ abstract class EditEndpoint extends SimpleHandler {
 				$reconciledItem->isNew() ? EDIT_NEW : EDIT_UPDATE,
 				$this->editToken
 			), true );
+
+			if ( $saveStatus->isOK() ) {
+				$reconciledItem->finish( $saveStatus->getValue()['revision'] );
+			}
 		}
 
 		return [ $saveStatus, $itemIds ];
