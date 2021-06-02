@@ -73,7 +73,7 @@ class SingleEditEndpoint extends EditEndpoint {
 			throw new LocalizedHttpException( $rex->getMessageValue(), 400 );
 		}
 
-		[ $saveStatus, $otherItemIds ] = $this->persistItem( $reconciledItem, $otherItems );
+		$saveStatus = $this->persistItem( $reconciledItem, $otherItems );
 
 		// Make some sort of response
 		$response = [
