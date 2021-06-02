@@ -1,5 +1,5 @@
 'use strict';
-const { assert, action, clientFactory } = require( 'api-testing' );
+const { assert, action, clientFactory, utils } = require( 'api-testing' );
 const wbk = require( 'wikibase-sdk' )( require( '../wikibase-edit.config' ) );
 const axios = require( 'axios' );
 const requestHelper = require( '../requestHelper' );
@@ -33,7 +33,7 @@ describe( 'POST /edit', () => {
 		const requestStatements = [
 			{
 				property: reconciliationPropertyId,
-				value: 'https://gitlab.com/OSEGermany/ohloom'
+				value: `https://gitlab.com/OSEGermany/ohloom?random=${utils.uniq()}`
 			}
 		];
 
@@ -78,7 +78,7 @@ describe( 'POST /edit', () => {
 		const requestStatements = [
 			{
 				property: reconciliationPropertyId,
-				value: 'https://gitlab.com/OSEGermany/ohloom'
+				value: `https://gitlab.com/OSEGermany/ohloom?random=${utils.uniq()}`
 			},
 			{
 				property: namePropertyId,
@@ -86,7 +86,7 @@ describe( 'POST /edit', () => {
 			},
 			{
 				property: billOfMaterialsPropertyId,
-				value: 'https://gitlab.com/OSEGermany/ohloom/-/raw/834222370f34ad2a07d0e41d09eb54378573b8c3/sBoM.csv'
+				value: `https://gitlab.com/OSEGermany/ohloom/-/raw/834222370f34ad2a07d0e41d09eb54378573b8c3/sBoM.csv?random=${utils.uniq()}`
 			}
 		];
 
@@ -121,7 +121,7 @@ describe( 'POST /edit', () => {
 		const requestStatements = [
 			{
 				property: reconciliationPropertyId,
-				value: 'https://gitlab.com/OSEGermany/ohloom/-/raw/834222370f34ad2a07d0e41d09eb54378573b8c3/okh.toml#Clamp_Ring'
+				value: `https://gitlab.com/OSEGermany/ohloom/-/raw/834222370f34ad2a07d0e41d09eb54378573b8c3/okh.toml#Clamp_Ring?random=${utils.uniq()}`
 			},
 			{
 				property: namePropertyId,
@@ -129,7 +129,7 @@ describe( 'POST /edit', () => {
 			},
 			{
 				property: billOfMaterialsPropertyId,
-				value: 'https://gitlab.com/OSEGermany/ohloom/-/raw/834222370f34ad2a07d0e41d09eb54378573b8c3/sBoM.csv'
+				value: `https://gitlab.com/OSEGermany/ohloom/-/raw/834222370f34ad2a07d0e41d09eb54378573b8c3/sBoM.csv?random=${utils.uniq()}`
 			}
 		];
 
@@ -169,7 +169,7 @@ describe( 'POST /edit', () => {
 		const requestStatements = [
 			{
 				property: reconciliationPropertyLabel,
-				value: 'https://gitlab.com/OSEGermany/ohlbroom/'
+				value: `https://gitlab.com/OSEGermany/ohlbroom/?random=${utils.uniq()}`
 			},
 			{
 				property: namePropertyLabel,
@@ -177,7 +177,7 @@ describe( 'POST /edit', () => {
 			},
 			{
 				property: billOfMaterialsPropertyLabel,
-				value: 'https://gitlab.com/OSEGermany/ohbroom/sBoM.csv'
+				value: `https://gitlab.com/OSEGermany/ohbroom/sBoM.csv?random=${utils.uniq()}`
 			}
 		];
 
