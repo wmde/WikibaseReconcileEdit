@@ -1,5 +1,5 @@
 'use strict';
-const { assert, action, clientFactory } = require( 'api-testing' );
+const { assert, action, clientFactory, utils } = require( 'api-testing' );
 const wbk = require( 'wikibase-sdk' )( require( '../wikibase-edit.config' ) );
 const axios = require( 'axios' );
 const requestHelper = require( '../requestHelper' );
@@ -32,12 +32,12 @@ describe( 'POST /batch-edit', () => {
 			billOfMaterialsPropertyId
 		];
 
-		const thirdItemUrl = 'https://gitlab.com/OSEGermany/ohbroom/something-something/sBoM.csv';
+		const thirdItemUrl = `https://gitlab.com/OSEGermany/ohbroom/something-something/sBoM.csv?random=${utils.uniq()}`;
 
 		const itemOneStatements = [
 			{
 				property: reconciliationPropertyLabel,
-				value: 'https://gitlab.com/OSEGermany/ohloom/1'
+				value: `https://gitlab.com/OSEGermany/ohloom/1?random=${utils.uniq()}`
 			},
 			{
 				property: namePropertyLabel,
@@ -52,7 +52,7 @@ describe( 'POST /batch-edit', () => {
 		const itemTwoStatements = [
 			{
 				property: reconciliationPropertyLabel,
-				value: 'https://gitlab.com/OSEGermany/ohloom/2'
+				value: `https://gitlab.com/OSEGermany/ohloom/2?random=${utils.uniq()}`
 			},
 			{
 				property: namePropertyLabel,
