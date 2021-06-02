@@ -28,7 +28,7 @@ class FullWikibaseItemInput {
 		$supportedTypes = [ 'item' ];
 		if ( !array_key_exists( 'type', $inputEntity ) || !in_array( $inputEntity['type'], $supportedTypes ) ) {
 			throw new ReconciliationException(
-				MessageValue::new( 'wikibasereconcileedit-fullwikibaseiteminput-unsupported-type' )
+				MessageValue::new( 'wikibasereconcileedit-unsupported-entity-type' )
 					->textListParams( $supportedTypes )
 					->numParams( count( $supportedTypes ) )
 			);

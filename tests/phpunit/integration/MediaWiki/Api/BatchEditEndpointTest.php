@@ -220,7 +220,7 @@ class BatchEditEndpointTest extends \MediaWikiIntegrationTestCase {
 		$exception = $this->executeHandlerAndGetHttpException( $handler, $request );
 
 		$this->assertInstanceOf( LocalizedHttpException::class, $exception );
-		$this->assertSame( 'wikibasereconcileedit-editendpoint-invalid-reconcile-parameter',
+		$this->assertSame( 'wikibasereconcileedit-invalid-reconcile-parameter',
 			$exception->getMessageValue()->getKey() );
 	}
 

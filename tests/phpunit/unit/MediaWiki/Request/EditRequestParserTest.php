@@ -141,7 +141,7 @@ class EditRequestParserTest extends TestCase {
 			$requestParser->parseRequestBody( $request );
 			$this->fail( 'expected LocalizedHttpException to be thrown' );
 		} catch ( LocalizedHttpException $e ) {
-			$this->assertSame( 'wikibasereconcileedit-editendpoint-unspecified-entity-input-version',
+			$this->assertSame( 'wikibasereconcileedit-unspecified-entity-input-version',
 				$e->getMessageValue()->getKey() );
 		}
 	}
@@ -160,7 +160,7 @@ class EditRequestParserTest extends TestCase {
 			$requestParser->parseRequestBody( $request );
 			$this->fail( 'expected LocalizedHttpException to be thrown' );
 		} catch ( LocalizedHttpException $e ) {
-			$this->assertSame( 'wikibasereconcileedit-editendpoint-invalid-entity-input-version',
+			$this->assertSame( 'wikibasereconcileedit-invalid-entity-input-version',
 				$e->getMessageValue()->getKey() );
 		}
 	}
@@ -183,7 +183,7 @@ class EditRequestParserTest extends TestCase {
 			$requestParser->parseRequestBody( $request );
 			$this->fail( 'expected LocalizedHttpException to be thrown' );
 		} catch ( LocalizedHttpException $e ) {
-			$this->assertSame( 'wikibasereconcileedit-editendpoint-invalid-reconcile-parameter',
+			$this->assertSame( 'wikibasereconcileedit-invalid-reconcile-parameter',
 				$e->getMessageValue()->getKey() );
 		}
 	}
@@ -210,7 +210,7 @@ class EditRequestParserTest extends TestCase {
 			$requestParser->parseRequestBody( $request );
 			$this->fail( 'expected LocalizedHttpException to be thrown' );
 		} catch ( LocalizedHttpException $e ) {
-			$this->assertSame( 'wikibasereconcileedit-editendpoint-unsupported-reconcile-version',
+			$this->assertSame( 'wikibasereconcileedit-unsupported-reconcile-version',
 				$e->getMessageValue()->getKey() );
 		}
 	}
@@ -234,7 +234,7 @@ class EditRequestParserTest extends TestCase {
 			$requestParser->parseRequestBody( $request );
 			$this->fail( 'expected LocalizedHttpException to be thrown' );
 		} catch ( LocalizedHttpException $e ) {
-			$this->assertSame( 'wikibasereconcileedit-editendpoint-invalid-reconcile-propertyid',
+			$this->assertSame( 'wikibasereconcileedit-invalid-reconcile-propertyid',
 				$e->getMessageValue()->getKey() );
 		}
 	}
@@ -261,7 +261,7 @@ class EditRequestParserTest extends TestCase {
 			$requestParser->parseRequestBody( $request );
 			$this->fail( 'expected LocalizedHttpException to be thrown' );
 		} catch ( LocalizedHttpException $e ) {
-			$this->assertSame( 'wikibasereconcileedit-editendpoint-invalid-type-property-must-be-url',
+			$this->assertSame( 'wikibasereconcileedit-invalid-property-type-must-be-url',
 				$e->getMessageValue()->getKey() );
 		}
 	}

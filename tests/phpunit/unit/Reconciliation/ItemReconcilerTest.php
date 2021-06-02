@@ -123,7 +123,7 @@ class ItemReconcilerTest extends MediaWikiUnitTestCase {
 					new SnakList( [ $stringSnak ] )
 				)
 			) ),
-			'wikibasereconcileedit-editendpoint-qualifiers-references-not-supported',
+			'wikibasereconcileedit-qualifiers-references-not-supported',
 		];
 
 		yield 'has reference on reconciliation statement' => [
@@ -136,7 +136,7 @@ class ItemReconcilerTest extends MediaWikiUnitTestCase {
 					] )
 				)
 			) ),
-			'wikibasereconcileedit-editendpoint-qualifiers-references-not-supported',
+			'wikibasereconcileedit-qualifiers-references-not-supported',
 		];
 
 		yield 'has qualifier on other statement' => [
@@ -147,7 +147,7 @@ class ItemReconcilerTest extends MediaWikiUnitTestCase {
 					new SnakList( [ $stringSnak ] )
 				)
 			) ),
-			'wikibasereconcileedit-editendpoint-qualifiers-references-not-supported',
+			'wikibasereconcileedit-qualifiers-references-not-supported',
 		];
 
 		yield 'has reference on other statement' => [
@@ -161,19 +161,19 @@ class ItemReconcilerTest extends MediaWikiUnitTestCase {
 					] )
 				)
 			) ),
-			'wikibasereconcileedit-editendpoint-qualifiers-references-not-supported',
+			'wikibasereconcileedit-qualifiers-references-not-supported',
 		];
 
 		yield 'no statements' => [
 			new Item(),
-			'wikibasereconcileedit-editendpoint-reconciliation-property-missing-in-statements',
+			'wikibasereconcileedit-reconciliation-property-missing-in-statements',
 		];
 
 		yield 'no reconciliation statement' => [
 			new Item( null, null, null, new StatementList(
 				new Statement( $stringSnak )
 			) ),
-			'wikibasereconcileedit-editendpoint-reconciliation-property-missing-in-statements',
+			'wikibasereconcileedit-reconciliation-property-missing-in-statements',
 		];
 
 		yield 'several reconciliation statements' => [
@@ -181,21 +181,21 @@ class ItemReconcilerTest extends MediaWikiUnitTestCase {
 				new Statement( $urlSnak ),
 				new Statement( $urlSnak ),
 			) ),
-			'wikibasereconcileedit-editendpoint-reconciliation-property-missing-in-statements',
+			'wikibasereconcileedit-reconciliation-property-missing-in-statements',
 		];
 
 		yield 'reconciliation statement with somevalue main snak' => [
 			new Item( null, null, null, new StatementList(
 				new Statement( new PropertySomeValueSnak( $urlPropertyId ) )
 			) ),
-			'wikibasereconcileedit-editendpoint-invalid-reconciliation-statement-type',
+			'wikibasereconcileedit-invalid-reconciliation-statement-type',
 		];
 
 		yield 'reconciliation statement with novalue main snak' => [
 			new Item( null, null, null, new StatementList(
 				new Statement( new PropertyNoValueSnak( $urlPropertyId ) )
 			) ),
-			'wikibasereconcileedit-editendpoint-invalid-reconciliation-statement-type',
+			'wikibasereconcileedit-invalid-reconciliation-statement-type',
 		];
 	}
 
