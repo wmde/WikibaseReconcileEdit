@@ -4,7 +4,6 @@ namespace MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\Api;
 
 use MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\Request\EditRequestParser;
 use MediaWiki\Extension\WikibaseReconcileEdit\Reconciliation\ItemReconciler;
-use MediaWiki\Extension\WikibaseReconcileEdit\Reconciliation\ReconciliationServiceItem;
 use MediaWiki\Extension\WikibaseReconcileEdit\ReconciliationException;
 use MediaWiki\Rest\LocalizedHttpException;
 use MediaWiki\Rest\Validator\JsonBodyValidator;
@@ -61,23 +60,14 @@ class BatchEditEndpoint extends EditEndpoint {
 		}
 
 		$status = Status::newGood( [] );
-		$savedOtherItems = [];
 		foreach ( $requests as $request ) {
 			$reconciledItem = $this->itemReconciler->reconcileItem(
 				$request->entity(),
 				$request->reconcilePropertyId()
 			);
+			$otherItems = $request->otherItems();
 
-			// only save new items once
-			$otherItems = array_filter(
-				$request->otherItems(),
-				function ( ReconciliationServiceItem $item ) use( $savedOtherItems ) {
-					return !in_array( $item->getItem()->getId(), $savedOtherItems );
-				}
-			);
-
-			[ $otherStatus, $itemIds ] = $this->persistItem( $reconciledItem, $otherItems );
-			$savedOtherItems = array_merge( $savedOtherItems, $itemIds );
+			$otherStatus = $this->persistItem( $reconciledItem, $otherItems );
 			if ( !$otherStatus->isOk() ) {
 				break;
 			}

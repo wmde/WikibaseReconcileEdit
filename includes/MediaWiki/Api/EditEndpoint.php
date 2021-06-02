@@ -78,12 +78,11 @@ abstract class EditEndpoint extends SimpleHandler {
 	/**
 	 * @param ReconciledItem $reconciledItem
 	 * @param ReconciliationServiceItem[] $otherItems
-	 * @return array( Status, ItemId[] )
+	 * @return Status
 	 */
-	public function persistItem( ReconciledItem $reconciledItem, array $otherItems ): array {
+	public function persistItem( ReconciledItem $reconciledItem, array $otherItems ): Status {
 		$toSave = $reconciledItem->getItem();
 		$saveStatus = Status::newGood();
-		$itemIds = [];
 
 		foreach ( $otherItems as $otherItem ) {
 			// don't need to save this again
@@ -113,7 +112,6 @@ abstract class EditEndpoint extends SimpleHandler {
 				break;
 			}
 
-			$itemIds[] = $otherItem->getItem()->getId();
 			$otherItem->updateFromEntityRevision( $saveStatus->getValue()['revision'] );
 		}
 
@@ -136,7 +134,7 @@ abstract class EditEndpoint extends SimpleHandler {
 			}
 		}
 
-		return [ $saveStatus, $itemIds ];
+		return $saveStatus;
 	}
 
 	public function needsWriteAccess() {
