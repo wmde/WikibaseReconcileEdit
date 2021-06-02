@@ -3,6 +3,8 @@
 namespace MediaWiki\Extension\WikibaseReconcileEdit\Reconciliation;
 
 use Wikibase\DataModel\Entity\Item;
+use Wikibase\Lib\Store\EntityRevision;
+use Wikimedia\Assert\Assert;
 
 /**
  * An item found by the {@link ReconciliationService}, together with its revision ID.
@@ -43,6 +45,23 @@ class ReconciliationServiceItem {
 	 */
 	public function getRevision() {
 		return $this->revision;
+	}
+
+	/**
+	 * Replace the item and revision ID with those of the given entity revision.
+	 *
+	 * This should be used after the caller has saved the reconciliation service item.
+	 * The entity revision is assumed to be based on the previous {@link #getItem item};
+	 * in particular, the caller must ensure that the entity is an Item,
+	 * and that it has the same URL statement
+	 * (i.e. it is correct for a {@link ReconciliationService} to still return
+	 * this {@link ReconciliationServiceItem} instance for the same URL).
+	 */
+	public function updateFromEntityRevision( EntityRevision $entityRevision ): void {
+		$item = $entityRevision->getEntity();
+		Assert::parameterType( Item::class, $item, '$entityRevision->getEntity()' );
+		$this->item = $item;
+		$this->revision = $entityRevision->getRevisionId();
 	}
 
 }

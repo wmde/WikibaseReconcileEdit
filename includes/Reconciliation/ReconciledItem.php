@@ -3,14 +3,13 @@
 namespace MediaWiki\Extension\WikibaseReconcileEdit\Reconciliation;
 
 use Wikibase\DataModel\Entity\Item;
+use Wikibase\Lib\Store\EntityRevision;
 
 /**
  * A reconciled item, returned by {@link ItemReconciler}.
  *
- * This class contains a modified item and the base revision ID
- * that should be used when saving it.
- * It should not be confused with {@link ReconciliationServiceItem},
- * which contains a not-yet-reconciled item with its revision ID.
+ * This class contains a modified item
+ * and the {@link ReconciliationServiceItem} it is based on.
  *
  * @license GPL-2.0-or-later
  */
@@ -19,19 +18,15 @@ class ReconciledItem {
 	/** @var Item */
 	private $item;
 
-	/** @var int|false */
-	private $baseRevisionId;
+	/** @var ReconciliationServiceItem */
+	private $reconciliationServiceItem;
 
-	/**
-	 * @param Item $item
-	 * @param int|false $baseRevisionId
-	 */
 	public function __construct(
 		Item $item,
-		$baseRevisionId
+		ReconciliationServiceItem $reconciliationServiceItem
 	) {
 		$this->item = $item;
-		$this->baseRevisionId = $baseRevisionId;
+		$this->reconciliationServiceItem = $reconciliationServiceItem;
 	}
 
 	/**
@@ -46,11 +41,25 @@ class ReconciledItem {
 	 * @return false|int
 	 */
 	public function getBaseRevisionId() {
-		return $this->baseRevisionId;
+		return $this->reconciliationServiceItem->getRevision();
 	}
 
 	public function isNew(): bool {
-		return $this->baseRevisionId === false;
+		return $this->getBaseRevisionId() === false;
+	}
+
+	/**
+	 * Record that the reconciled item was saved as the given revision.
+	 *
+	 * After this call, the {@link ReconciledItem} should be discarded:
+	 * it must no longer be used, since it no longer contains unsaved modifications.
+	 */
+	public function finish( EntityRevision $entityRevision ): void {
+		$this->reconciliationServiceItem->updateFromEntityRevision( $entityRevision );
+		// clear the item to ensure it’s not reused
+		// (if anyone tries, they’ll get a TypeError)
+		$this->item = null;
+		$this->reconciliationServiceItem = null;
 	}
 
 }
