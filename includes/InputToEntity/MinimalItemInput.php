@@ -93,13 +93,13 @@ class MinimalItemInput {
 				if ( !array_key_exists( 'property', $statementDetails ) ) {
 					throw new ReconciliationException(
 						MessageValue::new(
-							'wikibasereconcileedit-minimaliteminput-required-keys' )
+							'wikibasereconcileedit-statements-missing-keys' )
 							->textParams( 'property' )
 					);
 				} elseif ( !array_key_exists( 'value', $statementDetails ) ) {
 					throw new ReconciliationException(
 						MessageValue::new(
-							'wikibasereconcileedit-minimaliteminput-required-keys' )
+							'wikibasereconcileedit-statements-missing-keys' )
 							->textParams( 'value' )
 					);
 				}
@@ -154,7 +154,7 @@ class MinimalItemInput {
 
 		if ( empty( $entityIds ) ) {
 			throw new ReconciliationException(
-				MessageValue::new( 'wikibasereconcileedit-editendpoint-property-not-found' )
+				MessageValue::new( 'wikibasereconcileedit-property-not-found' )
 				->textParams( $label ) );
 		}
 

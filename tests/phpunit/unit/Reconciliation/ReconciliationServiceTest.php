@@ -313,7 +313,7 @@ class ReconciliationServiceTest extends \MediaWikiUnitTestCase {
 			$exception = $service->getOrCreateItemByStatementUrl( $propertyId, $reconcileUrl );
 			$this->fail( 'expected ReconciliationException to be thrown' );
 		} catch ( ReconciliationException $rex ) {
-			$this->assertSame( 'wikibasereconcileedit-reconciliationservice-matched-multiple-items',
+			$this->assertSame( 'wikibasereconcileedit-matched-multiple-items',
 				$rex->getMessageValue()->getKey() );
 		}
 	}

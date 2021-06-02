@@ -137,7 +137,7 @@ class ReconciliationService {
 		// If we have more than one item matches, something is wrong and we can't edit
 		if ( $numberItemsThatReferenceTheUrlInCorrectStatement > 1 ) {
 			throw new ReconciliationException(
-				MessageValue::new( 'wikibasereconcileedit-reconciliationservice-matched-multiple-items' )
+				MessageValue::new( 'wikibasereconcileedit-matched-multiple-items' )
 					->textListParams( $idsOfItemsThatReferenceTheUrlInCorrectStatement )
 					->numParams( $numberItemsThatReferenceTheUrlInCorrectStatement ),
 			);

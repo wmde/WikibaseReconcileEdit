@@ -47,7 +47,7 @@ class ItemReconciler {
 		foreach ( $inputItem->getStatements()->toArray() as $statement ) {
 			if ( $statement->getQualifiers()->count() !== 0 || $statement->getReferences()->count() !== 0 ) {
 				throw new ReconciliationException(
-					MessageValue::new( 'wikibasereconcileedit-editendpoint-qualifiers-references-not-supported' ),
+					MessageValue::new( 'wikibasereconcileedit-qualifiers-references-not-supported' ),
 				);
 			}
 		}
@@ -55,13 +55,15 @@ class ItemReconciler {
 		$reconciliationStatements = $inputItem->getStatements()->getByPropertyId( $reconcileUrlProperty );
 		if ( $reconciliationStatements->count() !== 1 ) {
 			throw new ReconciliationException(
-				MessageValue::new( 'wikibasereconcileedit-editendpoint-reconciliation-property-missing-in-statements' )
+				MessageValue::new(
+					'wikibasereconcileedit-reconciliation-property-missing-in-statements'
+				)
 			);
 		}
 		$reconciliationStatement = $reconciliationStatements->toArray()[0];
 		if ( !$reconciliationStatement->getMainSnak() instanceof PropertyValueSnak ) {
 			throw new ReconciliationException(
-				MessageValue::new( 'wikibasereconcileedit-editendpoint-invalid-reconciliation-statement-type' )
+				MessageValue::new( 'wikibasereconcileedit-invalid-reconciliation-statement-type' )
 			);
 		}
 

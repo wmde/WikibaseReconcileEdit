@@ -33,7 +33,7 @@ class FullWikibaseItemInputTest extends \MediaWikiUnitTestCase {
 			$new = $sut->getItem( $requestEntity );
 			$this->fail( 'expected ReconciliationException to be thrown' );
 		} catch ( ReconciliationException $rex ) {
-			$this->assertSame( 'wikibasereconcileedit-fullwikibaseiteminput-unsupported-type',
+			$this->assertSame( 'wikibasereconcileedit-unsupported-entity-type',
 				$rex->getMessageValue()->getKey() );
 		}
 	}

@@ -140,7 +140,7 @@ class MinimalItemInputTest extends \MediaWikiUnitTestCase {
 			$new = $sut->getItem( $requestEntityMissingProperty, $prop );
 			$this->fail( 'expected ReconciliationException to be thrown' );
 		} catch ( ReconciliationException $rex ) {
-			$this->assertSame( 'wikibasereconcileedit-minimaliteminput-required-keys',
+			$this->assertSame( 'wikibasereconcileedit-statements-missing-keys',
 				$rex->getMessageValue()->getKey() );
 		}
 	}
@@ -167,7 +167,7 @@ class MinimalItemInputTest extends \MediaWikiUnitTestCase {
 			$new = $sut->getItem( $requestEntityMissingValue, $prop );
 			$this->fail( 'expected ReconciliationException to be thrown' );
 		} catch ( ReconciliationException $rex ) {
-			$this->assertSame( 'wikibasereconcileedit-minimaliteminput-required-keys',
+			$this->assertSame( 'wikibasereconcileedit-statements-missing-keys',
 				$rex->getMessageValue()->getKey() );
 		}
 	}
@@ -205,7 +205,7 @@ class MinimalItemInputTest extends \MediaWikiUnitTestCase {
 	}
 
 	public function testGetPropertyIdByLabelNothingFound() {
-		$exceptionMessageKey = 'wikibasereconcileedit-editendpoint-property-not-found';
+		$exceptionMessageKey = 'wikibasereconcileedit-property-not-found';
 		$propertyIdsArray = [];
 		$propByLabel = 'im-a-label';
 		$propertyLabelResolver = $this->createMock( PropertyLabelResolver::class );

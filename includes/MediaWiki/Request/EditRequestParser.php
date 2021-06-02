@@ -43,7 +43,7 @@ class EditRequestParser {
 
 		if ( !is_array( $reconcile ) ) {
 			throw new LocalizedHttpException(
-				MessageValue::new( 'wikibasereconcileedit-editendpoint-invalid-reconcile-parameter' ),
+				MessageValue::new( 'wikibasereconcileedit-invalid-reconcile-parameter' ),
 				400
 			);
 		}
@@ -53,7 +53,7 @@ class EditRequestParser {
 			!in_array( $reconcile[self::VERSION_KEY], self::SUPPORTED_RECONCILE_VERSIONS )
 		) {
 			throw new LocalizedHttpException(
-				MessageValue::new( 'wikibasereconcileedit-editendpoint-unsupported-reconcile-version' )
+				MessageValue::new( 'wikibasereconcileedit-unsupported-reconcile-version' )
 					->textListParams( self::SUPPORTED_RECONCILE_VERSIONS )
 					->numParams( count( self::SUPPORTED_RECONCILE_VERSIONS ) ),
 				400
@@ -65,7 +65,7 @@ class EditRequestParser {
 			!preg_match( PropertyId::PATTERN, $reconcile['urlReconcile'] )
 		) {
 			throw new LocalizedHttpException(
-				MessageValue::new( 'wikibasereconcileedit-editendpoint-invalid-reconcile-propertyid' )
+				MessageValue::new( 'wikibasereconcileedit-invalid-reconcile-propertyid' )
 					->textParams( $reconcile[self::VERSION_KEY], 'urlReconcile' ),
 				400
 			);
@@ -75,7 +75,7 @@ class EditRequestParser {
 		$datatype = $this->propertyDataTypeLookup->getDataTypeIdForProperty( $reconcilePropertyId );
 		if ( $datatype !== 'url' ) {
 			throw new LocalizedHttpException(
-				MessageValue::new( 'wikibasereconcileedit-editendpoint-invalid-type-property-must-be-url' )
+				MessageValue::new( 'wikibasereconcileedit-invalid-property-type-must-be-url' )
 					->textParams( 'urlReconcile', $reconcilePropertyId->getSerialization(), $datatype ),
 				400
 			);
@@ -90,7 +90,7 @@ class EditRequestParser {
 			!array_key_exists( self::VERSION_KEY, $entity )
 		) {
 			throw new LocalizedHttpException(
-				MessageValue::new( 'wikibasereconcileedit-editendpoint-unspecified-entity-input-version' ),
+				MessageValue::new( 'wikibasereconcileedit-unspecified-entity-input-version' ),
 				400
 			);
 		}
@@ -102,7 +102,7 @@ class EditRequestParser {
 			[ $inputEntity, $otherItems ] = $this->minimalItemInput->getItem( $entity, $reconcilePropertyId );
 		} else {
 			throw new LocalizedHttpException(
-				MessageValue::new( 'wikibasereconcileedit-editendpoint-invalid-entity-input-version' )
+				MessageValue::new( 'wikibasereconcileedit-invalid-entity-input-version' )
 					->textParams( $inputEntityVersion )
 					->textListParams( self::SUPPORTED_ENTITY_VERSIONS )
 					->numParams( count( self::SUPPORTED_ENTITY_VERSIONS ) ),

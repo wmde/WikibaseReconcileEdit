@@ -60,7 +60,7 @@ abstract class EditEndpoint extends SimpleHandler {
 
 		if ( $this->requestBody === null ) {
 			throw new LocalizedHttpException(
-				MessageValue::new( 'wikibasereconcileedit-editendpoint-invalid-request-body' ),
+				MessageValue::new( 'wikibasereconcileedit-invalid-json-request-body' ),
 				415
 			);
 		}
@@ -157,7 +157,7 @@ abstract class EditEndpoint extends SimpleHandler {
 	protected function validateContentType( string $contentType ): void {
 		if ( $contentType !== 'application/json' ) {
 			throw new LocalizedHttpException(
-				MessageValue::new( 'wikibasereconcileedit-editendpoint-invalid-content-type' )
+				MessageValue::new( 'wikibasereconcileedit-invalid-content-type' )
 					->textParams( 'application/json' ),
 				415
 			);
