@@ -74,7 +74,7 @@ describe( 'POST /edit', () => {
 		assert.equal( status, 403 );
 	} );
 
-	it( 'Should return nice error when property datatype not found', async () => {
+	it( 'Should not crash when property datatype not found', async () => {
 		const params = requestHelper.getRequestPayload(
 			[ { property: 'P999991', value: 'abc' } ],
 			reconciliationPropertyId,
