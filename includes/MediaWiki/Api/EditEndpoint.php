@@ -2,6 +2,7 @@
 
 namespace MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\Api;
 
+use ApiMessage;
 use MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\Request\EditRequestParser;
 use MediaWiki\Extension\WikibaseReconcileEdit\Reconciliation\ItemReconciler;
 use MediaWiki\Extension\WikibaseReconcileEdit\Reconciliation\ReconciledItem;
@@ -139,6 +140,31 @@ abstract class EditEndpoint extends SimpleHandler {
 
 	public function needsWriteAccess() {
 		return true;
+	}
+
+	/**
+	 * Returns the base for the response body
+	 * @param Status $status
+	 * @return array
+	 */
+	public function getResponseBody( Status $status ): array {
+		$response = [
+			'success' => $status->isGood(),
+			'errors' => []
+		];
+
+		$errors = $status->getErrors();
+		if ( !empty( $errors ) ) {
+			$response['errors'] = array_map( function ( $errorMessage ) {
+				$msg = ApiMessage::create( $errorMessage );
+				return [
+					'code' => $msg->getApiCode(),
+					'text' => $msg->text()
+				];
+			}, $errors );
+		}
+
+		return $response;
 	}
 
 	/**
