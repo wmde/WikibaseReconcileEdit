@@ -11,6 +11,7 @@ use Wikibase\DataModel\Entity\EntityId;
 use Wikibase\DataModel\Entity\Item;
 use Wikibase\DataModel\Entity\PropertyId;
 use Wikibase\DataModel\Services\Lookup\PropertyDataTypeLookup;
+use Wikibase\DataModel\Services\Lookup\PropertyDataTypeLookupException;
 use Wikibase\DataModel\Services\Term\PropertyLabelResolver;
 use Wikibase\Repo\ValueParserFactory;
 
@@ -169,6 +170,25 @@ class MinimalItemInputTest extends \MediaWikiUnitTestCase {
 			$this->assertSame( 'wikibasereconcileedit-minimaliteminput-required-keys',
 				$rex->getMessageValue()->getKey() );
 		}
+	}
+
+	public function testPropertyDatatypeNotFound() {
+		$prop = new PropertyId( 'P23' );
+
+		$mockLookup = $this->createMock( PropertyDataTypeLookup::class );
+		$mockLookup->method( 'getDataTypeIdForProperty' )
+			->willThrowException( new PropertyDataTypeLookupException( $prop ) );
+
+		$sut = new MinimalItemInput(
+			$mockLookup,
+			$this->mockValueParserFactory(),
+			$this->mockReconciliationService(),
+			$this->mockPropertyLabelResolver(),
+		);
+		$this->expectException( ReconciliationException::class );
+		$this->expectExceptionMessage( 'wikibasereconcileedit-property-datatype-lookup-error' );
+
+		$sut->getItem( [ 'statements' => [ [ 'property' => 'P1', 'value' => 'whatever' ] ] ], $prop );
 	}
 
 	public function testGetPropertyByPropertyID() {

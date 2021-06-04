@@ -10,6 +10,7 @@ use Wikibase\DataModel\Entity\EntityIdValue;
 use Wikibase\DataModel\Entity\Item;
 use Wikibase\DataModel\Entity\PropertyId;
 use Wikibase\DataModel\Services\Lookup\PropertyDataTypeLookup;
+use Wikibase\DataModel\Services\Lookup\PropertyDataTypeLookupException;
 use Wikibase\DataModel\Services\Term\PropertyLabelResolver;
 use Wikibase\DataModel\SiteLink;
 use Wikibase\DataModel\Snak\PropertyValueSnak;
@@ -103,11 +104,21 @@ class MinimalItemInput {
 					);
 				}
 				$propertyId = $this->getPropertyId( $statementDetails['property'] );
-				[ $dataValue, $reconciliationServiceItems ] = $this->getDataValue(
-					$propertyId,
-					$statementDetails['value'],
-					$reconcileUrlProperty
-				);
+
+				try {
+					[ $dataValue, $reconciliationServiceItems ] = $this->getDataValue(
+						$propertyId,
+						$statementDetails['value'],
+						$reconcileUrlProperty
+					);
+				} catch ( PropertyDataTypeLookupException $exception ) {
+					throw new ReconciliationException(
+						MessageValue::new(
+							'wikibasereconcileedit-property-datatype-lookup-error' )
+							->textParams( $statementDetails['property'] )
+					);
+				}
+
 				$item->getStatements()->addNewStatement(
 					new PropertyValueSnak( $propertyId, $dataValue )
 				);

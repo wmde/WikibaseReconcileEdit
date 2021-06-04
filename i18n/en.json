@@ -21,5 +21,6 @@
 	"wikibasereconcileedit-reconciliationservice-matched-multiple-items": "The reconciliation is ambiguous; matched {{PLURAL:$2|item|$2 items}}: $1",
 	"wikibasereconcileedit-minimaliteminput-required-keys": "Statements missing '$1' key",
 	"wikibasereconcileedit-fullwikibaseiteminput-unsupported-type": "The only supported entity {{PLURAL:$2|type is|types are}} $1.",
-	"wikibasereconcileedit-unauthorized-access": "Unauthorized access. You need to be registered and provide a valid token."
+	"wikibasereconcileedit-unauthorized-access": "Unauthorized access. You need to be registered and provide a valid token.",
+	"wikibasereconcileedit-property-datatype-lookup-error": "Could not find datatype for property with id '$1'"
 }

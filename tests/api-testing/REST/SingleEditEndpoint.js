@@ -74,6 +74,22 @@ describe( 'POST /edit', () => {
 		assert.equal( status, 403 );
 	} );
 
+	it( 'Should not crash when property datatype not found', async () => {
+		const params = requestHelper.getRequestPayload(
+			[ { property: 'P999991', value: 'abc' } ],
+			reconciliationPropertyId,
+			await actionAgent.token()
+		);
+
+		const { status, body } = await client.post(
+			'/edit',
+			params
+		);
+		assert.equal( status, 400 );
+		assert.nestedProperty( body, 'messageTranslations' );
+
+	} );
+
 	it( 'Should create the repo item and a referenced bill of material', async () => {
 		const requestStatements = [
 			{
