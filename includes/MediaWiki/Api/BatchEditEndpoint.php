@@ -68,16 +68,15 @@ class BatchEditEndpoint extends EditEndpoint {
 			$otherItems = $request->otherItems();
 
 			$otherStatus = $this->persistItem( $reconciledItem, $otherItems );
+			$status->merge( $otherStatus );
 			if ( !$otherStatus->isOk() ) {
 				break;
 			}
 			$status->setResult( true, array_merge( $status->getValue(), [ $otherStatus->getValue() ] ) );
-			$status->merge( $otherStatus );
 		}
 
-		$response = [
-			'success' => $status->isOK(),
-		];
+		$response = $this->getResponseBody( $status );
+
 		if ( $status->isOK() ) {
 			$response['results'] = array_map( static function ( $result ) {
 				/** @var EntityRevision $entityRevision */
@@ -88,7 +87,6 @@ class BatchEditEndpoint extends EditEndpoint {
 				];
 			}, $status->getValue() );
 		}
-		// TODO attach errors
 
 		return $response;
 	}

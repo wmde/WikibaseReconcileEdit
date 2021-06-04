@@ -75,11 +75,9 @@ class SingleEditEndpoint extends EditEndpoint {
 
 		$saveStatus = $this->persistItem( $reconciledItem, $otherItems );
 
-		// Make some sort of response
-		$response = [
-			'success' => $saveStatus->isGood()
-		];
-		if ( $saveStatus->isGood() ) {
+		$response = $this->getResponseBody( $saveStatus );
+
+		if ( $saveStatus->isOK() ) {
 			/** @var EntityRevision $entityRevision */
 			$entityRevision = $saveStatus->getValue()['revision'];
 			$response['entityId'] = $entityRevision->getEntity()->getId()->getSerialization();
