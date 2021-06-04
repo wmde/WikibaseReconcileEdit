@@ -77,7 +77,7 @@ class SingleEditEndpoint extends EditEndpoint {
 
 		$response = $this->getResponseBody( $saveStatus );
 
-		if ( $saveStatus->isGood() ) {
+		if ( $saveStatus->isOK() ) {
 			/** @var EntityRevision $entityRevision */
 			$entityRevision = $saveStatus->getValue()['revision'];
 			$response['entityId'] = $entityRevision->getEntity()->getId()->getSerialization();

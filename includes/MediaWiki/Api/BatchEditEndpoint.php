@@ -77,7 +77,7 @@ class BatchEditEndpoint extends EditEndpoint {
 
 		$response = $this->getResponseBody( $status );
 
-		if ( $status->isGood() ) {
+		if ( $status->isOK() ) {
 			$response['results'] = array_map( static function ( $result ) {
 				/** @var EntityRevision $entityRevision */
 				$entityRevision = $result['revision'];
