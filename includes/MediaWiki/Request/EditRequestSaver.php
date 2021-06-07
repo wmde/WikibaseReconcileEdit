@@ -97,6 +97,7 @@ class EditRequestSaver {
 				EDIT_NEW,
 				$editToken
 			), true );
+
 			if ( !$saveStatus->isOK() ) {
 				break;
 			}
@@ -104,13 +105,14 @@ class EditRequestSaver {
 			$otherItem->updateFromEntityRevision( $saveStatus->getValue()['revision'] );
 		}
 
-		$editEntity = $this->editEntityFactory->newEditEntity(
-			$user,
-			$toSave->getId(),
-			$reconciledItem->getBaseRevisionId()
-		);
-
 		if ( $saveStatus->isOK() ) {
+
+			$editEntity = $this->editEntityFactory->newEditEntity(
+				$user,
+				$toSave->getId(),
+				$reconciledItem->getBaseRevisionId()
+			);
+
 			$saveStatus->merge( $editEntity->attemptSave(
 				$toSave,
 				'Reconciliation Edit',
