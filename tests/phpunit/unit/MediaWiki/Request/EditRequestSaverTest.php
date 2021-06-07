@@ -80,7 +80,7 @@ class EditRequestSaverTest extends TestCase {
 		], '', $this->user );
 
 		$this->assertTrue( $status->isGood() );
-		$this->assertEquals( $expectedRevision, $status->getValue()[0]['revision'] );
+		$this->assertSame( $expectedRevision, $status->getValue()[0]['revision'] );
 	}
 
 	public function testEditRequestSavesWith_OtherItems(): void {
@@ -157,11 +157,11 @@ class EditRequestSaverTest extends TestCase {
 		], 'token', $this->user );
 
 		$this->assertTrue( $status->isGood() );
-		$this->assertEquals( $secondEntityRevision, $status->getValue()[0]['revision'] );
-		$this->assertEquals( $thirdEntityRevision, $status->getValue()[1]['revision'] );
+		$this->assertSame( $secondEntityRevision, $status->getValue()[0]['revision'] );
+		$this->assertSame( $thirdEntityRevision, $status->getValue()[1]['revision'] );
 
 		// updated from save
-		$this->assertEquals( $firstEntityRevision->getRevisionId(), $otherItem->getRevision() );
+		$this->assertSame( $firstEntityRevision->getRevisionId(), $otherItem->getRevision() );
 	}
 
 	public function testEditRequestSavesWith_OtherItemsThatFail(): void {
@@ -199,7 +199,7 @@ class EditRequestSaverTest extends TestCase {
 		$this->assertEquals( 'not cool', $status->getErrors()[0]['message'] );
 		$this->assertEquals( 'error', $status->getErrors()[0]['type'] );
 
-		// updated from save
+		// not updated from save
 		$this->assertFalse( $otherItem->getRevision() );
 	}
 
