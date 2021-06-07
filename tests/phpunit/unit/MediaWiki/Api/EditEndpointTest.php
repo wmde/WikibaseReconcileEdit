@@ -6,13 +6,12 @@ namespace MediaWiki\Extension\WikibaseReconcileEdit\Tests\Unit\MediaWiki\Api;
 
 use MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\Api\EditEndpoint;
 use MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\Request\EditRequestParser;
-use MediaWiki\Extension\WikibaseReconcileEdit\Reconciliation\ItemReconciler;
+use MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\Request\EditRequestSaver;
 use MediaWiki\Session\SessionProviderInterface;
 use Message;
 use PHPUnit\Framework\TestCase;
 use Status;
 use User;
-use Wikibase\Repo\EditEntity\MediawikiEditEntityFactory;
 
 /**
  * @covers \MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\Api\EditEndpoint
@@ -46,9 +45,8 @@ class EditEndpointTest extends TestCase {
 		$stub = $this->getMockForAbstractClass(
 			EditEndpoint::class,
 			[
-				$this->createMock( MediawikiEditEntityFactory::class ),
 				$this->createMock( EditRequestParser::class ),
-				$this->createMock( ItemReconciler::class ),
+				$this->createMock( EditRequestSaver::class ),
 				$this->createMock( User::class ),
 				$this->createMock( SessionProviderInterface::class ),
 			]

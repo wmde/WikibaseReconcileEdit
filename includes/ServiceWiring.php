@@ -5,6 +5,7 @@ use MediaWiki\Extension\WikibaseReconcileEdit\InputToEntity\FullWikibaseItemInpu
 use MediaWiki\Extension\WikibaseReconcileEdit\InputToEntity\MinimalItemInput;
 use MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\ExternalLinks;
 use MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\Request\EditRequestParser;
+use MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\Request\EditRequestSaver;
 use MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\WikibaseReconcileEditServices;
 use MediaWiki\Extension\WikibaseReconcileEdit\Reconciliation\ItemReconciler;
 use MediaWiki\Extension\WikibaseReconcileEdit\Reconciliation\ReconciliationService;
@@ -26,6 +27,18 @@ return [
 			$repo->getPropertyDataTypeLookup(),
 			WikibaseReconcileEditServices::getFullWikibaseItemInput( $services ),
 			WikibaseReconcileEditServices::getMinimalItemInput( $services )
+		);
+	},
+
+	'WikibaseReconcileEdit.EditRequestSaver' => function ( MediaWikiServices $services ): EditRequestSaver {
+		$repo = WikibaseRepo::getDefaultInstance();
+		$editEntityFactory = method_exists( $repo, 'getEditEntityFactory' )
+			? $repo->getEditEntityFactory( $services ) // 1.36+
+			: $repo->newEditEntityFactory(); // 1.35
+
+		return new EditRequestSaver(
+			$editEntityFactory,
+			WikibaseReconcileEditServices::getItemReconciler(),
 		);
 	},
 

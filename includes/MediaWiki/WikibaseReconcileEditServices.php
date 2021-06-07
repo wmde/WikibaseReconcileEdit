@@ -6,6 +6,7 @@ use MediaWiki\Extension\WikibaseReconcileEdit\EditStrategy\SimplePutStrategy;
 use MediaWiki\Extension\WikibaseReconcileEdit\InputToEntity\FullWikibaseItemInput;
 use MediaWiki\Extension\WikibaseReconcileEdit\InputToEntity\MinimalItemInput;
 use MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\Request\EditRequestParser;
+use MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\Request\EditRequestSaver;
 use MediaWiki\Extension\WikibaseReconcileEdit\Reconciliation\ItemReconciler;
 use MediaWiki\Extension\WikibaseReconcileEdit\Reconciliation\ReconciliationService;
 use MediaWiki\MediaWikiServices;
@@ -24,6 +25,11 @@ class WikibaseReconcileEditServices {
 	public static function getEditRequestParser( ContainerInterface $services = null ): EditRequestParser {
 		return ( $services ?: MediaWikiServices::getInstance() )
 			->get( 'WikibaseReconcileEdit.EditRequestParser' );
+	}
+
+	public static function getEditRequestSaver( ContainerInterface $services = null ): EditRequestSaver {
+		return ( $services ?: MediaWikiServices::getInstance() )
+			->get( 'WikibaseReconcileEdit.EditRequestSaver' );
 	}
 
 	public static function getExternalLinks( ContainerInterface $services = null ): ExternalLinks {

@@ -6,7 +6,6 @@ use MediaWiki\Extension\WikibaseReconcileEdit\InputToEntity\MinimalItemInput;
 use MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\Api\BatchEditEndpoint;
 use MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\Request\EditRequestParser;
 use MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\WikibaseReconcileEditServices;
-use MediaWiki\Extension\WikibaseReconcileEdit\Reconciliation\ItemReconciler;
 use MediaWiki\Rest\LocalizedHttpException;
 use MediaWiki\Rest\RequestData;
 use MediaWiki\Rest\RequestInterface;
@@ -65,11 +64,8 @@ class BatchEditEndpointTest extends \MediaWikiIntegrationTestCase {
 		$repo = WikibaseRepo::getDefaultInstance();
 		$reconciliationService = WikibaseReconcileEditServices::getReconciliationService();
 		$propertyDataTypeLookup = WikibaseRepo::getDefaultInstance()->getPropertyDataTypeLookup();
-		$editEntityFactory = method_exists( $repo, 'getEditEntityFactory' )
-			? $repo->getEditEntityFactory() // 1.36+
-			: $repo->newEditEntityFactory(); // 1.35
+
 		return new BatchEditEndpoint(
-			$editEntityFactory,
 			new EditRequestParser(
 				$propertyDataTypeLookup,
 				WikibaseReconcileEditServices::getFullWikibaseItemInput(),
@@ -80,10 +76,7 @@ class BatchEditEndpointTest extends \MediaWikiIntegrationTestCase {
 					WikibaseReconcileEditServices::getPropertyLabelResolver()
 				)
 			),
-			new ItemReconciler(
-				$reconciliationService,
-				WikibaseReconcileEditServices::getSimplePutStrategy()
-			),
+			WikibaseReconcileEditServices::getEditRequestSaver(),
 			$user !== null ? $user : $this->defaultTestUser,
 			$sessionProvider !== null ? $sessionProvider : $this->getMockSessionProvider( false )
 		);

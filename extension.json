@@ -29,7 +29,7 @@
 			"factory": "MediaWiki\\Extension\\WikibaseReconcileEdit\\MediaWiki\\Api\\SingleEditEndpoint::factory",
 			"services": [
 				"WikibaseReconcileEdit.EditRequestParser",
-				"WikibaseReconcileEdit.ItemReconciler"
+				"WikibaseReconcileEdit.EditRequestSaver"
 			]
 		},
 		{
@@ -39,7 +39,7 @@
 			"factory": "MediaWiki\\Extension\\WikibaseReconcileEdit\\MediaWiki\\Api\\BatchEditEndpoint::factory",
 			"services": [
 				"WikibaseReconcileEdit.EditRequestParser",
-				"WikibaseReconcileEdit.ItemReconciler"
+				"WikibaseReconcileEdit.EditRequestSaver"
 			]
 		}
 	],

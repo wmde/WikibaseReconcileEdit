@@ -6,7 +6,6 @@ use MediaWiki\Extension\WikibaseReconcileEdit\InputToEntity\MinimalItemInput;
 use MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\Api\SingleEditEndpoint;
 use MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\Request\EditRequestParser;
 use MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\WikibaseReconcileEditServices;
-use MediaWiki\Extension\WikibaseReconcileEdit\Reconciliation\ItemReconciler;
 use MediaWiki\MediaWikiServices;
 use MediaWiki\Rest\LocalizedHttpException;
 use MediaWiki\Rest\RequestData;
@@ -72,11 +71,8 @@ class SingleEditEndpointTest extends \MediaWikiIntegrationTestCase {
 		$repo = WikibaseRepo::getDefaultInstance();
 		$reconciliationService = WikibaseReconcileEditServices::getReconciliationService();
 		$propertyDataTypeLookup = WikibaseRepo::getDefaultInstance()->getPropertyDataTypeLookup();
-		$editEntityFactory = method_exists( $repo, 'getEditEntityFactory' )
-			? $repo->getEditEntityFactory() // 1.36+
-			: $repo->newEditEntityFactory(); // 1.35
+
 		return new SingleEditEndpoint(
-			$editEntityFactory,
 			new EditRequestParser(
 				$propertyDataTypeLookup,
 				WikibaseReconcileEditServices::getFullWikibaseItemInput(),
@@ -87,10 +83,7 @@ class SingleEditEndpointTest extends \MediaWikiIntegrationTestCase {
 					WikibaseReconcileEditServices::getPropertyLabelResolver()
 				)
 			),
-			new ItemReconciler(
-				$reconciliationService,
-				WikibaseReconcileEditServices::getSimplePutStrategy()
-			),
+			WikibaseReconcileEditServices::getEditRequestSaver(),
 			$user !== null ? $user : $this->defaultTestUser,
 			$sessionProvider !== null ? $sessionProvider : $this->getMockSessionProvider( false )
 		);
