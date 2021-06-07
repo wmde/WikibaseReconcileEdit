@@ -5,6 +5,7 @@ namespace MediaWiki\Extension\WikibaseReconcileEdit\MediaWiki\Request;
 use MediaWiki\Extension\WikibaseReconcileEdit\Reconciliation\ItemReconciler;
 use MediaWiki\Extension\WikibaseReconcileEdit\Reconciliation\ReconciledItem;
 use MediaWiki\Extension\WikibaseReconcileEdit\Reconciliation\ReconciliationServiceItem;
+use MediaWiki\Extension\WikibaseReconcileEdit\ReconciliationException;
 use Status;
 use User;
 use Wikibase\Repo\EditEntity\MediawikiEditEntityFactory;
@@ -32,7 +33,10 @@ class EditRequestSaver {
 
 	/**
 	 * @param EditRequest[] $requests
-	 * @throws \MediaWiki\Extension\WikibaseReconcileEdit\ReconciliationException
+	 * @param string $editToken
+	 * @param User $user
+	 * @return Status
+	 * @throws ReconciliationException
 	 */
 	public function persistEdits( array $requests, string $editToken, User $user ): Status {
 		$status = Status::newGood( [] );
@@ -44,11 +48,12 @@ class EditRequestSaver {
 			$otherItems = $request->otherItems();
 
 			$otherStatus = $this->persistItem( $reconciledItem, $otherItems, $editToken, $user );
+			$status->merge( $otherStatus );
+
 			if ( !$otherStatus->isOk() ) {
 				break;
 			}
 			$status->setResult( true, array_merge( $status->getValue(), [ $otherStatus->getValue() ] ) );
-			$status->merge( $otherStatus );
 		}
 
 		return $status;

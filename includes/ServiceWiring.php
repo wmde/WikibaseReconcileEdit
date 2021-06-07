@@ -33,7 +33,7 @@ return [
 	'WikibaseReconcileEdit.EditRequestSaver' => function ( MediaWikiServices $services ): EditRequestSaver {
 		$repo = WikibaseRepo::getDefaultInstance();
 		$editEntityFactory = method_exists( $repo, 'getEditEntityFactory' )
-			? $repo->getEditEntityFactory() // 1.36+
+			? $repo->getEditEntityFactory( $services ) // 1.36+
 			: $repo->newEditEntityFactory(); // 1.35
 
 		return new EditRequestSaver(
