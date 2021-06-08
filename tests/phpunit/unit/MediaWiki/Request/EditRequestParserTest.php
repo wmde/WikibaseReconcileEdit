@@ -14,7 +14,6 @@ use ValueParsers\StringParser;
 use Wikibase\DataModel\Entity\PropertyId;
 use Wikibase\DataModel\Services\Lookup\InMemoryDataTypeLookup;
 use Wikibase\DataModel\Services\Lookup\PropertyDataTypeLookup;
-use Wikibase\DataModel\Services\Lookup\PropertyDataTypeLookupException;
 use Wikibase\DataModel\Services\Term\PropertyLabelResolver;
 use Wikibase\Repo\ValueParserFactory;
 
@@ -276,7 +275,8 @@ class EditRequestParserTest extends TestCase {
 		];
 		$requestParser = $this->getEditRequestParser();
 
-		$this->expectException( PropertyDataTypeLookupException::class );
+		$this->expectException( LocalizedHttpException::class );
+		$this->expectExceptionMessage( 'wikibasereconcileedit-property-datatype-lookup-error' );
 		$requestParser->parseRequestBody( $request );
 	}
 
