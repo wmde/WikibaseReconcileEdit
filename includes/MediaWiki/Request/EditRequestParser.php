@@ -7,6 +7,7 @@ use MediaWiki\Extension\WikibaseReconcileEdit\InputToEntity\MinimalItemInput;
 use MediaWiki\Rest\LocalizedHttpException;
 use Wikibase\DataModel\Entity\PropertyId;
 use Wikibase\DataModel\Services\Lookup\PropertyDataTypeLookup;
+use Wikibase\DataModel\Services\Lookup\PropertyDataTypeLookupException;
 use Wikimedia\Message\MessageValue;
 
 /**
@@ -72,7 +73,15 @@ class EditRequestParser {
 		}
 		$reconcilePropertyId = new PropertyId( $reconcile['urlReconcile'] );
 
-		$datatype = $this->propertyDataTypeLookup->getDataTypeIdForProperty( $reconcilePropertyId );
+		try {
+			$datatype = $this->propertyDataTypeLookup->getDataTypeIdForProperty( $reconcilePropertyId );
+		} catch ( PropertyDataTypeLookupException $exception ) {
+			throw new LocalizedHttpException(
+				MessageValue::new(
+					'wikibasereconcileedit-property-datatype-lookup-error' )
+					->textParams( $reconcile['urlReconcile'] )
+			);
+		}
 		if ( $datatype !== 'url' ) {
 			throw new LocalizedHttpException(
 				MessageValue::new( 'wikibasereconcileedit-invalid-property-type-must-be-url' )
