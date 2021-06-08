@@ -11,9 +11,36 @@
 		"module": "readonly"
 	},
 	"rules": {
+		"indent": [
+			"error",
+			"tab",
+			{
+				"SwitchCase": 1,
+				"MemberExpression": "off"
+			}
+		],
+		"jsdoc/require-param": "off",
 		"max-len": "off",
 		"mediawiki/valid-package-file-require": "off",
-		"no-jquery/no-global-selector": "off",
-		"no-shadow": "error"
+		"new-cap": "off",
+		"no-underscore-dangle": "off",
+		"no-use-before-define": [
+			"error",
+			"nofunc"
+		],
+		"no-unused-vars": [
+			"error",
+			{
+				"args": "none"
+			}
+		],
+		"no-useless-concat": "off",
+		"one-var": "off",
+		"operator-linebreak": "off",
+		"valid-jsdoc": "off",
+		"vars-on-top": "off",
+		"mediawiki/class-doc": "off",
+		"no-jquery/no-class-state": "off",
+		"no-jquery/no-global-selector": "off"
 	}
 }

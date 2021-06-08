@@ -2,8 +2,8 @@
 	"private": true,
 	"scripts": {
 		"api-testing": "mocha --timeout 0 --recursive tests/api-testing",
-		"api-testing-lint": "eslint --cache --max-warnings 0 tests/api-testing/**",
-		"api-testing-lint-fix": "eslint --fix --cache --max-warnings 0 tests/api-testing/**"
+		"lint": "eslint --cache --max-warnings 0 .",
+		"lint-fix": "eslint --fix --cache --max-warnings 0 ."
 	},
 	"devDependencies": {
 		"api-testing": "^1.2.0",
@@ -14,6 +14,10 @@
 		"wikibase-edit": "^4.14.0",
 		"wikibase-sdk": "^7.13.0"
 	},
+	"eslintIgnore": [
+		"vendor/**",
+		"/tests/api-testing/wikibase-edit.config.js"
+	],
 	"engines": {
 		"node": ">=10.0.0"
 	}
