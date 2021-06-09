@@ -21,6 +21,19 @@
 			"i18n"
 		]
 	},
+	"SpecialPages": {
+		"WikibaseReconcileEdit": {
+			"class": "MediaWiki\\Extension\\WikibaseReconcileEdit\\MediaWiki\\Specials\\SpecialWikibaseReconcileEdit",
+			"factory": "MediaWiki\\Extension\\WikibaseReconcileEdit\\MediaWiki\\Specials\\SpecialWikibaseReconcileEdit::factory",
+			"services": [
+				"WikibaseReconcileEdit.EditRequestParser",
+				"WikibaseReconcileEdit.EditRequestSaver"
+			]
+		}
+	},
+	"ExtensionMessagesFiles": {
+		"WikibaseReconcileEditAlias": "WikibaseReconcileEdit.i18n.alias.php"
+	},
 	"RestRoutes": [
 		{
 			"path": "/wikibase-reconcile-edit/v0/edit",
