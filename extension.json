@@ -34,6 +34,17 @@
 	"ExtensionMessagesFiles": {
 		"WikibaseReconcileEditAlias": "WikibaseReconcileEdit.i18n.alias.php"
 	},
+	"ResourceModules": {
+		"ext.WikibaseReconcileEdit": {
+			"localBasePath": "resources",
+			"packageFiles": [
+				"index.js"
+			],
+			"dependencies": [
+				"oojs"
+			]
+		}
+	},
 	"RestRoutes": [
 		{
 			"path": "/wikibase-reconcile-edit/v0/edit",

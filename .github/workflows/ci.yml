@@ -22,7 +22,7 @@ jobs:
             - name: lint
               run: |
                   npm install
-                  npm run api-testing-lint
+                  npm run lint
     api-testing:
         runs-on: ubuntu-latest
         steps:
