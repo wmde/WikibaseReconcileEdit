@@ -85,11 +85,9 @@ class SpecialWikibaseReconcileEdit extends SpecialPage {
 
 	public function execute( $subPage ) {
 		parent::execute( $subPage );
+
 		$this->requireLogin();
 		$this->showRequestForm();
-
-		$out = $this->getOutput();
-		$out->addModules( 'ext.WikibaseReconcileEdit' );
 	}
 
 	public function submitForm( $data ) {
