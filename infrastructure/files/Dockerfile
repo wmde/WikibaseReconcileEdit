@@ -1,7 +1,7 @@
-FROM mediawiki:1.35
+FROM mediawiki:1.35.3
 
 RUN apt-get update && \
-    DEBIAN_FRONTEND=noninteractive apt-get install --yes --no-install-recommends libbz2-dev=1.* gettext-base=0.19.* wget && \
+    DEBIAN_FRONTEND=noninteractive apt-get install --yes --no-install-recommends libbz2-dev=1.* gettext-base wget && \
     rm -rf /var/lib/apt/lists/*
 
 RUN a2enmod rewrite
