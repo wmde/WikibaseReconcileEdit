@@ -25,3 +25,4 @@ sftp-config.json
 /.eslintcache
 
 .api-testing.config.json
+infrastructure/vagrant/.vagrant

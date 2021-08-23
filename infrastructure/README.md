@@ -20,10 +20,43 @@ The file `inventory.yml` contains a single host, which is the target for the tes
 ### Setup
 
 Set up your VPS instance on https://horizon.wikimedia.org and a web proxy to reach it from the internet, then:
+
 ```sh
 $ cd extensions/WikibaseReconcileEdit/infrastructure
 $ ansible-galaxy install -r requirements.yml
+```
+#### Deploy to test system
+
+```sh
 $ ansible-playbook setup.yml --limit <hostname>.wikidata-dev.eqiad1.wikimedia.cloud
+```
+
+#### Deploy to virtual machine
+
+Add this in `/etc/hosts/`
+```sh
+192.168.100.42 wikibase-reconcile.vm
+```
+
+Add this to your `~/.ssh/config`
+
+```sh
+Host wikibase-reconcile.vm
+  User vagrant
+  IdentityFile /<PATH_TO_WIKIBASE_RECONCILE_EDIT>/infrastructure/vagrant/.vagrant/machines/default/virtualbox/private_key
+```
+
+Start the virtual machine by
+
+```sh
+$ cd infrastructure/vagrant/
+$ vagrant up
+```
+
+Deploy to the virtual machine
+
+```sh
+$ ansible-playbook setup.yml --limit wikibase-reconcile.vm
 ```
 
 Once the setup process has completed, you can access the newly installed Wikibase test system via web proxy, e.g. `https://wikibase-reconcile-testing.wmcloud.org/`.
